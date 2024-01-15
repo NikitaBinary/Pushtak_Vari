@@ -17,12 +17,16 @@ const singupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    confirmPassword: {
-        type: String,
-        required: true
-    },
+    // confirmPassword: {
+    //     type: String,
+    //     required: true
+    // },
     userType: {
         type: String,
+    },
+    otp: {
+        type: String,
+        default: ''
     }
 },
     {
