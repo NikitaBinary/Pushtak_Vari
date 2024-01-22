@@ -18,11 +18,11 @@ const uploadStorage = multer({ storage: storage })
 
 Router.post("/addEbookType", ebookController.addEbookTypeController)
 Router.get("/ebookTypeList", ebookController.ebookTypeListController)
-Router.post("/createEbook", uploadStorage.single("bookImage"), ebookController.createEbookController)
-Router.put("/updateEbook/:id", uploadStorage.single("bookImage"), ebookController.updateEbookController)
-Router.delete("/deleteEbook/:id", ebookController.deleteEbookController)
-Router.get("/getEbookList", ebookController.getEbookListController)
-Router.get("/getEbookInfo/:id", ebookController.getEbookInfoController)
+Router.post("/createEbook", superAdminAuth, uploadStorage.single("bookImage"), ebookController.createEbookController)
+Router.put("/updateEbook/:id", superAdminAuth, uploadStorage.single("bookImage"), ebookController.updateEbookController)
+Router.delete("/deleteEbook/:id", superAdminAuth, ebookController.deleteEbookController)
+Router.get("/getEbookList", superAdminAuth, ebookController.getEbookListController)
+Router.get("/getEbookInfo/:id", superAdminAuth, ebookController.getEbookInfoController)
 
 
 

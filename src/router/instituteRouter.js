@@ -6,12 +6,12 @@ const instituteController = new authController();
 
 
 
-Router.post("/createInstitute", instituteController.createInstituteController)
-Router.get("/instituteList", instituteController.instituteListController)
-Router.put("/updateInstitute/:id", instituteController.updateInstituteController)
-Router.get("/getInstituteInfo/:id", instituteController.getInstituteInfoController)
-Router.delete("/deleteInstituteInfo/:id", instituteController.deleteInstituteInfoController)
-Router.put("/instituteStatus/:id", instituteController.instituteStatusController)
+Router.post("/createInstitute", superAdminAuth, instituteController.createInstituteController)
+Router.get("/instituteList", superAdminAuth, instituteController.instituteListController)
+Router.put("/updateInstitute/:id", superAdminAuth, instituteController.updateInstituteController)
+Router.get("/getInstituteInfo/:id", superAdminAuth, instituteController.getInstituteInfoController)
+Router.delete("/deleteInstituteInfo/:id", superAdminAuth, instituteController.deleteInstituteInfoController)
+Router.put("/instituteStatus/:id", superAdminAuth, instituteController.instituteStatusController)
 
 
 

@@ -7,11 +7,11 @@ const subscriptionController = new authController();
 
 Router.post("/addSubscriptionDuration", subscriptionController.addSubscriptionDurationController)
 Router.get("/subscriptionDurationList", subscriptionController.subscriptionDurationListController)
-Router.post("/addSubscription", subscriptionController.addSubscriptionController)
-Router.get("/subscriptionList", subscriptionController.subscriptionListController)
-Router.put("/updateSubscription/:id", subscriptionController.updateSubscriptionController)
-Router.get("/getSubscriptionInfo/:id", subscriptionController.getSubscriptionInfoController)
-Router.delete("/deleteSubscription/:id", subscriptionController.deleteSubscriptionController)
+Router.post("/addSubscription", superAdminAuth, subscriptionController.addSubscriptionController)
+Router.get("/subscriptionList", superAdminAuth, subscriptionController.subscriptionListController)
+Router.put("/updateSubscription/:id", superAdminAuth, subscriptionController.updateSubscriptionController)
+Router.get("/getSubscriptionInfo/:id", superAdminAuth, subscriptionController.getSubscriptionInfoController)
+Router.delete("/deleteSubscription/:id", superAdminAuth, subscriptionController.deleteSubscriptionController)
 
 
 module.exports = Router;

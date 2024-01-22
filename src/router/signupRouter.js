@@ -14,11 +14,11 @@ Router.put("/resetPassword", signUPController.resetPassword);
 // user apis -------------------------------
 
 Router.post("/createUser", superAdminAuth, signUPController.userSignupController);
-Router.get("/userList", signUPController.userListController)
-Router.put("/updateUser/:id", signUPController.updateUserController)
-Router.get("/getUserInfo/:id", signUPController.getUserInfoController)
-Router.delete("/deleteUserInfo/:id", signUPController.deleteUserInfoController)
-Router.put("/userStatus/:id", signUPController.userStatusController)
+Router.get("/userList", superAdminAuth, signUPController.userListController)
+Router.put("/updateUser/:id", superAdminAuth, signUPController.updateUserController)
+Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
+Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
+Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
 
 
 
