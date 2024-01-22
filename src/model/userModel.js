@@ -27,6 +27,13 @@ const singupSchema = new mongoose.Schema({
     otp: {
         type: String,
         default: ''
+    },
+    activeStatus: {
+        type: Boolean,
+        default: true
+    },
+    is_instituteUser:{
+        type:Boolean,
     }
 },
     {

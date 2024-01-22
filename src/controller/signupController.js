@@ -17,7 +17,7 @@ class authController {
             }
             return res.json({
                 status: 201,
-                message: "User created",
+                message: "User has been added successfully!",
                 data: response.userDetail
             })
 
@@ -116,6 +116,118 @@ class authController {
         }
     }
 
+    async userListController(req, res) {
+        try {
+            const userList = await userService.userListService();
+
+            return res.json({
+                status: 200,
+                message: "User list get",
+                data: userList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
+    async updateUserController(req, res) {
+        try {
+            let dataBody = req.body
+            const id = req.params.id
+            const userInfo = await userService.updateUserService(id, dataBody);
+            if (!userInfo.userDetail) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "UserId not exists",
+                });
+            }
+            delete userInfo.userDetail
+            return res.status(200).send({
+                status: 200,
+                message: "User information has been updated successfully!",
+                body: userInfo
+            });
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async getUserInfoController(req, res) {
+        try {
+            const id = req.params.id
+            const userInfo = await userService.getUserInfoService(id);
+            if (!userInfo.userDetail) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "UserId not exists",
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "User Detail get",
+                body: userInfo
+            });
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async deleteUserInfoController(req, res) {
+        try {
+            let id = req.params.id
+            const response = await userService.deleteUserService(id);
+            if (!response.userInfo) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "UserId not exists",
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "User info deleted",
+                data: response.userdata
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async userStatusController(req, res) {
+        try {
+            let id = req.params.id
+            let status = req.query.activeStatus
+            const response = await userService.userStatusService(id, status);
+            if (!response.userInfo) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "UserId not exists",
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "User status has been updated successfully!",
+                data: response.userdata
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;
