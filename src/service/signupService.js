@@ -6,6 +6,9 @@ const Mail = require('../helper/mail')
 
 class AuthService {
 
+    async verifyUser(query) {
+        return  await user.findOne(query);
+    }
     async userSignupService(userBody) {
         let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
         if (!uniqueEmail) {
@@ -87,6 +90,66 @@ class AuthService {
             }
         } catch (error) {
             console.log(error);
+            throw error;
+        }
+    }
+
+    async userListService() {
+        try {
+            const userList = await user.find()
+            return userList
+        } catch (error) {
+            throw error;
+        }
+    }
+    async updateUserService(_id, dataBody) {
+        try {
+            delete dataBody.email
+            let userDetail = await user.findOne({ _id: _id });
+            let userInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
+
+            return { userDetail, userInfo }
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getUserInfoService(_id) {
+        try {
+            let userDetail = await user.findOne({ _id: _id });
+            if (userDetail) {
+                var userInfo = await user.findOne({ _id: _id }, {});
+            }
+            return { userDetail, userInfo }
+        } catch (error) {
+            throw error;
+        }
+    }
+    async deleteUserService(_id) {
+        try {
+            let userInfo = await user.findOne({ _id: _id });
+            if (userInfo) {
+                var userdata = await user.findOneAndDelete({ _id });
+            }
+            return { userInfo, userdata }
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async userStatusService(_id, status) {
+        try {
+            function convertStringToBoolean(value) {
+                return value === 'true';
+            }
+            const active = await convertStringToBoolean(status);
+            let userInfo = await user.findOne({ _id: _id });
+            if (userInfo) {
+                var userdata = await user.findByIdAndUpdate(
+                    _id, { activeStatus: active }, { new: true }
+                );
+            }
+            return { userInfo, userdata }
+        } catch (error) {
             throw error;
         }
     }
