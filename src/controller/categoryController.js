@@ -6,10 +6,6 @@ class authController {
         try {
             const file = req.file
             const data = req.body
-            const host = `${req.protocol}://${req.get('host')}`
-            const pathde = `../../uploads/${file.filename}`
-            const imageUrl = `${host}/${pathde}`
-            data.categoryImage = imageUrl
             const categoryInfo = await categoryService.addCategoryService(data, file);
             return res.json({
                 status: 201,

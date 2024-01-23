@@ -16,8 +16,7 @@ const storage = multer.diskStorage({
 
 const uploadStorage = multer({ storage: storage })
 
-
-Router.post("/addCategory", uploadStorage.single("categoryImage"), categoryController.addCategoryController);
+Router.post("/addCategory", uploadStorage.single("file"), categoryController.addCategoryController);
 Router.get("/categoryList", categoryController.categoryListController)
 
 
