@@ -3,8 +3,11 @@ const category = require("../model/categoryModel");
 class AuthService {
     async addCategoryService(categoryBody, file) {
         try {
-            console.log("file--------->",file)
-            var categoryInfo = await category.create(categoryBody, file);
+            console.log("file--------->", file)
+            var categoryInfo = await category.create({
+                ...categoryBody,
+                categoryImage: file,
+            });
             return categoryInfo
 
         } catch (error) {

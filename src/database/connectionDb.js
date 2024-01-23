@@ -5,7 +5,7 @@ module.exports.dbConnection = async () => {
     try {
         // mongoose.set('debug', true);
         mongoose.set("strictQuery", true);
-        await mongoose.connect(process.env.Local_DB_URL,
+        await mongoose.connect(process.env.Server_DB_Url,
             {
                 useNewUrlParser: true,
                 useUnifiedTopology: true
