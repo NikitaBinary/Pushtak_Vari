@@ -18,7 +18,13 @@ const { dbConnection } = require('./src/database/connectionDb')
 // connect to db --------------
 dbConnection()
 
-router.use(cors());
+const corsOptions = {
+    origin: '*',
+};
+
+router.use(cors(corsOptions));
+
+// router.use(cors());
 router.use(express.json());
 router.use(bodyParser.json());
 router.use(express.urlencoded({ extended: true }));
