@@ -27,6 +27,95 @@ class authController {
             })
         }
     }
+
+    async loginInstituteController(req, res) {
+        try {
+            const response = await instituteService.loginInstituteService(req.body);
+            if (!response) {
+                return res.json({
+                    status: 400,
+                    message: "Email not registered",
+                })
+            }
+            return res.json({
+                status: 200,
+                message: "Institute User login successfully",
+                body: response
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
+    async forgotPassword(req, res) {
+        try {
+            const response = await instituteService.forgotPassordAndOTPService(req.body);
+            if (response) {
+                return res.json({
+                    status: 200,
+                    message: "OTP send successfully",
+                })
+            } else {
+                console.log("come in iff")
+                return res.json({
+                    status: 404,
+                    message: "Email does not exists",
+                })
+            }
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+    async verifyOTP(req, res) {
+        try {
+            const response = await instituteService.verifyOTP(req.body);
+            if (response) {
+                return res.json({
+                    status: 200,
+                    message: "OTP match successfully",
+                })
+            } else {
+                return res.json({
+                    status: 400,
+                    message: "Invalid Otp",
+                })
+            }
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
+    async resetPassword(req, res) {
+        try {
+            const response = await instituteService.resetPassword(req.body);
+            if (response) {
+                return res.status(200).send({
+                    status: 200,
+                    message: "Password Reset Successfully",
+                });
+            } else {
+                return res.status(400).send({
+                    status: 400,
+                    message: "Invalid email",
+                });
+            }
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
     async updateInstituteController(req, res) {
         try {
             let dataBody = req.body

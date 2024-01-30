@@ -1,7 +1,7 @@
 const express = require("express");
 const Router = express.Router();
 const authController = require("../controller/signupController");
-const { superAdminAuth } = require('../middleware/superAdminToken');
+const { superAdminAuth, insitituteAuth } = require('../middleware/superAdminToken');
 const signUPController = new authController();
 
 // login apis---------------------------
@@ -11,7 +11,7 @@ Router.put("/forgotPassword", signUPController.forgotPassordAndOTPController);
 Router.put("/verifyOTP", signUPController.verifyOTP);
 Router.put("/resetPassword", signUPController.resetPassword);
 
-// user apis -------------------------------
+// user apis -by SuperAdmin------------------------------
 
 Router.post("/createUser", superAdminAuth, signUPController.userSignupController);
 Router.get("/userList", superAdminAuth, signUPController.userListController)
@@ -19,6 +19,15 @@ Router.put("/updateUser/:id", superAdminAuth, signUPController.updateUserControl
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
+
+// user apis by institute ---------------------------------------
+Router.post("/instituteCreateUser", insitituteAuth, signUPController.instituteCreateUserController);
+Router.get("/instituteUserList", insitituteAuth, signUPController.instituteUserListController)
+Router.put("/instituteUpdateUser/:id", insitituteAuth, signUPController.updateUserController)
+Router.get("/instituteUpdateUserInfo/:id", insitituteAuth, signUPController.getUserInfoController)
+Router.delete("/instituteDeleteUserInfo/:id", insitituteAuth, signUPController.deleteUserInfoController)
+Router.put("/instituteUserStatus/:id", insitituteAuth, signUPController.userStatusController)
+
 
 
 

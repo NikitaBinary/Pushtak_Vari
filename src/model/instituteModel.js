@@ -28,7 +28,11 @@ const instituteSchema = new mongoose.Schema({
     studentList: {
         type: Array,
         default: []
-    }
+    },
+    otp: {
+        type: String,
+        default: ''
+    },
 },
     {
         timestamps: {
