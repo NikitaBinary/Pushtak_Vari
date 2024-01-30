@@ -56,7 +56,7 @@ class authController {
     async userloginController(req, res) {
         try {
             const response = await userService.userloginService(req.body);
-            if (!response) {
+            if (response.message) {
                 return res.json({
                     status: 400,
                     message: "Email not registered",
@@ -99,6 +99,7 @@ class authController {
     async verifyOTP(req, res) {
         try {
             const response = await userService.verifyOTP(req.body);
+            console.log("response------>",response)
             if (response) {
                 return res.json({
                     status: 200,
