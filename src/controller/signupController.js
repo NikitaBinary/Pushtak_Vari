@@ -29,6 +29,30 @@ class authController {
         }
     }
 
+    async instituteCreateUserController(req, res) {
+        try {
+            req.body.password = await getPasswordHash(req.body.password, 12);
+            const response = await userService.instituteUserService(req.body);
+            if (response.uniqueEmail) {
+                return res.json({
+                    status: 400,
+                    message: "Email already exists",
+                })
+            }
+            return res.json({
+                status: 201,
+                message: "User has been added successfully!",
+                data: response.userDetail
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
     async userloginController(req, res) {
         try {
             const response = await userService.userloginService(req.body);
@@ -134,6 +158,23 @@ class authController {
         }
     }
 
+    async instituteUserListController(req, res) {
+        try {
+            const userList = await userService.instituteUserListService();
+
+            return res.json({
+                status: 200,
+                message: "User list get",
+                data: userList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
     async updateUserController(req, res) {
         try {
             let dataBody = req.body

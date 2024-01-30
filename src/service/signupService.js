@@ -7,10 +7,19 @@ const Mail = require('../helper/mail')
 class AuthService {
 
     async verifyUser(query) {
-        return  await user.findOne(query);
+        return await user.findOne(query);
     }
     async userSignupService(userBody) {
         let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
+        if (!uniqueEmail) {
+            var userDetail = await user.create(userBody);
+        }
+        return { userDetail, uniqueEmail }
+    }
+
+    async instituteUserService(userBody) {
+        let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
+        userBody.is_instituteUser = true
         if (!uniqueEmail) {
             var userDetail = await user.create(userBody);
         }
@@ -97,6 +106,14 @@ class AuthService {
     async userListService() {
         try {
             const userList = await user.find()
+            return userList
+        } catch (error) {
+            throw error;
+        }
+    }
+    async instituteUserListService() {
+        try {
+            const userList = await user.find({ is_instituteUser: true }, {})
             return userList
         } catch (error) {
             throw error;
