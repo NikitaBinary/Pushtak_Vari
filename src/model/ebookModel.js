@@ -5,6 +5,9 @@ const ebookSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    bookLanguage:{
+        type: JSON
+    },
     authorName: {
         type: String,
         required: true
