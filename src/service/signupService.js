@@ -18,7 +18,7 @@ class AuthService {
         return { userDetail, uniqueEmail }
     }
 
-   
+
     async userloginService(userBody) {
         const userInfo = await user.findOne({ emailId: userBody.emailId });
         if (userInfo) {
@@ -150,15 +150,21 @@ class AuthService {
         }
     }
 
-    async userListService() {
+    async userListService(status) {
         try {
-            const userList = await user.find()
+            let userList
+            if (status) {
+                userList = await user.find({ is_instituteUser: status })
+            }
+            else {
+                userList = await user.find()
+            }
             return userList
         } catch (error) {
             throw error;
         }
     }
-   
+
     async updateUserService(_id, dataBody) {
         try {
             delete dataBody.email

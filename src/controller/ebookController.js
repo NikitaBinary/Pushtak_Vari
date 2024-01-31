@@ -38,11 +38,39 @@ class authController {
         }
     }
 
+    async ebooklanguageListController(req, res) {
+        try {
+            const ebooklanguageList = await ebookService.ebooklanguageListService();
+
+            return res.json({
+                status: 200,
+                message: "ebook language list get",
+                data: ebooklanguageList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
     async createEbookController(req, res) {
         try {
-            const file = req.files
+            const pdfFile = req.files.bookPdf
+            const imageFile = req.files.bookImage
+
             const data = req.body
-            const ebookDetail = await ebookService.createEbookService(data, file);
+
+            const [pdf_file] = pdfFile
+            const [image_file] = imageFile
+
+            const webUrl = `${req.protocol}://${req.get('host')}`;
+            const pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
+            const imageUrl = `${webUrl}/uploads/${image_file.filename}`
+
+            const ebookDetail = await ebookService.createEbookService(data, imageUrl, pdfUrl);
             return res.json({
                 status: 201,
                 message: "E-Book has been added successfully!",
@@ -58,9 +86,24 @@ class authController {
     }
     async updateEbookController(req, res) {
         try {
-            let dataBody = req.body
+            const dataBody = req.body
             const id = req.params.id
-            const eBookInfo = await ebookService.updateEbookService(id, dataBody);
+
+            const pdfFile = req.files.bookPdf
+            const imageFile = req.files.bookImage
+
+            const webUrl = `${req.protocol}://${req.get('host')}`;
+
+            if (imageFile) {
+                const [image_file] = imageFile
+                var ImageUrl = `${webUrl}/uploads/${image_file.filename}`
+            }
+            if (pdfFile) {
+                const [pdf_file] = pdfFile
+                var pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
+            }
+
+            const eBookInfo = await ebookService.updateEbookService(id, dataBody, ImageUrl, pdfUrl);
             if (!eBookInfo.eBookDetail) {
                 return res.status(404).send({
                     status: 404,
