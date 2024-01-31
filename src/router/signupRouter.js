@@ -1,7 +1,7 @@
 const express = require("express");
 const Router = express.Router();
 const authController = require("../controller/signupController");
-const { superAdminAuth, insitituteAuth } = require('../middleware/superAdminToken');
+const { superAdminAuth } = require('../middleware/superAdminToken');
 const signUPController = new authController();
 
 // login apis---------------------------
@@ -13,7 +13,6 @@ Router.put("/resetPassword", signUPController.resetPassword);
 
 // user apis -by SuperAdmin------------------------------
 
-Router.post("/createUser", superAdminAuth, signUPController.userSignupController);
 Router.get("/userList", superAdminAuth, signUPController.userListController)
 Router.put("/updateUser/:id", superAdminAuth, signUPController.updateUserController)
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
