@@ -55,7 +55,7 @@ class authController {
             })
 
         } catch (error) {
-            console.log("error----------.",error)
+            console.log("error----------.", error)
             return res.json({
                 status: 500,
                 message: error.message
@@ -130,7 +130,9 @@ class authController {
 
     async userListController(req, res) {
         try {
-            const userList = await userService.userListService();
+
+            const is_instituteUser = req.query.is_instituteUser 
+            const userList = await userService.userListService(is_instituteUser);
 
             return res.json({
                 status: 200,

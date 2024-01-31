@@ -18,6 +18,9 @@ const uploadStorage = multer({ storage: storage })
 
 Router.post("/addCategory", uploadStorage.single("file"), categoryController.addCategoryController);
 Router.get("/categoryList", categoryController.categoryListController)
+Router.put("/categoryUpdate/:id", uploadStorage.single("file"), categoryController.categoryUpdateController)
+Router.delete("/deleteCategory/:id", categoryController.deleteCategoryController)
+
 
 
 module.exports = Router;

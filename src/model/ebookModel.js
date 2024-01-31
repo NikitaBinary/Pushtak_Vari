@@ -3,27 +3,27 @@ const mongoose = require('mongoose');
 const ebookSchema = new mongoose.Schema({
     bookName: {
         type: String,
-        required: false
+        required: true
     },
     authorName: {
         type: String,
-        required: false
+        required: true
     },
     bookPdf: {
         type: String,
-        required: false
+        required: true
     },
     bookImage: {
         type: String,
-        required: false
+        required: true
     },
     category: {
         type: JSON,
-        required: false
+        required: true
     },
     bookType: {
         type: JSON,
-        required: false
+        required: true
     },
 },
     {

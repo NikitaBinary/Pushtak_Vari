@@ -29,8 +29,9 @@ router.use(express.json());
 router.use(bodyParser.json());
 router.use(express.urlencoded({ extended: true }));
 
-router.use('/uploads', express.static(__dirname + 'uploads/'));
+// router.use('/uploads', express.static(__dirname + 'uploads/'));
 
+router.use('/uploads', express.static('uploads/'));
 // call the api route ---------------------
 router.use('/api/v1', signUpRoute)
 router.use('/api/v1', categoryRoute)

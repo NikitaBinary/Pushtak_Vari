@@ -1,6 +1,8 @@
 const ebookType = require("../model/ebookTypeModel");
 const eBook = require("../model/ebookModel")
 const category = require("../model/categoryModel")
+const language = require("../model/ebookLanguageModel")
+
 
 class AuthService {
     async addEbookTypeService(ebookBody) {
@@ -20,23 +22,38 @@ class AuthService {
             throw error;
         }
     }
-
-    async createEbookService(ebookData, file) {
+    async ebooklanguageListService() {
         try {
-            const categoryData = await category.findById({ _id: ebookData.category }, { _id: 1, categoryName: 1 })
-            const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
-            ebookData.category = categoryData
-            eBookDetail.bookType = bookType
-            const eBookDetail = await eBook.create(ebookData, file);
-            return eBookDetail
-
+            const ebooklanguageList = await language.find()
+            return ebooklanguageList
         } catch (error) {
             throw error;
         }
     }
 
-    async updateEbookService(_id, dataBody) {
+    async createEbookService(ebookData, imageUrl, pdfUrl) {
         try {
+            const categoryData = await category.findById({ _id: ebookData.category }, { _id: 1, categoryName: 1 })
+            const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
+            ebookData.category = categoryData
+            ebookData.bookType = bookType
+            const eBookDetail = await eBook.create({
+                ...ebookData,
+                bookImage: imageUrl,
+                bookPdf: pdfUrl
+            });
+            return eBookDetail
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateEbookService(_id, dataBody, ImageUrl, pdfUrl) {
+        try {
+            if (ImageUrl || pdfUrl) {
+                dataBody.bookImage = ImageUrl
+                dataBody.bookPdf = pdfUrl
+            }
             let eBookDetail = await eBook.findOne({ _id: _id });
             let eBookInfo = await eBook.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
             return { eBookDetail, eBookInfo }
