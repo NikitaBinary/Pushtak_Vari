@@ -17,12 +17,9 @@ const singupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // confirmPassword: {
-    //     type: String,
-    //     required: true
-    // },
     userType: {
         type: String,
+        required: true
     },
     otp: {
         type: String,
@@ -32,8 +29,8 @@ const singupSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    is_instituteUser:{
-        type:Boolean,
+    is_instituteUser: {
+        type: Boolean,
     }
 },
     {

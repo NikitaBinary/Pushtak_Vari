@@ -18,23 +18,15 @@ class AuthService {
         return { userDetail, uniqueEmail }
     }
 
-    async instituteUserService(userBody) {
-        let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
-        userBody.is_instituteUser = true
-        if (!uniqueEmail) {
-            var userDetail = await user.create(userBody);
-        }
-        return { userDetail, uniqueEmail }
-    }
+   
     async userloginService(userBody) {
         const userInfo = await user.findOne({ emailId: userBody.emailId });
         if (userInfo) {
-            console.log("userInfo---------->", userInfo)
-            if (userInfo.userType == 'SuperAdmin') {
+            if (userInfo.userType == 'SUPER_ADMIN') {
                 let data = await user.findOne({ emailId: userBody.emailId });
                 await verifyPassword(userBody.password, data.password);
             }
-            if (userInfo.userType == 'insititute_user') {
+            if (userInfo.userType == 'INSTITUTE_USER') {
                 let data = await user.findOne({ emailId: userBody.emailId });
                 await verifyPassword(userBody.password, data.password);
             }
@@ -43,12 +35,12 @@ class AuthService {
             )
             return {
                 token: token,
-                instituteInfo
+                userInfo
             }
         }
         const instituteInfo = await institute.findOne({ emailId: userBody.emailId });
         if (instituteInfo) {
-            console.log("come 22")
+
             let data = await institute.findOne({ emailId: userBody.emailId });
             await verifyPassword(userBody.password, data.password);
 
@@ -85,7 +77,6 @@ class AuthService {
                 await mail.sendMail(email, html, subject);
                 return true;
             }
-            console.log("checkOtp--------->", checkOtp)
             let checkInstituteOtp = await institute.findOne({ emailId: email });
             if (checkInstituteOtp) {
                 let otp = `${Math.floor(100000 + Math.random() * 999999)}`;
@@ -118,16 +109,12 @@ class AuthService {
             const otp = body.otp;
             let checkOtp = await user.find({ emailId: email, otp: otp });
             let instituteCheckOtp = await institute.find({ emailId: email, otp: otp });
-            console.log("comee innn----------->", instituteCheckOtp)
-
 
             if (checkOtp.length > 0) {
-                console.log("comee innwwwn------------->", checkOtp)
                 await user.updateOne({ _id: checkOtp._id }, { $set: { otp: '' } }, { new: true });
                 return true;
             }
             if (instituteCheckOtp.length > 0) {
-                console.log("comee innn")
                 await institute.updateOne({ _id: checkOtp._id }, { $set: { otp: '' } }, { new: true });
                 return true;
             }
@@ -143,7 +130,7 @@ class AuthService {
         try {
             const email = body.emailId;
             let checkOtp = await user.findOne({ emailId: email });
-            let instituteCheckOtp = await institute.find({ emailId: email, otp: otp });
+            let instituteCheckOtp = await institute.findOne({ emailId: email });
             if (checkOtp) {
                 let password = await getPasswordHash(body.password, 12);
                 let userInfo = await user.updateOne({ _id: checkOtp._id }, { $set: { password: password } }, { new: true });
@@ -151,7 +138,7 @@ class AuthService {
             }
             if (instituteCheckOtp) {
                 let password = await getPasswordHash(body.password, 12);
-                let userInfo = await institute.updateOne({ _id: checkOtp._id }, { $set: { password: password } }, { new: true });
+                let userInfo = await institute.updateOne({ _id: instituteCheckOtp._id }, { $set: { password: password } }, { new: true });
                 return true;
             }
             else {
@@ -171,14 +158,7 @@ class AuthService {
             throw error;
         }
     }
-    async instituteUserListService() {
-        try {
-            const userList = await user.find({ is_instituteUser: true }, {})
-            return userList
-        } catch (error) {
-            throw error;
-        }
-    }
+   
     async updateUserService(_id, dataBody) {
         try {
             delete dataBody.email

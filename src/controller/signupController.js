@@ -1,6 +1,7 @@
 const HttpStatus = require("http-status-codes");
 const authService = require("../service/signupService");
 const { getPasswordHash } = require("../helper/passwordHelper");
+const userRoles = require("../helper/userRoles")
 const userService = new authService();
 
 
@@ -8,6 +9,14 @@ class authController {
     async userSignupController(req, res) {
         try {
             req.body.password = await getPasswordHash(req.body.password, 12);
+            if (req.body.userType) {
+                if (!userRoles.USER_ROLES.includes(req.body.userType)) {
+                    return res.json({
+                        status: 400,
+                        message: `Invalid User Type Should be [${userRoles.USER_ROLES}]`,
+                    })
+                }
+            }
             const response = await userService.userSignupService(req.body);
             if (response.uniqueEmail) {
                 return res.json({
@@ -29,29 +38,6 @@ class authController {
         }
     }
 
-    async instituteCreateUserController(req, res) {
-        try {
-            req.body.password = await getPasswordHash(req.body.password, 12);
-            const response = await userService.instituteUserService(req.body);
-            if (response.uniqueEmail) {
-                return res.json({
-                    status: 400,
-                    message: "Email already exists",
-                })
-            }
-            return res.json({
-                status: 201,
-                message: "User has been added successfully!",
-                data: response.userDetail
-            })
-
-        } catch (error) {
-            return res.json({
-                status: 500,
-                message: error.message
-            })
-        }
-    }
 
     async userloginController(req, res) {
         try {
@@ -69,6 +55,7 @@ class authController {
             })
 
         } catch (error) {
+            console.log("error----------.",error)
             return res.json({
                 status: 500,
                 message: error.message
@@ -99,7 +86,7 @@ class authController {
     async verifyOTP(req, res) {
         try {
             const response = await userService.verifyOTP(req.body);
-            console.log("response------>",response)
+            console.log("response------>", response)
             if (response) {
                 return res.json({
                     status: 200,
@@ -159,23 +146,7 @@ class authController {
         }
     }
 
-    async instituteUserListController(req, res) {
-        try {
-            const userList = await userService.instituteUserListService();
 
-            return res.json({
-                status: 200,
-                message: "User list get",
-                data: userList
-            })
-
-        } catch (error) {
-            return res.json({
-                status: 500,
-                message: error.message
-            })
-        }
-    }
     async updateUserController(req, res) {
         try {
             let dataBody = req.body

@@ -20,15 +20,5 @@ Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoContr
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
 
-// user apis by institute ---------------------------------------
-Router.post("/instituteCreateUser", insitituteAuth, signUPController.instituteCreateUserController);
-Router.get("/instituteUserList", insitituteAuth, signUPController.instituteUserListController)
-Router.put("/instituteUpdateUser/:id", insitituteAuth, signUPController.updateUserController)
-Router.get("/instituteUpdateUserInfo/:id", insitituteAuth, signUPController.getUserInfoController)
-Router.delete("/instituteDeleteUserInfo/:id", insitituteAuth, signUPController.deleteUserInfoController)
-Router.put("/instituteUserStatus/:id", insitituteAuth, signUPController.userStatusController)
-
-
-
 
 module.exports = Router;
