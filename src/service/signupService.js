@@ -11,6 +11,9 @@ class AuthService {
         return await user.findOne(query);
     }
     async userSignupService(userBody) {
+        if(userBody.userType == 'SUPER_ADMIN'){
+            userBody.is_instituteUser = null
+        }
         let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
         if (!uniqueEmail) {
             var userDetail = await user.create(userBody);
@@ -31,7 +34,7 @@ class AuthService {
                 await verifyPassword(userBody.password, data.password);
             }
             var token = await generateToken(
-                { email: userInfo.emailId, name: userInfo.fullName, userType: userInfo.userType }
+                { email: userInfo.emailId, name: userInfo.fullName }
             )
             return {
                 token: token,

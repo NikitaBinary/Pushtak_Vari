@@ -33,6 +33,9 @@ const instituteSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    instituteImage: {
+        type: String,
+    },
 },
     {
         timestamps: {

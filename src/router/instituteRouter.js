@@ -1,19 +1,26 @@
 const express = require("express");
 const Router = express.Router();
+const multer = require("multer");
 const authController = require("../controller/instituteController");
-const { superAdminAuth, insitituteAuth } = require('../middleware/superAdminToken');
+const { superAdminAuth } = require('../middleware/superAdminToken');
 const instituteController = new authController();
 
-//login apis---------------------------------
-Router.post("/loginInstitute", instituteController.loginInstituteController)
-Router.put("/forgotInstitutePassword", instituteController.forgotPassword);
-Router.put("/instituteVerifyOTP", instituteController.verifyOTP);
-Router.put("/instituteResetPassword", instituteController.resetPassword);
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname)
+    },
+})
+
+const uploadStorage = multer({ storage: storage })
+
 
 // main api -------------------------------------------
-Router.post("/createInstitute", superAdminAuth, instituteController.createInstituteController)
+Router.post("/createInstitute", superAdminAuth, uploadStorage.single("instituteImage"), instituteController.createInstituteController)
 Router.get("/instituteList", superAdminAuth, instituteController.instituteListController)
-Router.put("/updateInstitute/:id", superAdminAuth, instituteController.updateInstituteController)
+Router.put("/updateInstitute/:id", superAdminAuth, uploadStorage.single("instituteImage"), instituteController.updateInstituteController)
 Router.get("/getInstituteInfo/:id", superAdminAuth, instituteController.getInstituteInfoController)
 Router.delete("/deleteInstituteInfo/:id", superAdminAuth, instituteController.deleteInstituteInfoController)
 Router.put("/instituteStatus/:id", superAdminAuth, instituteController.instituteStatusController)
