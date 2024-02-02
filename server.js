@@ -10,6 +10,7 @@ const categoryRoute = require("./src/router/categoryRouter")
 const ebookRoute = require("./src/router/ebookRouter")
 const instituteRoute = require("./src/router/instituteRouter")
 const subscription = require("./src/router/subscriptionRouter")
+const notification = require("./src/router/notificationRouter")
 
 
 
@@ -38,6 +39,7 @@ router.use('/api/v1', categoryRoute)
 router.use('/api/v1', ebookRoute)
 router.use('/api/v1', instituteRoute)
 router.use('/api/v1', subscription)
+router.use('/api/v1', notification)
 
 
 
