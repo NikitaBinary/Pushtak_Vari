@@ -5,7 +5,7 @@ const ebookSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    bookLanguage:{
+    bookLanguage: {
         type: JSON
     },
     authorName: {
@@ -28,6 +28,10 @@ const ebookSchema = new mongoose.Schema({
         type: JSON,
         required: true
     },
+    videoLink: {
+        type: String,
+        required: true
+    }
 },
     {
         timestamps: {
