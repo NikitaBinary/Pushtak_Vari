@@ -7,7 +7,7 @@ class authController {
             const quizInfo = await quizService.addQuizService(req.body);
             return res.json({
                 status: 201,
-                message: "ebookType has been added successfully!",
+                message: "Quiz has been added successfully!",
                 data: quizInfo
             })
 
@@ -35,13 +35,16 @@ class authController {
             })
         }
     }
-    async addQuestionOptionController(req, res) {
+
+
+    async getQuizListController(req, res) {
         try {
-            const optionInfo = await quizService.addQuestionOptionService(req.body);
+            const quizList = await quizService.getQuizListService();
+
             return res.json({
-                status: 201,
-                message: "Option has been added successfully!",
-                data: optionInfo
+                status: 200,
+                message: "Quiz list get",
+                data: quizList
             })
 
         } catch (error) {
@@ -49,6 +52,30 @@ class authController {
                 status: 500,
                 message: error.message
             })
+        }
+    }
+
+    async deleteQuizController(req, res) {
+        try {
+            let id = req.params.id
+            const response = await quizService.deleteQuizService(id);
+
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "Quiz info deleted",
+                data: response
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
         }
     }
 
