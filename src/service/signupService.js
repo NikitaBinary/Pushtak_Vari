@@ -11,7 +11,7 @@ class AuthService {
         return await user.findOne(query);
     }
     async userSignupService(userBody) {
-        if(userBody.userType == 'SUPER_ADMIN'){
+        if (userBody.userType == 'SUPER_ADMIN') {
             userBody.is_instituteUser = null
         }
         let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
@@ -65,7 +65,7 @@ class AuthService {
             const email = body.emailId;
             let checkOtp = await user.findOne({ emailId: email });
             if (checkOtp) {
-                let otp = `${Math.floor(100000 + Math.random() * 999999)}`;
+                let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
                 console.log("otp--------->", otp)
                 await user.updateOne({ emailId: email }, { $set: { otp: otp } });
                 let mail = new Mail();
@@ -82,7 +82,7 @@ class AuthService {
             }
             let checkInstituteOtp = await institute.findOne({ emailId: email });
             if (checkInstituteOtp) {
-                let otp = `${Math.floor(100000 + Math.random() * 999999)}`;
+                let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
                 console.log("otp--------->", otp)
                 await institute.updateOne({ emailId: email }, { $set: { otp: otp } });
                 let mail = new Mail();
