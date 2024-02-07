@@ -4,7 +4,7 @@ const quizOptionSchema = new mongoose.Schema({
     quizId: {
         type: String,
     },
-    question: {
+    questions: {
         type: Array,
         default: []
     }

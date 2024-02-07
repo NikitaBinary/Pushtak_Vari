@@ -8,6 +8,13 @@ const quizSchema = new mongoose.Schema({
     description: {
         type: String,
         required: true,
+    },
+    questionCount: {
+        type: Number
+    },
+    solveByUser: {
+        type: Number,
+        default: 0
     }
 });
 
