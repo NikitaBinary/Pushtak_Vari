@@ -14,11 +14,11 @@ const ebookSchema = new mongoose.Schema({
     },
     bookPdf: {
         type: String,
-        required: true
+        required: false
     },
     bookImage: {
         type: String,
-        required: true
+        required: false
     },
     category: {
         type: JSON,
@@ -30,7 +30,7 @@ const ebookSchema = new mongoose.Schema({
     },
     videoLink: {
         type: String,
-        required: true
+        required: false
     }
 },
     {

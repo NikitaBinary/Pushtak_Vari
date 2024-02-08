@@ -8,7 +8,9 @@ const userService = new authService();
 class authController {
     async userSignupController(req, res) {
         try {
+            const userPassword = req.body.password
             req.body.password = await getPasswordHash(req.body.password, 12);
+            
             if (req.body.userType) {
                 if (!userRoles.USER_ROLES.includes(req.body.userType)) {
                     return res.json({
@@ -17,7 +19,7 @@ class authController {
                     })
                 }
             }
-            const response = await userService.userSignupService(req.body);
+            const response = await userService.userSignupService(req.body, userPassword);
             if (response.uniqueEmail) {
                 return res.json({
                     status: 400,
@@ -131,7 +133,7 @@ class authController {
     async userListController(req, res) {
         try {
 
-            const is_instituteUser = req.query.is_instituteUser 
+            const is_instituteUser = req.query.is_instituteUser
             const userList = await userService.userListService(is_instituteUser);
 
             return res.json({
@@ -153,7 +155,14 @@ class authController {
         try {
             let dataBody = req.body
             const id = req.params.id
-            const userInfo = await userService.updateUserService(id, dataBody);
+            const file = req.file
+
+            if (file) {
+                const webUrl = `${req.protocol}://${req.get('host')}`;
+                var ImageUrl = `${webUrl}/uploads/${file.filename}`
+            }
+
+            const userInfo = await userService.updateUserService(id, dataBody, ImageUrl);
             if (!userInfo.userDetail) {
                 return res.status(404).send({
                     status: 404,

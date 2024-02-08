@@ -9,11 +9,14 @@ class authController {
             const data = req.body
             const file = req.file
 
-            const webUrl = `${req.protocol}://${req.get('host')}`;
-            const ImageUrl = `${webUrl}/uploads/${file.filename}`
+            if (file) {
+                const webUrl = `${req.protocol}://${req.get('host')}`;
+                var ImageUrl = `${webUrl}/uploads/${file.filename}`
+            }
 
+            const password = req.body.password
             req.body.password = await getPasswordHash(req.body.password, 12);
-            const response = await instituteService.createInstituteService(data, ImageUrl);
+            const response = await instituteService.createInstituteService(data, ImageUrl, password);
             if (response.uniqueEmail) {
                 return res.json({
                     status: 400,

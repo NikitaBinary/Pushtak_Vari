@@ -10,13 +10,30 @@ class AuthService {
     async verifyUser(query) {
         return await user.findOne(query);
     }
-    async userSignupService(userBody) {
+    async userSignupService(userBody, userPassword) {
         if (userBody.userType == 'SUPER_ADMIN') {
             userBody.is_instituteUser = null
         }
         let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
         if (!uniqueEmail) {
             var userDetail = await user.create(userBody);
+            if (userPassword) {
+                const email = userBody.emailId;
+                let checkPassword = await user.findOne({ emailId: email });
+                if (checkPassword) {
+                    let mail = new Mail();
+                    const userName = email.split('@');
+                    const subject = "User Password";
+                    const html = `<h3>Hello ${userName[0]}</h3>
+                    <p> Successfully your are registered in Pustak Vari and</p>
+                    <p>  this your password ${userPassword}  for login into Pustak Vari</p>
+                    <br>
+                    <p>Thanks,</p>
+                    <p>Your Pushtak Vari team </p>`;
+                    await mail.sendMail(email, html, subject);
+                    // return true;
+                }
+            }
         }
         return { userDetail, uniqueEmail }
     }
@@ -168,11 +185,20 @@ class AuthService {
         }
     }
 
-    async updateUserService(_id, dataBody) {
+    async updateUserService(_id, dataBody, ImageUrl) {
         try {
             delete dataBody.email
             let userDetail = await user.findOne({ _id: _id });
             let userInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
+            if (ImageUrl) {
+                userInfo = await user.findOneAndUpdate({ _id: _id },
+                    {
+                        $set: {
+                            userImage: ImageUrl
+                        }
+                    },
+                    { new: true });
+            }
 
             return { userDetail, userInfo }
         } catch (error) {

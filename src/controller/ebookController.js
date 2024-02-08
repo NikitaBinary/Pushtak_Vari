@@ -60,16 +60,18 @@ class authController {
         try {
             const pdfFile = req.files.bookPdf
             const imageFile = req.files.bookImage
-
             const data = req.body
 
-            const [pdf_file] = pdfFile
-            const [image_file] = imageFile
-
             const webUrl = `${req.protocol}://${req.get('host')}`;
-            const pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
-            const imageUrl = `${webUrl}/uploads/${image_file.filename}`
 
+            if (imageFile) {
+                const [image_file] = imageFile
+                var imageUrl = `${webUrl}/uploads/${image_file.filename}`
+            }
+            if (pdfFile) {
+                const [pdf_file] = pdfFile
+                var pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
+            }
             const ebookDetail = await ebookService.createEbookService(data, imageUrl, pdfUrl);
             return res.json({
                 status: 201,
