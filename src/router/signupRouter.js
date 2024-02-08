@@ -1,8 +1,21 @@
 const express = require("express");
 const Router = express.Router();
+const multer = require("multer");
 const authController = require("../controller/signupController");
 const { superAdminAuth } = require('../middleware/superAdminToken');
 const signUPController = new authController();
+
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname)
+    },
+})
+
+const uploadStorage = multer({ storage: storage })
 
 // login apis---------------------------
 Router.post("/userSingup", signUPController.userSignupController);
@@ -14,7 +27,7 @@ Router.put("/resetPassword", signUPController.resetPassword);
 // user apis -by SuperAdmin------------------------------
 
 Router.get("/userList", superAdminAuth, signUPController.userListController)
-Router.put("/updateUser/:id", superAdminAuth, signUPController.updateUserController)
+Router.put("/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"), signUPController.updateUserController)
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)

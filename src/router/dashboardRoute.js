@@ -5,7 +5,7 @@ const { superAdminAuth } = require('../middleware/superAdminToken');
 const dashboardController = new authController();
 
 
-Router.get("/getUserStatusCount", superAdminAuth, dashboardController.getUserStatusController)
+Router.get("/dashboardStatics", superAdminAuth, dashboardController.getUserStatusController)
 
 
 module.exports = Router

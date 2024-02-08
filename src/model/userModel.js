@@ -31,6 +31,10 @@ const singupSchema = new mongoose.Schema({
     },
     is_instituteUser: {
         type: Boolean,
+    },
+    userImage: {
+        type: String,
+        default: ''
     }
 },
     {
