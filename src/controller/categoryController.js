@@ -57,7 +57,7 @@ class authController {
             if (!categoryInfo.categoryDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "category not exists",
+                    message: "category not exists.",
                 });
             }
             delete categoryInfo.categoryDetail
@@ -87,7 +87,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "Category info deleted",
+                message: "Category info deleted.",
                 data: response
             })
         } catch (error) {

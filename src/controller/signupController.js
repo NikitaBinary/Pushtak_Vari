@@ -8,23 +8,40 @@ const userService = new authService();
 class authController {
     async userSignupController(req, res) {
         try {
-            const userPassword = req.body.password
-            req.body.password = await getPasswordHash(req.body.password, 12);
-            
+            const data = req.body
+            const userPassword = data.password
+
+            const instituteImage = req.files.userImage
+            const userImage = req.files.instituteImage
+
+            const webUrl = `${req.protocol}://${req.get('host')}`;
+
+            if (userImage) {
+                const [user_image] = userImage
+                var user_Image = `${webUrl}/uploads/${user_image.filename}`
+            }
+            if (instituteImage) {
+                const [institute_image] = instituteImage
+                var institute_Image = `${webUrl}/uploads/${institute_image.filename}`
+            }
+
+            req.body.password = await getPasswordHash(data.password, 12);
+
             if (req.body.userType) {
-                if (!userRoles.USER_ROLES.includes(req.body.userType)) {
+                if (!userRoles.USER_ROLES.includes(data.userType)) {
                     return res.json({
                         status: 400,
                         message: `Invalid User Type Should be [${userRoles.USER_ROLES}]`,
                     })
                 }
             }
-            const response = await userService.userSignupService(req.body, userPassword);
+            const response = await userService.userSignupService(data, userPassword, user_Image, institute_Image);
             if (response.uniqueEmail) {
                 return res.json({
                     status: 400,
-                    message: "Email already exists",
+                    message: "Email already exists.",
                 })
+
             }
             return res.json({
                 status: 201,
@@ -33,6 +50,7 @@ class authController {
             })
 
         } catch (error) {
+            console.log("error------------->", error)
             return res.json({
                 status: 500,
                 message: error.message
@@ -47,12 +65,12 @@ class authController {
             if (response.message) {
                 return res.json({
                     status: 400,
-                    message: "Email not registered",
+                    message: "Email not registered.",
                 })
             }
             return res.json({
                 status: 200,
-                message: "User login successfully",
+                message: "User login successfully.",
                 body: response
             })
 
@@ -70,12 +88,12 @@ class authController {
             if (response) {
                 return res.json({
                     status: 200,
-                    message: "OTP send successfully",
+                    message: "OTP send successfully.",
                 })
             } else {
                 return res.json({
                     status: 404,
-                    message: "Email does not exists",
+                    message: "Email does not exists.",
                 })
             }
         } catch (error) {
@@ -88,16 +106,15 @@ class authController {
     async verifyOTP(req, res) {
         try {
             const response = await userService.verifyOTP(req.body);
-            console.log("response------>", response)
             if (response) {
                 return res.json({
                     status: 200,
-                    message: "OTP match successfully",
+                    message: "OTP match successfully.",
                 })
             } else {
                 return res.json({
                     status: 400,
-                    message: "Invalid Otp",
+                    message: "Invalid Otp.",
                 })
             }
         } catch (error) {
@@ -114,12 +131,12 @@ class authController {
             if (response) {
                 return res.status(200).send({
                     status: 200,
-                    message: "Password Reset Successfully",
+                    message: "Password Reset Successfully.",
                 });
             } else {
                 return res.status(400).send({
                     status: 400,
-                    message: "Invalid email",
+                    message: "Invalid email.",
                 });
             }
         } catch (error) {
@@ -138,7 +155,7 @@ class authController {
 
             return res.json({
                 status: 200,
-                message: "User list get",
+                message: "User list get.",
                 data: userList
             })
 
@@ -166,7 +183,7 @@ class authController {
             if (!userInfo.userDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "UserId not exists",
+                    message: "UserId not exists.",
                 });
             }
             delete userInfo.userDetail
@@ -190,12 +207,12 @@ class authController {
             if (!userInfo.userDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "UserId not exists",
+                    message: "UserId not exists.",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "User Detail get",
+                message: "User detail get.",
                 body: userInfo
             });
         } catch (error) {
@@ -213,12 +230,12 @@ class authController {
             if (!response.userInfo) {
                 return res.status(404).send({
                     status: 404,
-                    message: "UserId not exists",
+                    message: "UserId not exists.",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "User info deleted",
+                message: "User info deleted.",
                 data: response.userdata
             })
         } catch (error) {

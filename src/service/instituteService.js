@@ -2,6 +2,7 @@ const institute = require("../model/instituteModel");
 const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
+const user = require("../model/userModel")
 
 class AuthService {
 
@@ -55,7 +56,8 @@ class AuthService {
 
     async instituteListService() {
         try {
-            const instituteList = await institute.find()
+            const instituteList = await user.find({ userType: "INSTITUTE" },
+                { _id: 1, emailId: 1, mobileNo: 1, userType: 1, activeStatus: 1, instituteName: 1, studentList: 1 })
             return instituteList
         } catch (error) {
             throw error;
@@ -63,9 +65,10 @@ class AuthService {
     }
     async getInstituteInfoService(_id) {
         try {
-            let instituteDetail = await institute.findOne({ _id: _id });
+            let instituteDetail = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
             if (instituteDetail) {
-                var instituteInfo = await institute.findOne({ _id: _id }, {});
+                var instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" },
+                    { _id: 1, emailId: 1, mobileNo: 1, userType: 1, activeStatus: 1, instituteName: 1, studentList: 1 });
             }
             return { instituteDetail, instituteInfo }
         } catch (error) {
@@ -75,9 +78,9 @@ class AuthService {
 
     async deleteInstituteInfoService(_id) {
         try {
-            let instituteInfo = await institute.findOne({ _id: _id });
+            let instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
             if (instituteInfo) {
-                var institutedata = await institute.findOneAndDelete({ _id });
+                var institutedata = await institute.findOneAndDelete({ _id, userType: "INSTITUTE" });
             }
             return { instituteInfo, institutedata }
         } catch (error) {
@@ -91,10 +94,11 @@ class AuthService {
                 return value === 'true';
             }
             const active = await convertStringToBoolean(status);
-            let instituteInfo = await institute.findOne({ _id: _id });
+            let instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
+            let id = instituteInfo._id
             if (instituteInfo) {
                 var institutedata = await institute.findByIdAndUpdate(
-                    _id, { is_active: active }, { new: true }
+                    id, { is_active: active }, { new: true }
                 );
             }
             return { instituteInfo, institutedata }

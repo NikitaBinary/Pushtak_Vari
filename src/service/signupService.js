@@ -10,45 +10,93 @@ class AuthService {
     async verifyUser(query) {
         return await user.findOne(query);
     }
-    async userSignupService(userBody, userPassword) {
-        if (userBody.userType == 'SUPER_ADMIN') {
-            userBody.is_instituteUser = null
-        }
-        let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
-        if (!uniqueEmail) {
-            var userDetail = await user.create(userBody);
-            if (userPassword) {
-                const email = userBody.emailId;
-                let checkPassword = await user.findOne({ emailId: email });
-                if (checkPassword) {
-                    let mail = new Mail();
-                    const userName = email.split('@');
-                    const subject = "User Password";
-                    const html = `<h3>Hello ${userName[0]}</h3>
-                    <p> Successfully your are registered in Pustak Vari and</p>
-                    <p>  this your password ${userPassword}  for login into Pustak Vari</p>
-                    <br>
-                    <p>Thanks,</p>
-                    <p>Your Pushtak Vari team </p>`;
-                    await mail.sendMail(email, html, subject);
-                    // return true;
+    async userSignupService(userBody, userPassword, user_Image, institute_Image) {
+        try {
+            console.log("userBody---------------->", userBody)
+            let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
+            if (!uniqueEmail) {
+                if (userBody.userType == 'SUPER_ADMIN') {
+                    var superObj = {
+                        fullName: userBody.fullName,
+                        emailId: userBody.emailId,
+                        mobileNo: userBody.mobileNo,
+                        password: userBody.password,
+                        userType: userBody.userType,
+                        is_instituteUser: null,
+                        userImage: ""
+                    }
+                    var userDetail = await user.create(superObj);
+                }
+
+                if (userBody.userType == 'INSTITUTE_USER') {
+                    var institUser = {
+                        fullName: userBody.fullName,
+                        emailId: userBody.emailId,
+                        mobileNo: userBody.mobileNo,
+                        password: userBody.password,
+                        userType: userBody.userType,
+                        is_instituteUser: true,
+                        userImage: ""
+                    }
+                    var userDetail = await user.create(institUser);
+                }
+                if (userBody.userType == 'INSTITUTE') {
+                    var institUser = {
+                        instituteName: userBody.instituteName,
+                        emailId: userBody.emailId,
+                        mobileNo: userBody.mobileNo,
+                        password: userBody.password,
+                        userType: userBody.userType,
+                        is_active: true,
+                        studentList: [],
+                        // instituteImage: institute_Image
+                    }
+
+                    if (institute_Image) {
+                        institUser.instituteImage = institute_Image
+                    }
+
+                    var userDetail = await user.create(institUser);
+                }
+                if (userPassword) {
+                    const email = userBody.emailId;
+                    let checkPassword = await user.findOne({ emailId: email });
+                    if (checkPassword) {
+                        let mail = new Mail();
+                        const userName = email.split('@');
+                        const subject = "User Password";
+                        const html = `<h3>Hello ${userName[0]}</h3>
+                        <p> Successfully your are registered in Pustak Vari and</p>
+                        <p>  this your password ${userPassword}  for login into Pustak Vari</p>
+                        <br>
+                        <p>Thanks,</p>
+                        <p>Your Pushtak Vari team </p>`;
+                        await mail.sendMail(email, html, subject);
+                    }
                 }
             }
+            return { userDetail, uniqueEmail }
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
-        return { userDetail, uniqueEmail }
+
     }
 
 
     async userloginService(userBody) {
         const userInfo = await user.findOne({ emailId: userBody.emailId });
         if (userInfo) {
-            if (userInfo.userType == 'SUPER_ADMIN') {
-                let data = await user.findOne({ emailId: userBody.emailId });
-                await verifyPassword(userBody.password, data.password);
-            }
-            if (userInfo.userType == 'INSTITUTE_USER') {
-                let data = await user.findOne({ emailId: userBody.emailId });
-                await verifyPassword(userBody.password, data.password);
+            let data;
+            switch (userInfo.userType) {
+                case 'SUPER_ADMIN':
+                case 'INSTITUTE_USER':
+                case 'INSTITUTE':
+                    data = await user.findOne({ emailId: userBody.emailId });
+                    await verifyPassword(userBody.password, data.password);
+                    break;
+                default:
+                    return { message: "Invalid user access." };
             }
             var token = await generateToken(
                 { email: userInfo.emailId, name: userInfo.fullName }
@@ -58,20 +106,7 @@ class AuthService {
                 userInfo
             }
         }
-        const instituteInfo = await institute.findOne({ emailId: userBody.emailId });
-        if (instituteInfo) {
 
-            let data = await institute.findOne({ emailId: userBody.emailId });
-            await verifyPassword(userBody.password, data.password);
-
-            const token = await generateToken(
-                { email: instituteInfo.emailId, name: instituteInfo.instituteName }
-            )
-            return {
-                token: token,
-                instituteInfo
-            };
-        }
 
         return { message: "Not Found" }
 
@@ -97,23 +132,7 @@ class AuthService {
                 await mail.sendMail(email, html, subject);
                 return true;
             }
-            let checkInstituteOtp = await institute.findOne({ emailId: email });
-            if (checkInstituteOtp) {
-                let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-                console.log("otp--------->", otp)
-                await institute.updateOne({ emailId: email }, { $set: { otp: otp } });
-                let mail = new Mail();
-                const userName = email.split('@');
-                const subject = "Forgot Password";
-                const html = `<h3>Hello ${userName[0]}</h3>
-                <p> ${otp} is the otp for your ${email} account.</p>
-                <p> If you didn't ask to reset your password, you can ignore this email.</p>
-                <br>
-                <p>Thanks,</p>
-                <p>Your Pushtak Vari team </p>`;
-                await mail.sendMail(email, html, subject);
-                return true;
-            }
+
             else {
                 return false;
             }
@@ -128,14 +147,9 @@ class AuthService {
             const email = body.emailId;
             const otp = body.otp;
             let checkOtp = await user.find({ emailId: email, otp: otp });
-            let instituteCheckOtp = await institute.find({ emailId: email, otp: otp });
 
             if (checkOtp.length > 0) {
                 await user.updateOne({ _id: checkOtp._id }, { $set: { otp: '' } }, { new: true });
-                return true;
-            }
-            if (instituteCheckOtp.length > 0) {
-                await institute.updateOne({ _id: checkOtp._id }, { $set: { otp: '' } }, { new: true });
                 return true;
             }
             else {

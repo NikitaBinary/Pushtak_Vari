@@ -3,23 +3,18 @@ const mongoose = require('mongoose');
 const singupSchema = new mongoose.Schema({
     fullName: {
         type: String,
-        required: true
     },
     emailId: {
         type: String,
-        required: true
     },
     mobileNo: {
-        type: String,
-        required: true,
+        type: Number,
     },
     password: {
         type: String,
-        required: true
     },
     userType: {
         type: String,
-        required: true
     },
     otp: {
         type: String,
@@ -34,7 +29,19 @@ const singupSchema = new mongoose.Schema({
     },
     userImage: {
         type: String,
-        default: ''
+    },
+    instituteName: {
+        type: String
+    },
+    is_active: {
+        type: Boolean
+    },
+    studentList: {
+        type: Array,
+        default: null
+    },
+    instituteImage: {
+        type: String
     }
 },
     {
