@@ -8,7 +8,7 @@ class authController {
             const ebookTypeInfo = await ebookService.addEbookTypeService(req.body);
             return res.json({
                 status: 201,
-                message: "ebookType has been added successfully!",
+                message: "E-Book type has been added successfully!",
                 data: ebookTypeInfo
             })
 
@@ -44,7 +44,7 @@ class authController {
 
             return res.json({
                 status: 200,
-                message: "ebook language list get",
+                message: "E-Book language list get",
                 data: ebooklanguageList
             })
 
@@ -109,13 +109,13 @@ class authController {
             if (!eBookInfo.eBookDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "eBook not exists",
+                    message: "E-Book not exists",
                 });
             }
             delete eBookInfo.eBookDetail
             return res.status(200).send({
                 status: 200,
-                message: "E-Book has been edited successfully!",
+                message: "E-Book has been updated successfully!",
                 body: eBookInfo
             });
         } catch (error) {
@@ -138,7 +138,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "ebook info deleted.",
+                message: "E-Book information deleted.",
                 data: response
             })
         } catch (error) {
@@ -155,7 +155,7 @@ class authController {
 
             return res.json({
                 status: 200,
-                message: "eBook list get.",
+                message: "E-Book list get.",
                 data: eBookList
             })
 
@@ -173,12 +173,12 @@ class authController {
             if (!response.eBookDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "eBookId not exists",
+                    message: "E-Book id not exists",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "eBook Detail get",
+                message: "E-Book Detail get",
                 body: response.eBookInfo
             });
         } catch (error) {

@@ -20,10 +20,6 @@ const singupSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    activeStatus: {
-        type: Boolean,
-        default: true
-    },
     is_instituteUser: {
         type: Boolean,
     },

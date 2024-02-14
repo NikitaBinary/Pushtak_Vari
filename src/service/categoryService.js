@@ -3,13 +3,14 @@ const category = require("../model/categoryModel");
 class AuthService {
     async addCategoryService(categoryBody, ImageUrl) {
         try {
-
-            var categoryInfo = await category.create({
-                ...categoryBody,
-                categoryImage: ImageUrl,
-            });
-            return categoryInfo
-
+            const uniqueCategory = await category.findOne({ categoryName: categoryBody.categoryName })
+            if (!uniqueCategory) {
+                var categoryInfo = await category.create({
+                    ...categoryBody,
+                    categoryImage: ImageUrl || '',
+                });
+            }
+            return { categoryInfo, uniqueCategory }
         } catch (error) {
             throw error;
         }

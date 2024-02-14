@@ -10,7 +10,7 @@ class authController {
             const response = await subscriptionService.addSubscriptionDurationService(data)
             return res.json({
                 status: 201,
-                message: "Sunscription duration added.",
+                message: "Subscription duration added.",
                 data: response
             })
 
@@ -86,7 +86,7 @@ class authController {
             delete subscriptionInfo.subscriptionDetail
             return res.status(200).send({
                 status: 200,
-                message: "Subscription has been edited successfully!",
+                message: "Subscription has been updated successfully!",
                 body: subscriptionInfo
             });
         } catch (error) {
@@ -104,12 +104,12 @@ class authController {
             if (!response.subscriptionDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "SubscriptionId not exists",
+                    message: "Subscription id not exists",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "Subscription Detail get",
+                message: "Subscription detail get",
                 body: response.subscriptionInfo
             });
         } catch (error) {
@@ -133,7 +133,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "Subscription info deleted",
+                message: "Subscription information deleted",
                 data: response
             })
         } catch (error) {

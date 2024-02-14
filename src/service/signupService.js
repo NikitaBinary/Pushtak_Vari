@@ -10,11 +10,13 @@ class AuthService {
     async verifyUser(query) {
         return await user.findOne(query);
     }
-    async userSignupService(userBody, userPassword, user_Image, institute_Image) {
+    async userSignupService(userBody, userPassword, institute_Image) {
         try {
-            console.log("userBody---------------->", userBody)
             let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
-            if (!uniqueEmail) {
+            let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo })
+           
+            if (!uniqueEmail && !uniqueMobileNo) {
+          
                 if (userBody.userType == 'SUPER_ADMIN') {
                     var superObj = {
                         fullName: userBody.fullName,
@@ -75,7 +77,7 @@ class AuthService {
                     }
                 }
             }
-            return { userDetail, uniqueEmail }
+            return { userDetail, uniqueEmail, uniqueMobileNo }
         } catch (error) {
             console.log(error);
             throw error;
@@ -188,10 +190,12 @@ class AuthService {
         try {
             let userList
             if (status) {
-                userList = await user.find({ is_instituteUser: status })
+                userList = await user.find({ is_instituteUser: status }, { "userType": { "$ne": 'INSTITUTE' } },
+                    { fullName: 1, emailId: 1, mobileNo: 1, password: 1, userType: 1, is_instituteUser: 1, userImage: 1, is_active: 1 })
             }
             else {
-                userList = await user.find()
+                userList = await user.find({ "userType": { "$ne": 'INSTITUTE' } },
+                    { fullName: 1, emailId: 1, mobileNo: 1, password: 1, userType: 1, is_instituteUser: 1, userImage: 1, is_active: 1 })
             }
             return userList
         } catch (error) {
@@ -202,10 +206,13 @@ class AuthService {
     async updateUserService(_id, dataBody, ImageUrl) {
         try {
             delete dataBody.email
-            let userDetail = await user.findOne({ _id: _id });
-            let userInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
+            let userDetail = await user.findOne({ _id: _id }, { "userType": { "$ne": 'INSTITUTE' } });
+            if (userDetail) {
+                var id = userDetail._id
+            }
+            let userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
             if (ImageUrl) {
-                userInfo = await user.findOneAndUpdate({ _id: _id },
+                userInfo = await user.findOneAndUpdate({ _id: IDBFactory },
                     {
                         $set: {
                             userImage: ImageUrl
@@ -251,7 +258,7 @@ class AuthService {
             let userInfo = await user.findOne({ _id: _id });
             if (userInfo) {
                 var userdata = await user.findByIdAndUpdate(
-                    _id, { activeStatus: active }, { new: true }
+                    _id, { is_active: active }, { new: true }
                 );
             }
             return { userInfo, userdata }
