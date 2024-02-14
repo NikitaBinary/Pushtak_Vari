@@ -138,7 +138,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "ebook info deleted",
+                message: "ebook info deleted.",
                 data: response
             })
         } catch (error) {
@@ -155,7 +155,7 @@ class authController {
 
             return res.json({
                 status: 200,
-                message: "eBook list get",
+                message: "eBook list get.",
                 data: eBookList
             })
 

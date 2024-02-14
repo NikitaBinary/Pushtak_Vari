@@ -61,7 +61,7 @@ class authController {
             const subscriptionList = await subscriptionService.subscriptionListService()
             return res.json({
                 status: 200,
-                message: "Get list of subscription",
+                message: "Get list of subscription.",
                 data: subscriptionList
             })
 
@@ -80,7 +80,7 @@ class authController {
             if (!subscriptionInfo.subscriptionDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "Subscription not exists",
+                    message: "Subscription not exists.",
                 });
             }
             delete subscriptionInfo.subscriptionDetail
@@ -104,12 +104,12 @@ class authController {
             if (!response.subscriptionDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "subscriptionId not exists",
+                    message: "SubscriptionId not exists",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "subscription Detail get",
+                message: "Subscription Detail get",
                 body: response.subscriptionInfo
             });
         } catch (error) {

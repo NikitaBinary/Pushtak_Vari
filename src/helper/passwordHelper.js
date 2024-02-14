@@ -7,6 +7,7 @@ async function getPasswordHash(password, length) {
 
 async function verifyPassword(password, hash) {
     const valid = await bcrypt.compare(password, hash);
+    console.log("vaid--------->",valid)
     if (!valid) {
         return Promise.reject({
             status: HttpStatus.UNAUTHORIZED,

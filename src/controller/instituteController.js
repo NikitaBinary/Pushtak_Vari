@@ -53,7 +53,7 @@ class authController {
             if (!instituteInfo.instituteDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "Institute not exists",
+                    message: "Institute not exists.",
                 });
             }
             delete instituteInfo.instituteDetail
@@ -94,7 +94,7 @@ class authController {
             if (!instituteInfo.instituteDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "instituteId not exists",
+                    message: "InstituteId not exists",
                 });
             }
             return res.status(200).send({
@@ -122,7 +122,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "Institute info deleted",
+                message: "Institute info deleted.",
                 data: response.institutedata
             })
         } catch (error) {
@@ -140,12 +140,12 @@ class authController {
             if (!response.instituteInfo) {
                 return res.status(404).send({
                     status: 404,
-                    message: "instituteId not exists",
+                    message: "InstituteId not exists",
                 });
             }
             return res.status(200).send({
                 status: 200,
-                message: "institute status has been updated successfully!",
+                message: "Institute status has been updated successfully!",
                 data: response.institutedata
             })
         } catch (error) {

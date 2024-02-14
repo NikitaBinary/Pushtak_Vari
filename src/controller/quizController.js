@@ -68,7 +68,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "Quiz info deleted",
+                message: "Quiz info deleted.",
                 data: response
             })
         } catch (error) {
