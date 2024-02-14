@@ -11,18 +11,11 @@ class authController {
             const data = req.body
             const userPassword = data.password
 
-            const instituteImage = req.files.userImage
-            const userImage = req.files.instituteImage
-
+            const institutImage = req.file
             const webUrl = `${req.protocol}://${req.get('host')}`;
 
-            if (userImage) {
-                const [user_image] = userImage
-                var user_Image = `${webUrl}/uploads/${user_image.filename}`
-            }
-            if (instituteImage) {
-                const [institute_image] = instituteImage
-                var institute_Image = `${webUrl}/uploads/${institute_image.filename}`
+            if (institutImage) {
+                var institute_Image = `${webUrl}/uploads/${institutImage.filename}`
             }
 
             req.body.password = await getPasswordHash(data.password, 12);
@@ -35,7 +28,7 @@ class authController {
                     })
                 }
             }
-            const response = await userService.userSignupService(data, userPassword, user_Image, institute_Image);
+            const response = await userService.userSignupService(data, userPassword, institute_Image);
             if (response.uniqueEmail) {
                 return res.json({
                     status: 400,
@@ -43,12 +36,31 @@ class authController {
                 })
 
             }
-            return res.json({
-                status: 201,
-                message: "User has been added successfully!",
-                data: response.userDetail
-            })
 
+            if (response.uniqueMobileNo) {
+                return res.json({
+                    status: 400,
+                    message: "Mobile number already exists.",
+                })
+            }
+            if (response.userDetail) {
+                let instituteData = response.userDetail.userType
+                if (instituteData == 'INSTITUTE') {
+                    return res.json({
+                        status: 201,
+                        message: "Institute has been added successfully!",
+                        data: response.userDetail
+                    })
+                }
+                else {
+                    return res.json({
+                        status: 201,
+                        message: "User has been added successfully!",
+                        data: response.userDetail
+                    })
+                }
+            }
+            
         } catch (error) {
             console.log("error------------->", error)
             return res.json({
@@ -235,7 +247,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "User info deleted.",
+                message: "User information deleted.",
                 data: response.userdata
             })
         } catch (error) {

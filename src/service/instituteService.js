@@ -45,8 +45,8 @@ class AuthService {
             if (ImageUrl) {
                 dataBody.instituteImage = ImageUrl
             }
-            let instituteDetail = await institute.findOne({ _id: _id });
-            let instituteInfo = await institute.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
+            let instituteDetail = await user.findOne({ _id: _id }, { userType: "INSTITUTE" });
+            let instituteInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
 
             return { instituteDetail, instituteInfo }
         } catch (error) {
@@ -57,7 +57,7 @@ class AuthService {
     async instituteListService() {
         try {
             const instituteList = await user.find({ userType: "INSTITUTE" },
-                { _id: 1, emailId: 1, mobileNo: 1, userType: 1, activeStatus: 1, instituteName: 1, studentList: 1 })
+                { _id: 1, emailId: 1, mobileNo: 1, userType: 1, is_active: 1, instituteName: 1, studentList: 1, instituteImage: 1 })
             return instituteList
         } catch (error) {
             throw error;
@@ -65,10 +65,13 @@ class AuthService {
     }
     async getInstituteInfoService(_id) {
         try {
-            let instituteDetail = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
+            let instituteDetail = await user.findOne({ _id: _id }, { userType: "INSTITUTE" });
             if (instituteDetail) {
-                var instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" },
-                    { _id: 1, emailId: 1, mobileNo: 1, userType: 1, activeStatus: 1, instituteName: 1, studentList: 1 });
+                let id = instituteDetail._id
+                var instituteInfo = await user.findOne(
+                    { _id: id, userType: "INSTITUTE" },
+                    { _id: 1, emailId: 1, mobileNo: 1, userType: 1, is_active: 1, instituteName: 1, studentList: 1, instituteImage: 1 }
+                );
             }
             return { instituteDetail, instituteInfo }
         } catch (error) {
@@ -78,9 +81,9 @@ class AuthService {
 
     async deleteInstituteInfoService(_id) {
         try {
-            let instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
+            let instituteInfo = await user.findOne({ _id: _id, userType: "INSTITUTE" });
             if (instituteInfo) {
-                var institutedata = await institute.findOneAndDelete({ _id, userType: "INSTITUTE" });
+                var institutedata = await user.findOneAndDelete({ _id, userType: "INSTITUTE" });
             }
             return { instituteInfo, institutedata }
         } catch (error) {

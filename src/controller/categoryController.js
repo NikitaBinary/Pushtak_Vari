@@ -7,14 +7,23 @@ class authController {
             const file = req.file
             const data = req.body
 
-            const webUrl = `${req.protocol}://${req.get('host')}`;
-            const ImageUrl = `${webUrl}/uploads/${file.filename}`
-
+            if(file){
+                const webUrl = `${req.protocol}://${req.get('host')}`;
+                var ImageUrl = `${webUrl}/uploads/${file.filename}`
+            }
+            
             const categoryInfo = await categoryService.addCategoryService(data, ImageUrl);
+           
+            if(categoryInfo.uniqueCategory){
+                return res.json({
+                    status: 400,
+                    message: "Category name already exists.",
+                })
+            }
             return res.json({
                 status: 201,
                 message: "Category has been added successfully!",
-                data: categoryInfo
+                data: categoryInfo.categoryInfo
             })
 
         } catch (error) {
@@ -57,13 +66,13 @@ class authController {
             if (!categoryInfo.categoryDetail) {
                 return res.status(404).send({
                     status: 404,
-                    message: "category not exists.",
+                    message: "Category not exists.",
                 });
             }
             delete categoryInfo.categoryDetail
             return res.status(200).send({
                 status: 200,
-                message: "Category has been edited successfully!",
+                message: "Category has been updated successfully!",
                 body: categoryInfo
             });
         } catch (error) {
@@ -87,7 +96,7 @@ class authController {
             }
             return res.status(200).send({
                 status: 200,
-                message: "Category info deleted.",
+                message: "Category information deleted.",
                 data: response
             })
         } catch (error) {

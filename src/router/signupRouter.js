@@ -18,8 +18,7 @@ const storage = multer.diskStorage({
 const uploadStorage = multer({ storage: storage })
 
 // login apis---------------------------
-Router.post("/userSingup", uploadStorage.fields
-([{ name: 'userImage', maxCount: 1 }, { name: 'instituteImage', maxCount: 1 }]), signUPController.userSignupController);
+Router.post("/userSingup", uploadStorage.single("instituteImage"), signUPController.userSignupController);
 Router.post("/userLogin", signUPController.userloginController);
 Router.put("/forgotPassword", signUPController.forgotPassordAndOTPController);
 Router.put("/verifyOTP", signUPController.verifyOTP);
