@@ -14,9 +14,9 @@ class AuthService {
         try {
             let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
             let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo })
-           
+
             if (!uniqueEmail && !uniqueMobileNo) {
-          
+
                 if (userBody.userType == 'SUPER_ADMIN') {
                     var superObj = {
                         fullName: userBody.fullName,
@@ -42,6 +42,18 @@ class AuthService {
                     }
                     var userDetail = await user.create(institUser);
                 }
+                if (userBody.userType == 'REGULAR_USER') {
+                    var institUser = {
+                        fullName: userBody.fullName,
+                        emailId: userBody.emailId,
+                        mobileNo: userBody.mobileNo,
+                        password: userBody.password,
+                        userType: userBody.userType,
+                        is_instituteUser: true,
+                        userImage: ""
+                    }
+                    var userDetail = await user.create(institUser);
+                }
                 if (userBody.userType == 'INSTITUTE') {
                     var institUser = {
                         instituteName: userBody.instituteName,
@@ -49,7 +61,7 @@ class AuthService {
                         mobileNo: userBody.mobileNo,
                         password: userBody.password,
                         userType: userBody.userType,
-                        is_active: true,
+                        is_active: false,
                         studentList: [],
                         // instituteImage: institute_Image
                     }
@@ -188,19 +200,30 @@ class AuthService {
 
     async userListService(status) {
         try {
-            let userList
+            let userList;
+            let query = { "userType": { "$ne": 'INSTITUTE' } };
+
+            let projection = {
+                fullName: 1,
+                emailId: 1,
+                mobileNo: 1,
+                password: 1,
+                userType: 1,
+                is_instituteUser: 1,
+                userImage: 1,
+                is_active: 1
+            };
+
             if (status) {
-                userList = await user.find({ is_instituteUser: status }, { "userType": { "$ne": 'INSTITUTE' } },
-                    { fullName: 1, emailId: 1, mobileNo: 1, password: 1, userType: 1, is_instituteUser: 1, userImage: 1, is_active: 1 })
+                query.is_instituteUser = status;
             }
-            else {
-                userList = await user.find({ "userType": { "$ne": 'INSTITUTE' } },
-                    { fullName: 1, emailId: 1, mobileNo: 1, password: 1, userType: 1, is_instituteUser: 1, userImage: 1, is_active: 1 })
-            }
-            return userList
+            userList = await user.find(query, projection);
+
+            return userList;
         } catch (error) {
             throw error;
         }
+
     }
 
     async updateUserService(_id, dataBody, ImageUrl) {

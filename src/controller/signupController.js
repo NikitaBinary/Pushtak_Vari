@@ -43,16 +43,18 @@ class authController {
                     message: "Mobile number already exists.",
                 })
             }
+           
             if (response.userDetail) {
-                let instituteData = response.userDetail.userType
-                if (instituteData == 'INSTITUTE') {
+                let data = response.userDetail.userType
+                if (data == 'INSTITUTE') {
                     return res.json({
                         status: 201,
                         message: "Institute has been added successfully!",
                         data: response.userDetail
                     })
                 }
-                else {
+                else if (data == 'REGULAR_USER' || data == 'INSTITUTE_USER') {
+                    console.log("comeee")
                     return res.json({
                         status: 201,
                         message: "User has been added successfully!",
@@ -60,7 +62,7 @@ class authController {
                     })
                 }
             }
-            
+
         } catch (error) {
             console.log("error------------->", error)
             return res.json({
