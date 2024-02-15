@@ -283,6 +283,29 @@ class authController {
             });
         }
     }
+
+    async logoutController(req, res) {
+        try {
+            let id = req.params.id
+            const response = await userService.logoutService(id);
+            if (!response.userInfo) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "UserId not exists",
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "User logout successfully!",
+                data: response.userdata
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;

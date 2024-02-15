@@ -97,13 +97,14 @@ class AuthService {
                 return value === 'true';
             }
             const active = await convertStringToBoolean(status);
-            let instituteInfo = await institute.findOne({ _id: _id, userType: "INSTITUTE" });
-            let id = instituteInfo._id
+            let instituteInfo = await user.findOne({ _id: _id, userType: "INSTITUTE" });
             if (instituteInfo) {
-                var institutedata = await institute.findByIdAndUpdate(
+                let id = instituteInfo._id
+                var institutedata = await user.findByIdAndUpdate(
                     id, { is_active: active }, { new: true }
                 );
             }
+
             return { instituteInfo, institutedata }
         } catch (error) {
             console.log("error------.", error)

@@ -31,6 +31,9 @@ Router.put("/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"),
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
+Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
+Router.put("/logout/:id", superAdminAuth, signUPController.logoutController)
+
 
 
 module.exports = Router;
