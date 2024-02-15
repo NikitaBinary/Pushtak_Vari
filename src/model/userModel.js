@@ -38,6 +38,9 @@ const singupSchema = new mongoose.Schema({
     },
     instituteImage: {
         type: String
+    },
+    loginStatus:{
+        type:Boolean
     }
 },
     {

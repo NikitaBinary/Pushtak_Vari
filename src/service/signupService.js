@@ -115,6 +115,15 @@ class AuthService {
             var token = await generateToken(
                 { email: userInfo.emailId, name: userInfo.fullName }
             )
+            await user.findOneAndUpdate(
+                { emailId: userBody.emailId },
+                {
+                    $set: {
+                        loginStatus: true
+                    }
+                },
+                { new: true }
+            )
             return {
                 token: token,
                 userInfo
@@ -282,6 +291,20 @@ class AuthService {
             if (userInfo) {
                 var userdata = await user.findByIdAndUpdate(
                     _id, { is_active: active }, { new: true }
+                );
+            }
+            return { userInfo, userdata }
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async logoutService(_id) {
+        try {
+            let userInfo = await user.findOne({ _id: _id });
+            if (userInfo) {
+                var userdata = await user.findByIdAndUpdate(
+                    _id, {  loginStatus: false }, { new: true }
                 );
             }
             return { userInfo, userdata }
