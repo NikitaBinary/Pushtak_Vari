@@ -45,8 +45,8 @@ Router.put("/app/resetPassword", signUPController.resetPassword);
 Router.put("/app/userStatus/:id", superAdminAuth, signUPController.userStatusController)
 Router.put("/app/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"), signUPController.updateUserController)
 Router.put("/app/logout/:id", superAdminAuth, signUPController.logoutController)
-
-
-
+Router.get("/app/userList", superAdminAuth, signUPController.userListController)
+Router.get("/app/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
+Router.delete("/app/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 
 module.exports = Router;
