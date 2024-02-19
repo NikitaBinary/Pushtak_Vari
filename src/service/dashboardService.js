@@ -5,8 +5,8 @@ const moment = require("moment")
 class AuthService {
     async getUserStatusService() {
         try {
-            const activeUserCount = await user.find({ is_active: true }, { "userType": { "$nin": 'INSTITUTE' } }).countDocuments()
-            const inactiveUserCount = await user.find({ is_active: false }, { "userType": { "$nin": 'INSTITUTE' } }).countDocuments()
+            const activeUserCount = await user.find({ is_active: true }, { userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } }).countDocuments()
+            const inactiveUserCount = await user.find({ is_active: false }, { userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } }).countDocuments()
             const totalUser = await user.find({ "userType": { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } }).countDocuments();
             const totalInstitute = await user.find({ userType: "INSTITUTE" }).countDocuments()
             const instituteUserCount = await user.find({ userType: "INSTITUTE_USER" }).countDocuments()
@@ -52,6 +52,8 @@ class AuthService {
                 {
                     $project: {
                         _id: 0,
+
+                        
                         month: {
                             $switch: {
                                 branches: [
