@@ -31,7 +31,6 @@ Router.put("/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"),
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
-Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
 Router.put("/logout/:id", superAdminAuth, signUPController.logoutController)
 
 
@@ -42,6 +41,12 @@ Router.post("/app/userLogin", signUPController.userloginController);
 Router.put("/app/forgotPassword", signUPController.forgotPassordAndOTPController);
 Router.put("/app/verifyOTP", signUPController.verifyOTP);
 Router.put("/app/resetPassword", signUPController.resetPassword);
+
+Router.put("/app/userStatus/:id", superAdminAuth, signUPController.userStatusController)
+Router.put("/app/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"), signUPController.updateUserController)
+Router.put("/app/logout/:id", superAdminAuth, signUPController.logoutController)
+
+
 
 
 module.exports = Router;
