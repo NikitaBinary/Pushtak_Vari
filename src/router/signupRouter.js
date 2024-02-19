@@ -35,5 +35,13 @@ Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusControl
 Router.put("/logout/:id", superAdminAuth, signUPController.logoutController)
 
 
+/// ----------------------App side Apis-----------------------------------------------------
+
+Router.post("/app/userSingup", uploadStorage.single("instituteImage"), signUPController.userSignupController);
+Router.post("/app/userLogin", signUPController.userloginController);
+Router.put("/app/forgotPassword", signUPController.forgotPassordAndOTPController);
+Router.put("/app/verifyOTP", signUPController.verifyOTP);
+Router.put("/app/resetPassword", signUPController.resetPassword);
+
 
 module.exports = Router;
