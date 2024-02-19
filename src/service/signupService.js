@@ -15,10 +15,10 @@ class AuthService {
             let uniqueEmail = await user.findOne({ emailId: userBody.emailId });
             let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
             let userDetail;
-        
+
             if (!uniqueEmail && !uniqueMobileNo) {
                 let newUser;
-        
+
                 switch (userBody.userType) {
                     case 'SUPER_ADMIN':
                         newUser = {
@@ -29,7 +29,7 @@ class AuthService {
                             userType: userBody.userType,
                             is_instituteUser: null,
                             userImage: "",
-                            is_active:true
+                            is_active: true
                         };
                         break;
                     case 'INSTITUTE_USER':
@@ -41,7 +41,7 @@ class AuthService {
                             password: userBody.password,
                             userType: userBody.userType,
                             is_instituteUser: true,
-                            is_active:false,
+                            is_active: false,
                             userImage: ""
                         };
                         break;
@@ -60,9 +60,9 @@ class AuthService {
                     default:
                         throw new Error("Invalid userType");
                 }
-        
+
                 userDetail = await user.create(newUser);
-        
+
                 if (userPassword) {
                     const email = userBody.emailId;
                     let checkPassword = await user.findOne({ emailId: email });
@@ -80,14 +80,14 @@ class AuthService {
                     }
                 }
             }
-        
+
             console.log("userDetail---------------->", userDetail);
             return { userDetail, uniqueEmail, uniqueMobileNo };
         } catch (error) {
             console.log(error);
             throw error;
         }
-        
+
 
     }
 
@@ -221,7 +221,7 @@ class AuthService {
             if (status) {
                 query.is_instituteUser = status;
             }
-            userList = await user.find(query, projection).countDocuments();
+            userList = await user.find(query, projection);
 
             return userList;
         } catch (error) {
