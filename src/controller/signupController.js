@@ -36,14 +36,14 @@ class authController {
                 })
 
             }
-
+            console.log("response--------------->", response)
             if (response.uniqueMobileNo) {
                 return res.json({
                     status: 400,
                     message: "Mobile number already exists.",
                 })
             }
-           
+
             if (response.userDetail) {
                 let data = response.userDetail.userType
                 if (data == 'INSTITUTE') {
@@ -53,8 +53,7 @@ class authController {
                         data: response.userDetail
                     })
                 }
-                else if (data == 'REGULAR_USER' || data == 'INSTITUTE_USER') {
-                    console.log("comeee")
+                else if (data == 'REGULAR_USER' || data == 'INSTITUTE_USER' || data == 'SUPER_ADMIN') {
                     return res.json({
                         status: 201,
                         message: "User has been added successfully!",

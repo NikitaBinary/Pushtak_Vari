@@ -12,66 +12,57 @@ class AuthService {
     }
     async userSignupService(userBody, userPassword, institute_Image) {
         try {
-            let uniqueEmail = await user.findOne({ emailId: userBody.emailId })
-            let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo })
-
+            let uniqueEmail = await user.findOne({ emailId: userBody.emailId });
+            let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
+            let userDetail;
+        
             if (!uniqueEmail && !uniqueMobileNo) {
-
-                if (userBody.userType == 'SUPER_ADMIN') {
-                    var superObj = {
-                        fullName: userBody.fullName,
-                        emailId: userBody.emailId,
-                        mobileNo: userBody.mobileNo,
-                        password: userBody.password,
-                        userType: userBody.userType,
-                        is_instituteUser: null,
-                        userImage: ""
-                    }
-                    var userDetail = await user.create(superObj);
+                let newUser;
+        
+                switch (userBody.userType) {
+                    case 'SUPER_ADMIN':
+                        newUser = {
+                            fullName: userBody.fullName,
+                            emailId: userBody.emailId,
+                            mobileNo: userBody.mobileNo,
+                            password: userBody.password,
+                            userType: userBody.userType,
+                            is_instituteUser: null,
+                            userImage: "",
+                            is_active:true
+                        };
+                        break;
+                    case 'INSTITUTE_USER':
+                    case 'REGULAR_USER':
+                        newUser = {
+                            fullName: userBody.fullName,
+                            emailId: userBody.emailId,
+                            mobileNo: userBody.mobileNo,
+                            password: userBody.password,
+                            userType: userBody.userType,
+                            is_instituteUser: true,
+                            is_active:false,
+                            userImage: ""
+                        };
+                        break;
+                    case 'INSTITUTE':
+                        newUser = {
+                            instituteName: userBody.instituteName,
+                            emailId: userBody.emailId,
+                            mobileNo: userBody.mobileNo,
+                            password: userBody.password,
+                            userType: userBody.userType,
+                            is_active: false,
+                            studentList: [],
+                            instituteImage: institute_Image || ""
+                        };
+                        break;
+                    default:
+                        throw new Error("Invalid userType");
                 }
-
-                if (userBody.userType == 'INSTITUTE_USER') {
-                    var institUser = {
-                        fullName: userBody.fullName,
-                        emailId: userBody.emailId,
-                        mobileNo: userBody.mobileNo,
-                        password: userBody.password,
-                        userType: userBody.userType,
-                        is_instituteUser: true,
-                        userImage: ""
-                    }
-                    var userDetail = await user.create(institUser);
-                }
-                if (userBody.userType == 'REGULAR_USER') {
-                    var institUser = {
-                        fullName: userBody.fullName,
-                        emailId: userBody.emailId,
-                        mobileNo: userBody.mobileNo,
-                        password: userBody.password,
-                        userType: userBody.userType,
-                        is_instituteUser: true,
-                        userImage: ""
-                    }
-                    var userDetail = await user.create(institUser);
-                }
-                if (userBody.userType == 'INSTITUTE') {
-                    var institUser = {
-                        instituteName: userBody.instituteName,
-                        emailId: userBody.emailId,
-                        mobileNo: userBody.mobileNo,
-                        password: userBody.password,
-                        userType: userBody.userType,
-                        is_active: false,
-                        studentList: [],
-                        // instituteImage: institute_Image
-                    }
-
-                    if (institute_Image) {
-                        institUser.instituteImage = institute_Image
-                    }
-
-                    var userDetail = await user.create(institUser);
-                }
+        
+                userDetail = await user.create(newUser);
+        
                 if (userPassword) {
                     const email = userBody.emailId;
                     let checkPassword = await user.findOne({ emailId: email });
@@ -80,7 +71,7 @@ class AuthService {
                         const userName = email.split('@');
                         const subject = "User Password";
                         const html = `<h3>Hello ${userName[0]}</h3>
-                        <p> Successfully your are registered in Pustak Vari and</p>
+                        <p> Successfully you are registered in Pustak Vari and</p>
                         <p>  this your password ${userPassword}  for login into Pustak Vari</p>
                         <br>
                         <p>Thanks,</p>
@@ -89,11 +80,14 @@ class AuthService {
                     }
                 }
             }
-            return { userDetail, uniqueEmail, uniqueMobileNo }
+        
+            console.log("userDetail---------------->", userDetail);
+            return { userDetail, uniqueEmail, uniqueMobileNo };
         } catch (error) {
             console.log(error);
             throw error;
         }
+        
 
     }
 
@@ -210,7 +204,7 @@ class AuthService {
     async userListService(status) {
         try {
             let userList;
-            let query = { "userType": { "$ne": 'INSTITUTE' } };
+            let query = { "userType": { "$nin": ['INSTITUTE', 'SUPER_ADMIN'] } };
 
             let projection = {
                 fullName: 1,
@@ -220,13 +214,14 @@ class AuthService {
                 userType: 1,
                 is_instituteUser: 1,
                 userImage: 1,
-                is_active: 1
+                is_active: 1,
+                created_at: 1
             };
 
             if (status) {
                 query.is_instituteUser = status;
             }
-            userList = await user.find(query, projection);
+            userList = await user.find(query, projection).countDocuments();
 
             return userList;
         } catch (error) {
@@ -238,21 +233,20 @@ class AuthService {
     async updateUserService(_id, dataBody, ImageUrl) {
         try {
             delete dataBody.email
-            let userDetail = await user.findOne({ _id: _id }, { "userType": { "$ne": 'INSTITUTE' } });
+            let userDetail = await user.findOne({ _id: _id, userType: { $nin: ['SUPER_ADMIN', 'INSTITUTE'] } });
             if (userDetail) {
                 var id = userDetail._id
+                var userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
+                if (ImageUrl) {
+                    userInfo = await user.findOneAndUpdate({ _id: id },
+                        {
+                            $set: {
+                                userImage: ImageUrl
+                            }
+                        },
+                        { new: true });
+                }
             }
-            let userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
-            if (ImageUrl) {
-                userInfo = await user.findOneAndUpdate({ _id: IDBFactory },
-                    {
-                        $set: {
-                            userImage: ImageUrl
-                        }
-                    },
-                    { new: true });
-            }
-
             return { userDetail, userInfo }
         } catch (error) {
             throw error;
@@ -304,7 +298,7 @@ class AuthService {
             let userInfo = await user.findOne({ _id: _id });
             if (userInfo) {
                 var userdata = await user.findByIdAndUpdate(
-                    _id, {  loginStatus: false }, { new: true }
+                    _id, { loginStatus: false }, { new: true }
                 );
             }
             return { userInfo, userdata }
