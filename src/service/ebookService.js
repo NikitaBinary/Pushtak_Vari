@@ -96,6 +96,20 @@ class AuthService {
             throw error;
         }
     }
+
+    async getAppEbookListService(category) {
+        try {
+            if (category) {
+                 var eBookList = await eBook.find({ 'category.categoryName': category })
+            }
+            else{
+                eBookList = await eBook.find()
+            }
+            return eBookList
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = AuthService;

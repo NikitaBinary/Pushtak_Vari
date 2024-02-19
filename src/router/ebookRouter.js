@@ -28,6 +28,10 @@ Router.delete("/deleteEbook/:id", superAdminAuth, ebookController.deleteEbookCon
 Router.get("/getEbookList", superAdminAuth, ebookController.getEbookListController)
 Router.get("/getEbookInfo/:id", superAdminAuth, ebookController.getEbookInfoController)
 
+//==================App Side Apis ==========================================================
+
+Router.get("/app/getEbookList", superAdminAuth, ebookController.getAppEbookListController)
+
 
 
 module.exports = Router;

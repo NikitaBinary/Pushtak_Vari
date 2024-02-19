@@ -189,6 +189,25 @@ class authController {
         }
     }
 
+    async getAppEbookListController(req, res) {
+        try {
+            const category = req.query.type
+            const eBookList = await ebookService.getAppEbookListService(category);
+
+            return res.json({
+                status: 200,
+                message: "E-Book list get.",
+                data: eBookList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = authController;

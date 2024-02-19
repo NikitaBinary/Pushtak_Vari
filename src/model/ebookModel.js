@@ -31,7 +31,10 @@ const ebookSchema = new mongoose.Schema({
     videoLink: {
         type: String,
         required: false
-    }
+    },
+    about:{
+        type:String
+    },
 },
     {
         timestamps: {
