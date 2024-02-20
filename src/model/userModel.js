@@ -32,15 +32,21 @@ const singupSchema = new mongoose.Schema({
     is_active: {
         type: Boolean
     },
+    createdBy: {
+        type: String
+    },
     studentList: {
         type: Array,
         default: null
     },
+    studentCount: {
+        type: Number,
+    },
     instituteImage: {
         type: String
     },
-    loginStatus:{
-        type:Boolean
+    loginStatus: {
+        type: Boolean
     }
 },
     {
