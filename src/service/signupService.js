@@ -42,7 +42,8 @@ class AuthService {
                             userType: userBody.userType,
                             is_instituteUser: true,
                             is_active: false,
-                            userImage: ""
+                            userImage: "",
+                            createdBy: userBody.createdBy || '',
                         };
                         break;
                     case 'INSTITUTE':
@@ -54,7 +55,8 @@ class AuthService {
                             userType: userBody.userType,
                             is_active: false,
                             studentList: [],
-                            instituteImage: institute_Image || ""
+                            instituteImage: institute_Image || "",
+                            studentCount: 0
                         };
                         break;
                     default:
@@ -62,6 +64,20 @@ class AuthService {
                 }
 
                 userDetail = await user.create(newUser);
+                if (newUser.createdBy) {
+                    let id = newUser.createdBy
+                    const studeNumber
+                        = await user.findOneAndUpdate(
+                            { _id: id },
+                            { $inc: { studentCount: 1 } },
+                            { new: true }
+                        )
+                }
+                await user.updateMany({ userType: 'INSTITUTE' }, {
+                    $set: {
+                        studentCount: 0,
+                    }
+                })
 
                 if (userPassword) {
                     const email = userBody.emailId;
@@ -233,7 +249,7 @@ class AuthService {
     async updateUserService(_id, dataBody, ImageUrl) {
         try {
             delete dataBody.email
-            let userDetail = await user.findOne({ _id: _id, userType: { $nin: ['SUPER_ADMIN', 'INSTITUTE'] } });
+            let userDetail = await user.findOne({ _id: _id });
             if (userDetail) {
                 var id = userDetail._id
                 var userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });

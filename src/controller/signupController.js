@@ -36,7 +36,6 @@ class authController {
                 })
 
             }
-            console.log("response--------------->", response)
             if (response.uniqueMobileNo) {
                 return res.json({
                     status: 400,
