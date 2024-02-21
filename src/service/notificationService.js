@@ -15,16 +15,13 @@ class AuthService {
         }
     }
 
-    async getNotificationListService(usertype) {
+    async getNotificationListService() {
         try {
-           
-            if (usertype) {
-                var notificationList = await notification.find({ "userType.userType": usertype })
-            }
-            if (!usertype) {
-                notificationList = await notification.find()
-            }
-            return notificationList
+            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' } })
+            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' } })
+            const notificationList = await notification.find()
+
+            return { instituteNotificationList, userNotificationList, notificationList }
         } catch (error) {
             throw error;
         }
