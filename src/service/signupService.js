@@ -106,7 +106,6 @@ class AuthService {
         const userInfo = await user.findOne({ emailId: userBody.emailId });
         if (userInfo) {
             let data;
-            console.log("come ij iffff")
             switch (userInfo.userType) {
                 case 'SUPER_ADMIN':
                 case 'INSTITUTE_USER':
@@ -125,7 +124,8 @@ class AuthService {
                 { emailId: userBody.emailId },
                 {
                     $set: {
-                        loginStatus: true
+                        loginStatus: true,
+                        lastLoginDate: new Date()
                     }
                 },
                 { new: true }
@@ -227,14 +227,16 @@ class AuthService {
                 is_instituteUser: 1,
                 userImage: 1,
                 is_active: 1,
-                created_at: 1
+                created_at: 1,
+                lastLoginDate: 1
             };
 
             if (status) {
                 query.is_instituteUser = status;
                 query.userType = 'INSTITUTE_USER'
             }
-            userList = await user.find(query, projection);
+            let sortOptions = { created_at: -1 };
+            userList = await user.find(query, projection).sort(sortOptions);
 
             return userList;
         } catch (error) {
