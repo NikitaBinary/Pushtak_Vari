@@ -73,12 +73,6 @@ class AuthService {
                             { new: true }
                         )
                 }
-                await user.updateMany({ userType: 'INSTITUTE' }, {
-                    $set: {
-                        studentCount: 0,
-                    }
-                })
-
                 if (userPassword) {
                     const email = userBody.emailId;
                     let checkPassword = await user.findOne({ emailId: email });
@@ -112,10 +106,12 @@ class AuthService {
         const userInfo = await user.findOne({ emailId: userBody.emailId });
         if (userInfo) {
             let data;
+            console.log("come ij iffff")
             switch (userInfo.userType) {
                 case 'SUPER_ADMIN':
                 case 'INSTITUTE_USER':
                 case 'INSTITUTE':
+                case 'REGULAR_USER':
                     data = await user.findOne({ emailId: userBody.emailId });
                     await verifyPassword(userBody.password, data.password);
                     break;
@@ -236,6 +232,7 @@ class AuthService {
 
             if (status) {
                 query.is_instituteUser = status;
+                query.userType = 'INSTITUTE_USER'
             }
             userList = await user.find(query, projection);
 
