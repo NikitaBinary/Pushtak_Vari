@@ -38,8 +38,7 @@ class authController {
 
     async getNotificationList(req, res) {
         try {
-            const usertype = req.query.usertype
-            const notificationList = await notifiService.getNotificationListService(usertype);
+            const notificationList = await notifiService.getNotificationListService();
 
             return res.json({
                 status: 200,
