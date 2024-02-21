@@ -47,6 +47,9 @@ const singupSchema = new mongoose.Schema({
     },
     loginStatus: {
         type: Boolean
+    },
+    lastLoginDate: {
+        type: Date
     }
 },
     {

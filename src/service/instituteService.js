@@ -57,7 +57,10 @@ class AuthService {
     async instituteListService() {
         try {
             const instituteList = await user.find({ userType: "INSTITUTE" },
-                { _id: 1, emailId: 1, mobileNo: 1, userType: 1, studentCount: 1, is_active: 1, instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1 })
+                {
+                    _id: 1, emailId: 1, mobileNo: 1, userType: 1, studentCount: 1, is_active: 1,
+                    instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1
+                }).sort({ created_at: -1 })
             return instituteList
         } catch (error) {
             throw error;

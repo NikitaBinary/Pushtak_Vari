@@ -100,10 +100,10 @@ class AuthService {
     async getAppEbookListService(category) {
         try {
             if (category) {
-                 var eBookList = await eBook.find({ 'category.categoryName': category })
+                var eBookList = await eBook.find({ 'category.categoryName': category }).sort({ created_at: -1 });
             }
-            else{
-                eBookList = await eBook.find()
+            else {
+                eBookList = await eBook.find().sort({ created_at: -1 });
             }
             return eBookList
         } catch (error) {
