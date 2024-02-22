@@ -33,5 +33,10 @@ Router.get("/getEbookInfo/:id", superAdminAuth, ebookController.getEbookInfoCont
 Router.get("/app/getEbookList", superAdminAuth, ebookController.getAppEbookListController)
 
 
+//=================== app side apis of review======================================================
+
+Router.post("/app/addReview", superAdminAuth,ebookController.addReviewController)
+Router.get("/app/e-bookInfo/:id",superAdminAuth,ebookController.eBookInfoController)
+
 
 module.exports = Router;

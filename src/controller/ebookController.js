@@ -208,6 +208,46 @@ class authController {
         }
     }
 
+    async addReviewController(req, res) {
+        try {
+            const reviewInfo = await ebookService.addReviewService(req.body);
+            return res.json({
+                status: 201,
+                message: "E-Book review has been added successfully!",
+                data: reviewInfo
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
+    async eBookInfoController(req, res) {
+        try {
+            const id = req.params.id
+            const response = await ebookService.eBookInfoService(id);
+            if (!response.eBookDetail) {
+                return res.status(404).send({
+                    status: 404,
+                    message: "E-Book id not exists",
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "E-Book Detail get",
+                body: response.eBookInfo
+            });
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
 }
 
 module.exports = authController;

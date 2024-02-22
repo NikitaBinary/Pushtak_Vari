@@ -12,6 +12,15 @@ const ebookSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    co_authorName: {
+        type: String,
+    },
+    publisher: {
+        type: String,
+    },
+    bookPublishDate: {
+        type: String
+    },
     bookPdf: {
         type: String,
         required: false
@@ -32,9 +41,12 @@ const ebookSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    about:{
-        type:String
+    about: {
+        type: String
     },
+    price: {
+        type: Number
+    }
 },
     {
         timestamps: {
