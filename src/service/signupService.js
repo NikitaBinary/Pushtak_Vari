@@ -18,7 +18,7 @@ class AuthService {
 
             if (!uniqueEmail && !uniqueMobileNo) {
                 let newUser;
-
+              
                 switch (userBody.userType) {
                     case 'SUPER_ADMIN':
                         newUser = {
@@ -62,8 +62,9 @@ class AuthService {
                     default:
                         throw new Error("Invalid userType");
                 }
-
                 userDetail = await user.create(newUser);
+
+              
                 if (newUser.createdBy) {
                     let id = newUser.createdBy
                     const studeNumber
