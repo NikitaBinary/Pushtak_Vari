@@ -1,7 +1,9 @@
+const mongoose = require("mongoose")
 const ebookType = require("../model/ebookTypeModel");
 const eBook = require("../model/ebookModel")
 const category = require("../model/categoryModel")
 const language = require("../model/ebookLanguageModel")
+const review = require("../model/reviewModel");
 
 
 class AuthService {
@@ -106,6 +108,40 @@ class AuthService {
                 eBookList = await eBook.find().sort({ created_at: -1 });
             }
             return eBookList
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async addReviewService(reviewBody) {
+        try {
+            const reviewInfo = await review.create(reviewBody);
+            return reviewInfo
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async eBookInfoService(_id) {
+        try {
+
+            let eBookDetail = await eBook.findOne({ _id: new mongoose.Types.ObjectId(_id) });
+            if (eBookDetail) {
+                const pipeLine = []
+
+                pipeLine.push({ $match: { _id: new mongoose.Types.ObjectId(_id) } },
+                    {
+                        $lookup: {
+                            from: "review_lists",
+                            localField: "_id",
+                            foreignField: "bookId",
+                            as: "reviews"
+                        }
+                    })
+                var eBookInfo = await eBook.aggregate(pipeLine);
+            }
+            return { eBookDetail, eBookInfo }
         } catch (error) {
             throw error;
         }

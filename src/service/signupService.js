@@ -90,8 +90,6 @@ class AuthService {
                     }
                 }
             }
-
-            console.log("userDetail---------------->", userDetail);
             return { userDetail, uniqueEmail, uniqueMobileNo };
         } catch (error) {
             console.log(error);
