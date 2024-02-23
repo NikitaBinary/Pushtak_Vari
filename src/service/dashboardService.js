@@ -46,6 +46,12 @@ class AuthService {
 
             aggregationPipeline.push(
                 {
+                    $match: {
+                        created_at: { $gte: thirtyDaysAgo, $lte: currentDate },
+                        userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] }
+                    }
+                },
+                {
                     $project: {
                         month: { $month: "$created_at" }
                     }
@@ -83,8 +89,7 @@ class AuthService {
                 },
                 {
                     $sort: { month: 1 }
-                }
-
+                },
             );
             const lastYearUserGraphData = await user.aggregate(aggregationPipeline);
 
