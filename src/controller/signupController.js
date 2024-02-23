@@ -162,8 +162,9 @@ class authController {
     async userListController(req, res) {
         try {
 
+            const instituteId = req.query.id
             const is_instituteUser = req.query.is_instituteUser
-            const userList = await userService.userListService(is_instituteUser);
+            const userList = await userService.userListService(is_instituteUser, instituteId);
 
             return res.json({
                 status: 200,

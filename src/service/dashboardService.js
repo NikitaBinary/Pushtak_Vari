@@ -1,19 +1,25 @@
 const user = require("../model/userModel")
+const mongoose = require("mongoose")
 const eBook = require("../model/ebookModel")
 const moment = require("moment")
 
 class AuthService {
-    async getUserStatusService() {
+    async getUserStatusService(instituteId) {
         try {
             const activeUserCount = await user.countDocuments({ is_active: true, userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } });
             const inactiveUserCount = await user.countDocuments({ is_active: false, userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } });
 
             const totalUser = await user.countDocuments({ userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] } });
             const totalInstitute = await user.find({ userType: "INSTITUTE" }).countDocuments()
-            const instituteUserCount = await user.find({ userType: "INSTITUTE_USER" }).countDocuments()
 
-            const instituteActiveUserCount = await user.countDocuments({ is_active: true, userType: "INSTITUTE_USER" })
-            const instituteInactiveUserCount = await user.countDocuments({ is_active: false, userType: "INSTITUTE_USER" })
+            if (instituteId) {
+                var instituteUserCount = await user.find({ createdBy: new mongoose.Types.ObjectId(instituteId), userType: "INSTITUTE_USER" }).countDocuments()
+
+                var instituteActiveUserCount = await user.countDocuments({ is_active: true, userType: "INSTITUTE_USER", createdBy: new mongoose.Types.ObjectId(instituteId) })
+                var instituteInactiveUserCount = await user.countDocuments({ is_active: false, userType: "INSTITUTE_USER", createdBy: new mongoose.Types.ObjectId(instituteId) })
+
+            }
+
 
             const thirtyDaysAgo = moment().subtract(30, 'days').startOf('day').toDate();
             const currentDate = new Date();
@@ -53,8 +59,6 @@ class AuthService {
                 {
                     $project: {
                         _id: 0,
-
-
                         month: {
                             $switch: {
                                 branches: [

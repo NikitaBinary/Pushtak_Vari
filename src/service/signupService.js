@@ -1,4 +1,5 @@
 const user = require("../model/userModel");
+const mongoose = require("mongoose")
 const institute = require("../model/instituteModel");
 const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
@@ -212,7 +213,7 @@ class AuthService {
         }
     }
 
-    async userListService(status) {
+    async userListService(status, instituteId) {
         try {
             let userList;
             let query = { "userType": { "$nin": ['INSTITUTE', 'SUPER_ADMIN'] } };
@@ -230,8 +231,9 @@ class AuthService {
                 lastLoginDate: 1
             };
 
-            if (status) {
-                query.is_instituteUser = status;
+            if (instituteId) {
+                query.createdBy = new mongoose.Types.ObjectId(instituteId),
+                query.is_instituteUser = true;
                 query.userType = 'INSTITUTE_USER'
             }
             let sortOptions = { created_at: -1 };
