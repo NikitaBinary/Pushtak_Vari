@@ -1,4 +1,6 @@
+const { default: mongoose } = require("mongoose");
 const category = require("../model/categoryModel");
+const eBook = require("../model/ebookModel")
 
 class AuthService {
     async addCategoryService(categoryBody, ImageUrl) {
@@ -42,6 +44,24 @@ class AuthService {
             let categoryInfo = await category.findOne({ _id: _id });
             if (categoryInfo) {
                 var categorydata = await category.findOneAndDelete({ _id });
+
+
+                // let updateObj = {
+                //     _id: new mongoose.Types.ObjectId('65d6e954f4b1475fef683f63'),
+                //     categoryName: "Other Book"
+
+                // }
+                // console.log("yaaa")
+                // const data = await eBook.updateMany(
+                //     { 'category._id': _id },
+                //     {
+                //         $set: {
+                //             category: updateObj
+                //         }
+                //     }
+                // );
+
+               
                 return categorydata
             }
             return { message: "Category not found" }

@@ -4,7 +4,8 @@ const dashService = new authService();
 class authController {
     async getUserStatusController(req, res) {
         try {
-            const userList = await dashService.getUserStatusService();
+            const instituteId = req.query.instituteId
+            const userList = await dashService.getUserStatusService(instituteId);
             
             return res.json({
                 status: 200,
