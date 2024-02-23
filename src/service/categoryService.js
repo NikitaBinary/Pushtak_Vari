@@ -46,22 +46,25 @@ class AuthService {
                 var categorydata = await category.findOneAndDelete({ _id });
 
 
-                // let updateObj = {
-                //     _id: new mongoose.Types.ObjectId('65d6e954f4b1475fef683f63'),
-                //     categoryName: "Other Book"
 
-                // }
+                // let id = new mongoose.Types.ObjectId('65d6e954f4b1475fef683f63')
+                // let categoryName = "Other Book"
+
                 // console.log("yaaa")
-                // const data = await eBook.updateMany(
-                //     { 'category._id': _id },
-                //     {
-                //         $set: {
-                //             category: updateObj
-                //         }
+                // const data = await eBook.findOne( 
+                //     { 'category._id': _id }
+                // {
+                //     $set: {
+                //         "category._id": id,
+                //         // "category.categoryName": categoryName
                 //     }
+                // },
+                // { new: true }
                 // );
 
-               
+                // console.log("data--------->",data)
+
+
                 return categorydata
             }
             return { message: "Category not found" }
