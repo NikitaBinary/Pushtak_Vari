@@ -31,6 +31,7 @@ Router.get("/getEbookInfo/:id", superAdminAuth, ebookController.getEbookInfoCont
 //==================App Side Apis ==========================================================
 
 Router.get("/app/getEbookList", superAdminAuth, ebookController.getAppEbookListController)
+Router.get("/app/exploreBookList", superAdminAuth, ebookController.exploreBookListController)
 
 
 //=================== app side apis of review======================================================

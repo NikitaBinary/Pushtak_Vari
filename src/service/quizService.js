@@ -87,6 +87,46 @@ class AuthService {
             throw error;
         }
     }
+
+    async getAppQuizListService() {
+        try {
+
+            const questionAggregate = [
+                {
+                    $lookup: {
+                        from: 'quiz_questions',
+                        localField: "_id",
+                        foreignField: "quizId",
+                        as: "quizData"
+                    }
+                },
+                {
+                    $unwind: "$quizData"
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        quizName: 1,
+                        description: 1,
+                        questionCount: 1,
+                        question: "$quizData.questions"
+                    }
+                }
+            ]
+
+            const quizDetail = await quiz.aggregate(questionAggregate)
+
+            return quizDetail
+
+            // const quizList = await quiz.find(
+            //     {},
+            //     { _id: 1, quizName: 1, description: 1, questionCount: 1, solveByUser: 1 }
+            // )
+            // return quizList
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = AuthService

@@ -99,10 +99,10 @@ class AuthService {
         }
     }
 
-    async getAppEbookListService(category, language, limit, pageNo, skip) {
+    async getAppEbookListService(category, language) {
         try {
 
-            
+
             if (category || language) {
 
                 let categoryPipe = [
@@ -342,6 +342,28 @@ class AuthService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async exploreBookListService(pageSize, page, searchText) {
+        try {
+            const skip = (page - 1) * pageSize;
+
+            const totalDocuments = await eBook.countDocuments();
+            const totalPages = Math.ceil(totalDocuments / pageSize);
+
+            const eBookList = await eBook.find(
+                { $text: { $search: searchText } },
+                { score: { $meta: "textScore" }, _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
+            )
+                .sort({ score: { $meta: "textScore" }, created_at: -1 })
+                .skip(skip)
+                .limit(pageSize);
+
+            return { totalDocuments, totalPages, eBookList }
+        } catch (error) {
+            throw error;
+        }
+
     }
 }
 

@@ -62,6 +62,26 @@ class authController {
         }
     }
 
+    // async updateCartBuyBook(req, res) {
+    //     try {
+    //         let bookId = req.params.bookId
+    //         let userId = req.params.userId
+    //         const updateData = req.body
+    //         const response = await cartService.updateCartBuyBookService(updateData, userId, bookId);
+
+    //         return res.status(200).send({
+    //             status: 200,
+    //             message: "Book purchase successfully.",
+    //             data: response
+    //         })
+
+    //     } catch (error) {
+    //         return res.status(500).send({
+    //             status: 500,
+    //             message: error.message,
+    //         });
+    //     }
+    // }
 }
 
 module.exports = authController;

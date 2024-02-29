@@ -253,6 +253,28 @@ class authController {
         }
     }
 
+    async exploreBookListController(req, res) {
+        try {
+            const pageSize = Number(req.query.limit) || 10
+            const page = Number(req.query.page) || 1
+            const searchText = req.query.searchText || ""
+            const eBookList = await ebookService.exploreBookListService(pageSize, page, searchText);
+
+            return res.json({
+                status: 200,
+                message: "E-Book list get.",
+                data: eBookList
+            })
+
+        } catch (error) {
+            console.log("errorr----------->", error)
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = authController;

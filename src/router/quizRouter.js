@@ -7,8 +7,13 @@ const quizController = new authController();
 
 Router.post("/addQuiz", superAdminAuth, quizController.addQuizController)
 Router.get("/getQuestionType", quizController.getQuestionTypeController)
-Router.get("/getQuizList",superAdminAuth,quizController.getQuizListController)
-Router.delete("/deleteQuiz/:id",superAdminAuth,quizController.deleteQuizController)
+Router.get("/getQuizList", superAdminAuth, quizController.getQuizListController)
+Router.delete("/deleteQuiz/:id", superAdminAuth, quizController.deleteQuizController)
+
+
+///======================app side apis===================================================
+
+Router.get("/app/getQuizList", superAdminAuth, quizController.getAppQuizListController)
 
 
 module.exports = Router
