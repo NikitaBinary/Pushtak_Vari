@@ -17,7 +17,7 @@ async function superAdminAuth(req, res, next) {
             const token = req.headers.authorization.split('Bearer')[1].trim();
 
             const payload = await verifyToken(token);
-           
+
             if (payload.email && payload.name) {
                 let user = await useService.verifyUser({ emailId: payload.email });
                 if (!user) {
@@ -25,6 +25,7 @@ async function superAdminAuth(req, res, next) {
                 }
                 req.email = user.emailId;
                 // req.userId = user._id;
+                
             }
             next();
         }

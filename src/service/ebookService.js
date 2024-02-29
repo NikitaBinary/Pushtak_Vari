@@ -99,15 +99,212 @@ class AuthService {
         }
     }
 
-    async getAppEbookListService(category) {
+    async getAppEbookListService(category, language, limit, pageNo, skip) {
         try {
-            if (category) {
-                var eBookList = await eBook.find({ 'category.categoryName': category }).sort({ created_at: -1 });
+
+            
+            if (category || language) {
+
+                let categoryPipe = [
+                    {
+                        $match: {
+                            'category.categoryName': category,
+                            'bookLanguage.language': language,
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "review_lists",
+                            let: { bookId: "$_id" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: { $eq: ["$bookId", "$$bookId"] }
+                                    }
+                                },
+
+                                {
+                                    $group: {
+                                        _id: "$rating",
+                                        count: { $sum: 1 },
+                                        reviews: { $push: "$$ROOT" }
+                                    }
+                                },
+
+                                {
+                                    $group: {
+                                        _id: null,
+                                        totalReviews: { $sum: "$count" },
+                                        ratings: {
+                                            $push: {
+                                                rating: "$_id",
+                                                count: "$count"
+                                            }
+                                        },
+                                        reviews: { $push: "$reviews" }
+                                    }
+                                },
+                                {
+                                    $unwind: "$ratings"
+                                },
+                                {
+                                    $addFields: {
+                                        "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
+                                    }
+                                },
+                                {
+                                    $group: {
+                                        _id: null,
+                                        totalReviews: { $first: "$totalReviews" },
+                                        ratings: { $push: "$ratings" },
+                                        reviews: { $first: "$reviews" }
+                                    }
+                                },
+                                // {
+                                //     $skip: skip
+                                // },
+                                // {
+                                //     $limit: limit
+                                // }
+                            ],
+                            as: "reviewData"
+                        }
+                    },
+                ]
+                var categoryWiseBookList = await eBook.aggregate(categoryPipe);
             }
-            else {
-                eBookList = await eBook.find().sort({ created_at: -1 });
-            }
-            return eBookList
+
+            const newlyAddedBookList = await eBook.aggregate([
+                {
+                    $match: {
+                        'bookLanguage.language': language,
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "review_lists",
+                        let: { bookId: "$_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { $eq: ["$bookId", "$$bookId"] }
+                                }
+                            },
+
+                            {
+                                $group: {
+                                    _id: "$rating",
+                                    count: { $sum: 1 },
+                                    reviews: { $push: "$$ROOT" }
+                                }
+                            },
+
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalReviews: { $sum: "$count" },
+                                    ratings: {
+                                        $push: {
+                                            rating: "$_id",
+                                            count: "$count"
+                                        }
+                                    },
+                                    reviews: { $push: "$reviews" }
+                                }
+                            },
+                            {
+                                $unwind: "$ratings"
+                            },
+                            {
+                                $addFields: {
+                                    "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalReviews: { $first: "$totalReviews" },
+                                    ratings: { $push: "$ratings" },
+                                    reviews: { $first: "$reviews" }
+                                }
+                            }
+                        ],
+                        as: "reviewData"
+                    }
+                },
+
+                {
+                    $sort: { created_at: -1 }
+                }
+            ]);
+
+            const otherBookList = await eBook.aggregate([
+                {
+                    $match: {
+                        'category.categoryName': "Other Book",
+                        'bookLanguage.language': language,
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "review_lists",
+                        let: { bookId: "$_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { $eq: ["$bookId", "$$bookId"] }
+                                }
+                            },
+
+                            {
+                                $group: {
+                                    _id: "$rating",
+                                    count: { $sum: 1 },
+                                    reviews: { $push: "$$ROOT" }
+                                }
+                            },
+
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalReviews: { $sum: "$count" },
+                                    ratings: {
+                                        $push: {
+                                            rating: "$_id",
+                                            count: "$count"
+                                        }
+                                    },
+                                    reviews: { $push: "$reviews" }
+                                }
+                            },
+                            {
+                                $unwind: "$ratings"
+                            },
+                            {
+                                $addFields: {
+                                    "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalReviews: { $first: "$totalReviews" },
+                                    ratings: { $push: "$ratings" },
+                                    reviews: { $first: "$reviews" }
+                                }
+                            }
+                        ],
+                        as: "reviewData"
+                    }
+                },
+                {
+                    $sort: { created_at: -1 }
+                }
+
+            ])
+
+            return { categoryWiseBookList, newlyAddedBookList, otherBookList }
+
         } catch (error) {
             throw error;
         }
