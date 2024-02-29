@@ -1,13 +1,25 @@
 const mongoose = require("mongoose")
 const cart = require("../model/cartModel");
 
-
-
 class AuthService {
     async addBookToCartService(cartBody) {
         try {
-            const cartDetail = await cart.create(cartBody)
-            return cartDetail
+            const bookId = cartBody.BookId
+            const userId = cartBody.userId
+            if (bookId && userId) {
+                var cartDetail = await cart.findOne(
+                    {
+                        BookId: new mongoose.Types.ObjectId(bookId),
+                        userId: new mongoose.Types.ObjectId(userId)
+                    }
+                )
+                return cartDetail
+            }
+            else {
+                cartDetail = await cart.create(cartBody)
+                return cartDetail
+            }
+
         } catch (error) {
             throw error
         }
@@ -37,6 +49,7 @@ class AuthService {
             throw error;
         }
     }
+   
 }
 
 module.exports = AuthService;

@@ -79,6 +79,24 @@ class authController {
         }
     }
 
+    async getAppQuizListController(req, res) {
+        try {
+            const quizList = await quizService.getAppQuizListService();
+
+            return res.json({
+                status: 200,
+                message: "Quiz list get",
+                data: quizList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = authController

@@ -56,6 +56,7 @@ const ebookSchema = new mongoose.Schema({
         }
     });
 
+ebookSchema.index({ bookName: "text", authorName: "text" });
 
 const eBook = mongoose.model("eBookDetail", ebookSchema);
 module.exports = eBook;

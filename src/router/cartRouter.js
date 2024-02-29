@@ -8,6 +8,7 @@ const cartController = new authController();
 Router.post("/addBookToCart", superAdminAuth, cartController.addBookToCartController);
 Router.get("/cartBookList", superAdminAuth, cartController.cartBookListController);
 Router.delete("/deleteCartBook/:id", superAdminAuth, cartController.deleteCartBookController);
+// Router.put("/updateCart", superAdminAuth, cartController.updateCartBuyBook);
 
 
 module.exports = Router;
