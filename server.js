@@ -13,6 +13,7 @@ const subscription = require("./src/router/subscriptionRouter")
 const notification = require("./src/router/notificationRouter")
 const quiz = require("./src/router/quizRouter")
 const dashboard = require("./src/router/dashboardRoute")
+const cart = require("./src/router/cartRouter")
 
 
 
@@ -44,6 +45,7 @@ router.use('/api/v1', subscription)
 router.use('/api/v1', notification)
 router.use('/api/v1', quiz)
 router.use('/api/v1', dashboard)
+router.use("/api/v1", cart)
 
 
 

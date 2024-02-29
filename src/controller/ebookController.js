@@ -192,7 +192,11 @@ class authController {
     async getAppEbookListController(req, res) {
         try {
             const category = req.query.type
-            const eBookList = await ebookService.getAppEbookListService(category);
+            const language = req.query.language
+            // const limit = Number(req.query.limit) || 10
+            // const pageNo = Number(req.query.page) || 1
+            // const skip = (pageNo - 1) * limit;
+            const eBookList = await ebookService.getAppEbookListService(category, language);
 
             return res.json({
                 status: 200,
@@ -201,6 +205,7 @@ class authController {
             })
 
         } catch (error) {
+            console.log("errorr----------->", error)
             return res.json({
                 status: 500,
                 message: error.message
