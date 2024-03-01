@@ -6,19 +6,17 @@ class AuthService {
         try {
             const bookId = cartBody.BookId
             const userId = cartBody.userId
-            if (bookId && userId) {
-                var cartDetail = await cart.findOne(
-                    {
-                        BookId: new mongoose.Types.ObjectId(bookId),
-                        userId: new mongoose.Types.ObjectId(userId)
-                    }
-                )
-                return cartDetail
-            }
-            else {
+
+            var cartDetail = await cart.findOne(
+                {
+                    BookId: new mongoose.Types.ObjectId(bookId),
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            )
+            if (!cartDetail) {
                 cartDetail = await cart.create(cartBody)
-                return cartDetail
             }
+            return cartDetail
 
         } catch (error) {
             throw error
@@ -49,7 +47,7 @@ class AuthService {
             throw error;
         }
     }
-   
+
 }
 
 module.exports = AuthService;

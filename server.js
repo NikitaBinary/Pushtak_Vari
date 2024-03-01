@@ -14,6 +14,7 @@ const notification = require("./src/router/notificationRouter")
 const quiz = require("./src/router/quizRouter")
 const dashboard = require("./src/router/dashboardRoute")
 const cart = require("./src/router/cartRouter")
+const purchase = require("./src/router/purchaseRouter")
 
 
 
@@ -46,6 +47,7 @@ router.use('/api/v1', notification)
 router.use('/api/v1', quiz)
 router.use('/api/v1', dashboard)
 router.use("/api/v1", cart)
+router.use("/api/v1", purchase)
 
 
 
