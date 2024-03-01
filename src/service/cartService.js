@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const cart = require("../model/cartModel");
+const ebook = require("../model/ebookModel")
 
 class AuthService {
     async addBookToCartService(cartBody) {
@@ -26,7 +27,44 @@ class AuthService {
     async cartBookListService(userId) {
         try {
             if (userId) {
-                const cartList = await cart.find({ userId: userId }, {})
+
+                const aggregatePipe = [
+                    {
+                        $match: {
+                            userId: new mongoose.Types.ObjectId(userId)
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'ebookdetails',
+                            localField: 'BookId',
+                            foreignField: '_id',
+                            as: "bookDetail"
+                        }
+                    },
+                    {
+                        $unwind: "$bookDetail"
+                    },
+                    {
+                        $project: {
+                            bookImage: "$bookDetail.bookImage",
+                            _id: 1,
+                            BookId: 1,
+                            bookName: 1,
+                            price: 1,
+                            authorName: 1,
+                            bookLanguage: 1,
+                            is_purchase: 1,
+                            userId: 1,
+                            created_at: 1,
+                            updated_at: 1,
+                            category: 1
+                        }
+                    }
+                ]
+                const cartList = await cart.aggregate(aggregatePipe)
+
+
                 return cartList
             }
 

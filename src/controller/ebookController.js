@@ -193,9 +193,7 @@ class authController {
         try {
             const category = req.query.type
             const language = req.query.language
-            // const limit = Number(req.query.limit) || 10
-            // const pageNo = Number(req.query.page) || 1
-            // const skip = (pageNo - 1) * limit;
+           
             const eBookList = await ebookService.getAppEbookListService(category, language);
 
             return res.json({
