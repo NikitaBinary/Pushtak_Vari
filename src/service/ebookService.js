@@ -136,26 +136,11 @@ class AuthService {
                                         ratings: {
                                             $push: {
                                                 rating: "$_id",
-                                                count: "$count"
+                                                count: "$count",
+                                                percentage: { $multiply: [{ $divide: ["$count", "$totalReviews"] }, 100] }
                                             }
                                         },
                                         reviews: { $push: "$reviews" }
-                                    }
-                                },
-                                {
-                                    $unwind: "$ratings"
-                                },
-                                {
-                                    $addFields: {
-                                        "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
-                                    }
-                                },
-                                {
-                                    $group: {
-                                        _id: null,
-                                        totalReviews: { $first: "$totalReviews" },
-                                        ratings: { $push: "$ratings" },
-                                        reviews: { $first: "$reviews" }
                                     }
                                 }
                             ],
@@ -165,9 +150,6 @@ class AuthService {
                     {
                         $unwind: '$reviewData'
                     },
-                    // {
-                    //     $unwind: '$reviewData.reviews'
-                    // },
                     {
                         $addFields: {
                             "overallRating": {
@@ -191,7 +173,30 @@ class AuthService {
                             "overallRating": { $round: ["$overallRating", 1] }
                         }
                     },
-
+                    {
+                        $project: {
+                            "_id": 1,
+                            "bookName": 1,
+                            "bookLanguage": 1,
+                            "authorName": 1,
+                            "co_authorName": 1,
+                            "publisher": 1,
+                            "bookPublishDate": 1,
+                            "bookPdf": 1,
+                            "bookImage": 1,
+                            "category": 1,
+                            "bookType": 1,
+                            "videoLink": 1,
+                            "about": 1,
+                            "price": 1,
+                            "created_at": 1,
+                            "updated_at": 1,
+                            "reviewData.totalReviews": 1,
+                            "overallRating": 1,
+                            "reviewData.ratings": 1,
+                            "reviewData.reviews": { $reduce: { input: "$reviewData.reviews", initialValue: [], in: { $concatArrays: ["$$value", "$$this"] } } }
+                        }
+                    },
                     {
                         $sort: { created_at: -1 }
                     }
@@ -229,26 +234,11 @@ class AuthService {
                                     ratings: {
                                         $push: {
                                             rating: "$_id",
-                                            count: "$count"
+                                            count: "$count",
+                                            percentage: { $multiply: [{ $divide: ["$count", "$totalReviews"] }, 100] }
                                         }
                                     },
                                     reviews: { $push: "$reviews" }
-                                }
-                            },
-                            {
-                                $unwind: "$ratings"
-                            },
-                            {
-                                $addFields: {
-                                    "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
-                                }
-                            },
-                            {
-                                $group: {
-                                    _id: null,
-                                    totalReviews: { $first: "$totalReviews" },
-                                    ratings: { $push: "$ratings" },
-                                    reviews: { $first: "$reviews" }
                                 }
                             }
                         ],
@@ -258,9 +248,6 @@ class AuthService {
                 {
                     $unwind: '$reviewData'
                 },
-                // {
-                //     $unwind: '$reviewData.reviews'
-                // },
                 {
                     $addFields: {
                         "overallRating": {
@@ -284,7 +271,30 @@ class AuthService {
                         "overallRating": { $round: ["$overallRating", 1] }
                     }
                 },
-
+                {
+                    $project: {
+                        "_id": 1,
+                        "bookName": 1,
+                        "bookLanguage": 1,
+                        "authorName": 1,
+                        "co_authorName": 1,
+                        "publisher": 1,
+                        "bookPublishDate": 1,
+                        "bookPdf": 1,
+                        "bookImage": 1,
+                        "category": 1,
+                        "bookType": 1,
+                        "videoLink": 1,
+                        "about": 1,
+                        "price": 1,
+                        "created_at": 1,
+                        "updated_at": 1,
+                        "reviewData.totalReviews": 1,
+                        "overallRating": 1,
+                        "reviewData.ratings": 1,
+                        "reviewData.reviews": { $reduce: { input: "$reviewData.reviews", initialValue: [], in: { $concatArrays: ["$$value", "$$this"] } } }
+                    }
+                },
                 {
                     $sort: { created_at: -1 }
                 }
@@ -322,26 +332,11 @@ class AuthService {
                                     ratings: {
                                         $push: {
                                             rating: "$_id",
-                                            count: "$count"
+                                            count: "$count",
+                                            percentage: { $multiply: [{ $divide: ["$count", "$totalReviews"] }, 100] }
                                         }
                                     },
                                     reviews: { $push: "$reviews" }
-                                }
-                            },
-                            {
-                                $unwind: "$ratings"
-                            },
-                            {
-                                $addFields: {
-                                    "ratings.percentage": { $multiply: [{ $divide: ["$ratings.count", "$totalReviews"] }, 100] }
-                                }
-                            },
-                            {
-                                $group: {
-                                    _id: null,
-                                    totalReviews: { $first: "$totalReviews" },
-                                    ratings: { $push: "$ratings" },
-                                    reviews: { $first: "$reviews" }
                                 }
                             }
                         ],
@@ -351,9 +346,6 @@ class AuthService {
                 {
                     $unwind: '$reviewData'
                 },
-                // {
-                //     $unwind: '$reviewData.reviews'
-                // },
                 {
                     $addFields: {
                         "overallRating": {
@@ -377,7 +369,30 @@ class AuthService {
                         "overallRating": { $round: ["$overallRating", 1] }
                     }
                 },
-
+                {
+                    $project: {
+                        "_id": 1,
+                        "bookName": 1,
+                        "bookLanguage": 1,
+                        "authorName": 1,
+                        "co_authorName": 1,
+                        "publisher": 1,
+                        "bookPublishDate": 1,
+                        "bookPdf": 1,
+                        "bookImage": 1,
+                        "category": 1,
+                        "bookType": 1,
+                        "videoLink": 1,
+                        "about": 1,
+                        "price": 1,
+                        "created_at": 1,
+                        "updated_at": 1,
+                        "reviewData.totalReviews": 1,
+                        "overallRating": 1,
+                        "reviewData.ratings": 1,
+                        "reviewData.reviews": { $reduce: { input: "$reviewData.reviews", initialValue: [], in: { $concatArrays: ["$$value", "$$this"] } } }
+                    }
+                },
                 {
                     $sort: { created_at: -1 }
                 }
