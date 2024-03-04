@@ -122,7 +122,6 @@ class AuthService {
                                         $expr: { $eq: ["$bookId", "$$bookId"] }
                                     }
                                 },
-
                                 {
                                     $group: {
                                         _id: "$rating",
@@ -130,7 +129,6 @@ class AuthService {
                                         reviews: { $push: "$$ROOT" }
                                     }
                                 },
-
                                 {
                                     $group: {
                                         _id: null,
@@ -159,17 +157,44 @@ class AuthService {
                                         ratings: { $push: "$ratings" },
                                         reviews: { $first: "$reviews" }
                                     }
-                                },
-                                // {
-                                //     $skip: skip
-                                // },
-                                // {
-                                //     $limit: limit
-                                // }
+                                }
                             ],
                             as: "reviewData"
                         }
                     },
+                    {
+                        $unwind: '$reviewData'
+                    },
+                    // {
+                    //     $unwind: '$reviewData.reviews'
+                    // },
+                    {
+                        $addFields: {
+                            "overallRating": {
+                                $reduce: {
+                                    input: "$reviewData.ratings",
+                                    initialValue: 0,
+                                    in: { $add: ["$$value", { $multiply: ["$$this.rating", "$$this.count"] }] }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            "overallRating": {
+                                $divide: ["$overallRating", "$reviewData.totalReviews"]
+                            }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            "overallRating": { $round: ["$overallRating", 1] }
+                        }
+                    },
+
+                    {
+                        $sort: { created_at: -1 }
+                    }
                 ]
                 var categoryWiseBookList = await eBook.aggregate(categoryPipe);
             }
@@ -190,7 +215,6 @@ class AuthService {
                                     $expr: { $eq: ["$bookId", "$$bookId"] }
                                 }
                             },
-
                             {
                                 $group: {
                                     _id: "$rating",
@@ -198,7 +222,6 @@ class AuthService {
                                     reviews: { $push: "$$ROOT" }
                                 }
                             },
-
                             {
                                 $group: {
                                     _id: null,
@@ -232,11 +255,41 @@ class AuthService {
                         as: "reviewData"
                     }
                 },
+                {
+                    $unwind: '$reviewData'
+                },
+                // {
+                //     $unwind: '$reviewData.reviews'
+                // },
+                {
+                    $addFields: {
+                        "overallRating": {
+                            $reduce: {
+                                input: "$reviewData.ratings",
+                                initialValue: 0,
+                                in: { $add: ["$$value", { $multiply: ["$$this.rating", "$$this.count"] }] }
+                            }
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        "overallRating": {
+                            $divide: ["$overallRating", "$reviewData.totalReviews"]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        "overallRating": { $round: ["$overallRating", 1] }
+                    }
+                },
 
                 {
                     $sort: { created_at: -1 }
                 }
-            ]);
+            ]
+            );
 
             const otherBookList = await eBook.aggregate([
                 {
@@ -255,7 +308,6 @@ class AuthService {
                                     $expr: { $eq: ["$bookId", "$$bookId"] }
                                 }
                             },
-
                             {
                                 $group: {
                                     _id: "$rating",
@@ -263,7 +315,6 @@ class AuthService {
                                     reviews: { $push: "$$ROOT" }
                                 }
                             },
-
                             {
                                 $group: {
                                     _id: null,
@@ -297,6 +348,36 @@ class AuthService {
                         as: "reviewData"
                     }
                 },
+                {
+                    $unwind: '$reviewData'
+                },
+                // {
+                //     $unwind: '$reviewData.reviews'
+                // },
+                {
+                    $addFields: {
+                        "overallRating": {
+                            $reduce: {
+                                input: "$reviewData.ratings",
+                                initialValue: 0,
+                                in: { $add: ["$$value", { $multiply: ["$$this.rating", "$$this.count"] }] }
+                            }
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        "overallRating": {
+                            $divide: ["$overallRating", "$reviewData.totalReviews"]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        "overallRating": { $round: ["$overallRating", 1] }
+                    }
+                },
+
                 {
                     $sort: { created_at: -1 }
                 }

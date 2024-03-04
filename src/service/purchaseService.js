@@ -28,8 +28,8 @@ class AuthService {
             if (is_purchaseDetail) {
                 const bookPurchased = await purchase.findOneAndUpdate(
                     { _id: new mongoose.Types.ObjectId(id) },
-                    { 
-                        $set: { 
+                    {
+                        $set: {
                             is_purchase: true
                         }
                     },
@@ -60,10 +60,11 @@ class AuthService {
 
     async getPurchaseHistoryService(userId) {
         try {
-            const purchaseBookList = await purchase.aggregate([
+            const id = new mongoose.Types.ObjectId(userId)
+            const aggregatePipe = [
                 {
                     $match: {
-                        userId: new mongoose.Types.ObjectId(userId),
+                        userId: id,
                         is_purchase: true
                     }
                 },
@@ -74,12 +75,34 @@ class AuthService {
                         foreignField: '_id',
                         as: "bookDetail"
                     }
+                },
+                {
+                    $unwind: "$bookDetail"
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        BookId: 1,
+                        bookName: 1,
+                        price: 1,
+                        authorName: 1,
+                        bookLanguage: 1,
+                        is_purchase: 1,
+                        userId: 1,
+                        created_at: 1,
+                        updated_at: 1,
+                        bookImage: "$bookDetail.bookImage"
+                    }
                 }
-            ])
+            ]
+            const purchaseBookList = await purchase.aggregate(aggregatePipe)
+            // console.log("purchaseBookList------------->", purchaseBookList)
+
 
             return purchaseBookList
 
         } catch (error) {
+            console.log("error------------->", error)
             throw error
         }
     }
