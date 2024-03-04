@@ -45,8 +45,8 @@ class authController {
 
     async getPurchaseHistoryController(req, res) {
         try {
-            const userId = req.query.userId
-            const purchaseBookList = await purchaseService.getPurchaseHistoryService(userId)
+            const id = req.query.userId
+            const purchaseBookList = await purchaseService.getPurchaseHistoryService(id)
             return res.status(200).send({
                 status: 200,
                 message: "Purchase book detail.",
