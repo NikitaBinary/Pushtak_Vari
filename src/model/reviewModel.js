@@ -9,6 +9,15 @@ const reviewSchema = new mongoose.Schema({
     },
     review: {
         type: String,
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId
+    },
+    userImage: {
+        type: String,
+    },
+    userName: {
+        type: String,
     }
 },
     {
