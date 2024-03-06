@@ -59,7 +59,7 @@ class authController {
             delete instituteInfo.instituteDetail
             return res.status(200).send({
                 status: 200,
-                message: "Institute information has been edited successfully!",
+                message: "Institute information has been updated successfully!",
                 body: instituteInfo
             });
         } catch (error) {

@@ -38,7 +38,7 @@ const singupSchema = new mongoose.Schema({
     studentList: {
         type: Array,
         default: null
-    },
+    },  
     studentCount: {
         type: Number,
     },
@@ -50,6 +50,12 @@ const singupSchema = new mongoose.Schema({
     },
     lastLoginDate: {
         type: Date
+    },
+    genre_prefernce: {
+        type: String
+    },
+    author_prefernce: {
+        type: String
     }
 },
     {
