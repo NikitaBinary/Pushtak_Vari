@@ -128,7 +128,7 @@ class AuthService {
             if (category || language) {
 
                 let categoryPipe = []
-                categoryPipe.push(                    
+                categoryPipe.push(
                     {
                         $match: {
                             'category.categoryName': category,
@@ -157,8 +157,9 @@ class AuthService {
                 categoryWiseBookList.forEach(book => {
                     const reviews = book.reviewData;
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                    book.reviewData = ratingStats;
+                    book.ratings = ratingStats;
                     book.overallRating = Math.round(overallRating);
+                    book.reviewData = reviews
                 });
             }
 
@@ -191,11 +192,13 @@ class AuthService {
             )
             const newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
 
+
             newlyAddedBookList.forEach(book => {
                 const reviews = book.reviewData;
                 const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                book.reviewData = ratingStats;
+                book.ratings = ratingStats;
                 book.overallRating = Math.round(overallRating);
+                book.reviewData = reviews
             });
 
             const otherAggregatePipe = []
@@ -231,8 +234,9 @@ class AuthService {
             otherBookList.forEach(book => {
                 const reviews = book.reviewData;
                 const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                book.reviewData = ratingStats;
+                book.ratings = ratingStats;
                 book.overallRating = Math.round(overallRating);
+                book.reviewData = reviews
             });
 
             return { categoryWiseBookList, newlyAddedBookList, otherBookList }

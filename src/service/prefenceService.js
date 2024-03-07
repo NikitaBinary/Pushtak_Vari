@@ -23,7 +23,7 @@ class AuthService {
                 )
             }
             if (genre) {
-                await user.findOneAndUpdate(
+             const genreItem =  await user.findOneAndUpdate(
                     { _id: userId },
                     {
                         $set: {
@@ -34,9 +34,13 @@ class AuthService {
                         new: true
                     }
                 )
+                const result1 = {
+                   genre : genreItem.genre_prefernce
+                }
+                return result1
             }
             if (author) {
-                await user.findOneAndUpdate(
+                const authorItem = await user.findOneAndUpdate(
                     { _id: userId },
                     {
                         $set: {
@@ -47,6 +51,10 @@ class AuthService {
                         new: true
                     }
                 )
+                const result2 = {
+                    author_prefernce : authorItem.author_prefernce
+                 }
+                 return result2
             }
             return { genreList, authorList }
         } catch (error) {
