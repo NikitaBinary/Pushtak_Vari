@@ -311,15 +311,26 @@ class AuthService {
 
             const totalDocuments = await eBook.countDocuments();
             const totalPages = Math.ceil(totalDocuments / pageSize);
+            let eBookList
+            if (searchText) {
+                eBookList = await eBook.find(
+                    { $text: { $search: searchText } },
+                    { score: { $meta: "textScore" }, _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
+                )
+                    .sort({ score: { $meta: "textScore" }, created_at: -1 })
+                    .skip(skip)
+                    .limit(pageSize);
 
-            const eBookList = await eBook.find(
-                { $text: { $search: searchText } },
-                { score: { $meta: "textScore" }, _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
-            )
-                .sort({ score: { $meta: "textScore" }, created_at: -1 })
-                .skip(skip)
-                .limit(pageSize);
-
+            }
+            else {
+                eBookList = await eBook.find(
+                    {},
+                    { _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
+                )
+                    .sort({ created_at: -1 })
+                    .skip(skip)
+                    .limit(pageSize);
+            }
             return { totalDocuments, totalPages, eBookList }
         } catch (error) {
             throw error;
