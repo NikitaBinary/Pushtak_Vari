@@ -77,6 +77,12 @@ class authController {
             if (response.message) {
                 return res.json({
                     status: 400,
+                    message: response.message,
+                })
+            }
+            if (response.message) {
+                return res.json({
+                    status: 400,
                     message: "Email not registered.",
                 })
             }

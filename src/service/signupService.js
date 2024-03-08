@@ -34,7 +34,6 @@ class AuthService {
                         };
                         break;
                     case 'INSTITUTE_USER':
-                    case 'REGULAR_USER':
                         newUser = {
                             fullName: userBody.fullName,
                             emailId: userBody.emailId,
@@ -42,11 +41,23 @@ class AuthService {
                             password: userBody.password,
                             userType: userBody.userType,
                             is_instituteUser: true,
-                            is_active: false,
+                            is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
                         };
                         break;
+                    case 'REGULAR_USER':
+                        newUser = {
+                            fullName: userBody.fullName,
+                            emailId: userBody.emailId,
+                            mobileNo: userBody.mobileNo,
+                            password: userBody.password,
+                            userType: userBody.userType,
+                            is_instituteUser: false,
+                            is_active: true,
+                            userImage: "",
+                            createdBy: userBody.createdBy || '',
+                        };
                     case 'INSTITUTE':
                         newUser = {
                             instituteName: userBody.instituteName,
@@ -54,7 +65,7 @@ class AuthService {
                             mobileNo: userBody.mobileNo,
                             password: userBody.password,
                             userType: userBody.userType,
-                            is_active: false,
+                            is_active: true,
                             studentList: [],
                             instituteImage: institute_Image || "",
                             studentCount: 0
@@ -103,42 +114,48 @@ class AuthService {
 
 
     async userloginService(userBody) {
-        const userInfo = await user.findOne({ emailId: userBody.emailId });
-        if (userInfo) {
-            let data;
-            switch (userInfo.userType) {
-                case 'SUPER_ADMIN':
-                case 'INSTITUTE_USER':
-                case 'INSTITUTE':
-                case 'REGULAR_USER':
-                    data = await user.findOne({ emailId: userBody.emailId });
-                    await verifyPassword(userBody.password, data.password);
-                    break;
-                default:
-                    return { message: "Invalid user access." };
+        try {
+            const userInfo = await user.findOne({ emailId: userBody.emailId });
+            if (userInfo) {
+                if (userInfo.is_active == false) {
+                    return { message: "Your account has been deactivated." };
+                }
+                let data;
+                switch (userInfo.userType) {
+                    case 'SUPER_ADMIN':
+                    case 'INSTITUTE_USER':
+                    case 'INSTITUTE':
+                    case 'REGULAR_USER':
+                        data = await user.findOne({ emailId: userBody.emailId });
+                        await verifyPassword(userBody.password, data.password);
+
+                        break;
+                    default:
+                        return { message: "Invalid user access." };
+                }
+                var token = await generateToken(
+                    { email: userInfo.emailId, name: userInfo.fullName }
+                )
+                await user.findOneAndUpdate(
+                    { emailId: userBody.emailId },
+                    {
+                        $set: {
+                            loginStatus: true,
+                            lastLoginDate: new Date()
+                        }
+                    },
+                    { new: true }
+                )
+                return {
+                    token: token,
+                    userInfo
+                }
             }
-            var token = await generateToken(
-                { email: userInfo.emailId, name: userInfo.fullName }
-            )
-            await user.findOneAndUpdate(
-                { emailId: userBody.emailId },
-                {
-                    $set: {
-                        loginStatus: true,
-                        lastLoginDate: new Date()
-                    }
-                },
-                { new: true }
-            )
-            return {
-                token: token,
-                userInfo
-            }
+            return { message: "Not Found" }
+
+        } catch (error) {
+            throw error
         }
-
-
-        return { message: "Not Found" }
-
     }
 
     async forgotPassordAndOTPService(body) {
@@ -233,7 +250,7 @@ class AuthService {
 
             if (instituteId) {
                 query.createdBy = new mongoose.Types.ObjectId(instituteId),
-                query.is_instituteUser = true;
+                    query.is_instituteUser = true;
                 query.userType = 'INSTITUTE_USER'
             }
             let sortOptions = { created_at: -1 };
@@ -298,8 +315,18 @@ class AuthService {
             }
             const active = await convertStringToBoolean(status);
             let userInfo = await user.findOne({ _id: _id });
-            if (userInfo) {
+            if (userInfo.userType == 'INSTITUTE') {
                 var userdata = await user.findByIdAndUpdate(
+                    _id, { is_active: active }, { new: true }
+                );
+                await user.updateMany(
+                    { createdBy: _id, userType: 'INSTITUTE_USER' },
+                    { is_active: active },
+                    { new: true }
+                )
+            }
+            if (userInfo.userType != 'SUPER_ADMIN') {
+                userdata = await user.findByIdAndUpdate(
                     _id, { is_active: active }, { new: true }
                 );
             }
