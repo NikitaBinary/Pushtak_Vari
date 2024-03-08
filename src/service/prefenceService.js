@@ -64,22 +64,30 @@ class AuthService {
 
     async updateMyPrefenceService(userId, genre, author) {
         try {
-            let updatePrefrence
+            let prefenceResult
             if (genre) {
-                updatePrefrence = await user.findOneAndUpdate(
+                const updatePrefrence_genre = await user.findOneAndUpdate(
                     { _id: userId },
-                    { genre_prefernce: genre }
+                    { genre_prefernce: genre },
+                    { new: true }
                 )
+                prefenceResult = {
+                    genre_prefernce: updatePrefrence_genre.genre_prefernce
+                }
             }
 
             if (author) {
-                updatePrefrence = await user.findOneAndUpdate(
+                const updatePrefrence_auhtor = await user.findOneAndUpdate(
                     { _id: userId },
                     { author_prefernce: author }
                 )
+                prefenceResult = {
+                    author_prefernce: updatePrefrence_auhtor.author_prefernce
+                }
             }
 
-            return updatePrefrence
+
+            return prefenceResult
         } catch (error) {
             throw error
         }
