@@ -159,6 +159,7 @@ class AuthService {
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
                     book.ratings = ratingStats;
                     book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
                     book.reviewData = reviews
                 });
             }
@@ -198,6 +199,7 @@ class AuthService {
                 const { ratingStats, overallRating } = calculateRatingStats(reviews);
                 book.ratings = ratingStats;
                 book.overallRating = Math.round(overallRating);
+                book.reviewUserCount = book.reviewData.length
                 book.reviewData = reviews
             });
 
@@ -236,6 +238,7 @@ class AuthService {
                 const { ratingStats, overallRating } = calculateRatingStats(reviews);
                 book.ratings = ratingStats;
                 book.overallRating = Math.round(overallRating);
+                book.reviewUserCount = book.reviewData.length
                 book.reviewData = reviews
             });
 
@@ -307,31 +310,68 @@ class AuthService {
 
     async exploreBookListService(pageSize, page, searchText) {
         try {
-            const skip = (page - 1) * pageSize;
+            async function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
 
-            const totalDocuments = await eBook.countDocuments();
-            const totalPages = Math.ceil(totalDocuments / pageSize);
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+                const totalReviews = reviews.length;
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { overallRating };
+            }
             let eBookList
-            if (searchText) {
-                eBookList = await eBook.find(
-                    { $text: { $search: searchText } },
-                    { score: { $meta: "textScore" }, _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
-                )
-                    .sort({ score: { $meta: "textScore" }, created_at: -1 })
-                    .skip(skip)
-                    .limit(pageSize);
+            const bookaggregate = []
 
-            }
-            else {
-                eBookList = await eBook.find(
-                    {},
-                    { _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1 }
+            if (searchText) {
+                bookaggregate.push(
+                    {
+                        $match: {
+                            $text: { $search: searchText }
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
                 )
-                    .sort({ created_at: -1 })
-                    .skip(skip)
-                    .limit(pageSize);
             }
-            return { totalDocuments, totalPages, eBookList }
+            bookaggregate.push(
+                {
+                    $lookup: {
+                        from: 'review_lists',
+                        localField: '_id',
+                        foreignField: 'bookId',
+                        as: "reviewData"
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, reviewData: 1
+                    }
+                },
+                {
+                    $sort: { created_at: -1 }
+                }
+            )
+
+            eBookList = await eBook.aggregate(bookaggregate)
+            eBookList.forEach(async (book) => {
+                const reviews = book.reviewData;
+                const { overallRating } = await calculateRatingStats(reviews);
+                book.overallRating = Math.round(overallRating);
+            });
+
+            eBook.updateMany(
+                {},
+                { $set: { videoLink: 'https://www.youtube.com/watch?v=6nv3qy3oNkc' } },
+            )
+
+            return { eBookList }
         } catch (error) {
             throw error;
         }

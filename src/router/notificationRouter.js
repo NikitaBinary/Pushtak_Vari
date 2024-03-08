@@ -10,5 +10,11 @@ Router.get("/getUserTypeList", notificationController.getUserTypeList);
 Router.get("/getNotificationList",superAdminAuth,notificationController.getNotificationList)
 Router.get("/getNotificationTypeList",notificationController.getNotificationTypeList)
 
+// app side notification api =================================================================
+
+Router.get("/app/getNotificationList",superAdminAuth,notificationController.getNotificationList)
+
+
+
 
 module.exports = Router
