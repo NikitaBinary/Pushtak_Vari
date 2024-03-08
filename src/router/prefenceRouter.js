@@ -6,6 +6,7 @@ const prefenceController = new authController();
 
 
 Router.get("/app/myPrefence", superAdminAuth, prefenceController.myPrefenceController);
+Router.put("/app/resetMyPrefrence/:id", superAdminAuth, prefenceController.updateMyPrefenceController);
 
 
 module.exports = Router;

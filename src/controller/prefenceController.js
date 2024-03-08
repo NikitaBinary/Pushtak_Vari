@@ -25,6 +25,28 @@ class authController {
             })
         }
     }
+
+    async updateMyPrefenceController(req, res) {
+        try {
+            const userId = req.params.userId
+            const genre = req.query.genre
+            const author = req.query.author
+            const response = await prefenceService.updateMyPrefenceService(userId, genre, author)
+
+            return res.json({
+                status: 200,
+                message: "Get the list of prefernces",
+                data: response
+            })
+
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
 }
 
 module.exports = authController;

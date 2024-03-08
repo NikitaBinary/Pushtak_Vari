@@ -23,7 +23,7 @@ class AuthService {
                 )
             }
             if (genre) {
-             const genreItem =  await user.findOneAndUpdate(
+                const genreItem = await user.findOneAndUpdate(
                     { _id: userId },
                     {
                         $set: {
@@ -35,7 +35,7 @@ class AuthService {
                     }
                 )
                 const result1 = {
-                   genre : genreItem.genre_prefernce
+                    genre: genreItem.genre_prefernce
                 }
                 return result1
             }
@@ -52,14 +52,38 @@ class AuthService {
                     }
                 )
                 const result2 = {
-                    author_prefernce : authorItem.author_prefernce
-                 }
-                 return result2
+                    author_prefernce: authorItem.author_prefernce
+                }
+                return result2
             }
             return { genreList, authorList }
         } catch (error) {
             throw error
         }
+    }
+
+    async updateMyPrefenceService(userId, genre, author) {
+        try {
+            let updatePrefrence
+            if (genre) {
+                updatePrefrence = await user.findOneAndUpdate(
+                    { _id: userId },
+                    { genre_prefernce: genre }
+                )
+            }
+
+            if (author) {
+                updatePrefrence = await user.findOneAndUpdate(
+                    { _id: userId },
+                    { author_prefernce: author }
+                )
+            }
+
+            return updatePrefrence
+        } catch (error) {
+            throw error
+        }
+
     }
 }
 module.exports = AuthService;
