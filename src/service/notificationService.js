@@ -28,6 +28,16 @@ class AuthService {
 
     }
 
+    async getNotificationList(userType) {
+        try {
+            const notificationList = await notification.find({ "userType.userType": userType })
+            return notificationList
+        } catch (error) {
+            throw error;
+        }
+
+    }
+
     async getUserTypeListService() {
         try {
             const userTypeList = await userType.find()
