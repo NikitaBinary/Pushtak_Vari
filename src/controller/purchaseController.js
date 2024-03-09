@@ -76,6 +76,55 @@ class authController {
             });
         }
     }
+
+    async updateBookStatusController(req, res) {
+        try {
+            const userId = req.params.id
+            const bookId = req.query.bookId
+            const totalPages = req.query.totalPages
+            const readPages = req.query.readPages
+            const response = await purchaseService.updateBookStatusService(userId, bookId,totalPages,readPages)
+
+            return res.status(200).send({
+                status: 200,
+                message: "Update book reading status.",
+                bookReadingPercent: response.bookReadingStatus
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async progressbookController(req, res) {
+       try {
+        const bookId = req.query.bookId
+        const userId = req.query.userId
+
+        const response = await purchaseService.progressbookService(bookId,userId)
+
+        if(response.message){
+            return res.status(200).send({
+                status: 404,
+                message: response.message
+            })
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Get book progress",
+            data: response
+        })
+        
+       } catch (error) {
+        return res.status(500).send({
+            status: 500,
+            message: error.message,
+        });
+       }
+    }
 }
 
 module.exports = authController;

@@ -196,7 +196,7 @@ class AuthService {
                 },
                 {
                     $project: {
-                        _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1,overallRating: 1, reviewData: 1
+                        _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
                     }
                 },
                 {
@@ -219,6 +219,111 @@ class AuthService {
             throw error
         }
 
+    }
+
+    async progressbookService(bookId, userId) {
+        try {
+
+            async function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
+
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+                const totalReviews = reviews.length;
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { overallRating };
+            }
+            const is_BookExists = await purchase.findOne(
+                {
+                    BookId: new mongoose.Types.ObjectId(bookId),
+                    userId: new mongoose.Types.ObjectId(userId)
+                })
+            if (!is_BookExists) {
+                return { message: "Book Not found" }
+            } else {
+
+                let eBookList
+                const bookaggregate = []
+
+                if (bookId && userId) {
+                    bookaggregate.push(
+                        {
+                            $match: {
+                                _id: new mongoose.Types.ObjectId(bookId),
+
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        }
+                    )
+                }
+                bookaggregate.push(
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                )
+
+                eBookList = await ebook.aggregate(bookaggregate)
+                eBookList.forEach(async (book) => {
+                    const reviews = book.reviewData;
+                    const { overallRating } = await calculateRatingStats(reviews);
+                    book.overallRating = Math.round(overallRating);
+                    book.bookReadingStatus = is_BookExists.bookReadingStatus
+                });
+                
+                return { eBookList }
+
+            }
+
+        } catch (error) {
+            console.log("error------------->", error)
+            throw error
+        }
+    }
+    async updateBookStatusService(userId, bookId, totalPages, readPages) {
+        try {
+
+            let status = Number((readPages / totalPages) * 100)
+            const readingStatusUpdate = await purchase.findOneAndUpdate(
+                {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    BookId: bookId,
+                    is_purchase: true
+                },
+                {
+                    $set: {
+                        bookReadingStatus: status
+                    }
+                },
+                { new: true }
+            )
+
+            return readingStatusUpdate
+
+        } catch (error) {
+            console.log("error------------->", error)
+            throw error
+        }
     }
 }
 
