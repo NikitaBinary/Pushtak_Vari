@@ -366,11 +366,6 @@ class AuthService {
                 book.overallRating = Math.round(overallRating);
             });
 
-            eBook.updateMany(
-                {},
-                { $set: { videoLink: 'https://www.youtube.com/watch?v=6nv3qy3oNkc' } },
-            )
-
             return { eBookList }
         } catch (error) {
             throw error;

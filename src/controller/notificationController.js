@@ -54,6 +54,25 @@ class authController {
         }
     }
 
+    async getNotificationListController(req, res) {
+        try {
+            const userType = req.query.userType
+            const notificationList = await notifiService.getNotificationList(userType);
+
+            return res.json({
+                status: 200,
+                message: "Notification list get",
+                data: notificationList
+            })
+
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
     async getNotificationTypeList(req, res) {
         try {
             const notyTypeList = await notifiService.getNotificationTypeService();

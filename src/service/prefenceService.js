@@ -62,36 +62,28 @@ class AuthService {
         }
     }
 
-    async updateMyPrefenceService(userId, genre, author) {
+    async updateMyPrefenceService(userId) {
         try {
-            let prefenceResult
-            if (genre) {
-                const updatePrefrence_genre = await user.findOneAndUpdate(
-                    { _id: userId },
-                    { genre_prefernce: genre },
-                    { new: true }
-                )
-                prefenceResult = {
-                    genre_prefernce: updatePrefrence_genre.genre_prefernce
+            if (userId) {
+                const userInfo = await user.findOne({ _id: userId })
+                if (!userInfo) {
+                    return { message: "User not found!" }
                 }
-            }
-
-            if (author) {
-                const updatePrefrence_auhtor = await user.findOneAndUpdate(
+                var updatePreference = await user.updateOne(
                     { _id: userId },
-                    { author_prefernce: author }
-                )
-                prefenceResult = {
-                    author_prefernce: updatePrefrence_auhtor.author_prefernce
-                }
+                    {
+                        $unset: {
+                            genre_preference: 1,
+                            // author_preference: ""
+                        }
+                    },
+                    {multi: true}
+                );
             }
-
-
-            return prefenceResult
+            return updatePreference
         } catch (error) {
             throw error
         }
-
     }
 }
 module.exports = AuthService;

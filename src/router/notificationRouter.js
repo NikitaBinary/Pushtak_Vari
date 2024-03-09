@@ -12,7 +12,7 @@ Router.get("/getNotificationTypeList",notificationController.getNotificationType
 
 // app side notification api =================================================================
 
-Router.get("/app/getNotificationList",superAdminAuth,notificationController.getNotificationList)
+Router.get("/app/getNotificationList",superAdminAuth,notificationController.getNotificationListController)
 
 
 

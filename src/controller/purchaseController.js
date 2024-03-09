@@ -33,7 +33,7 @@ class authController {
                 data: purchaseDetail
             })
 
-            
+
         } catch (error) {
             return res.status(500).send({
                 status: 500,
@@ -51,6 +51,23 @@ class authController {
                 status: 200,
                 message: "Purchase book detail.",
                 data: purchaseBookList
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async getMoreItemController(req, res) {
+        try {
+            const userId = req.params.id
+            const response = await purchaseService.getMoreItemService(userId)
+            return res.status(200).send({
+                status: 200,
+                message: "More item book list.",
+                data: response
             })
         } catch (error) {
             return res.status(500).send({
