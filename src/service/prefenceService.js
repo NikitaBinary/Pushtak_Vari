@@ -23,7 +23,7 @@ class AuthService {
                 )
             }
             if (genre) {
-                const genreItem = await user.findOneAndUpdate(
+                const genreItem = await user.findByIdAndUpdate(
                     { _id: userId },
                     {
                         $set: {
@@ -58,6 +58,7 @@ class AuthService {
             }
             return { genreList, authorList }
         } catch (error) {
+            console.log("error----------->", error)
             throw error
         }
     }
@@ -70,15 +71,15 @@ class AuthService {
                     return { message: "User not found!" }
                 }
                 var updatePreference = await user.updateOne(
-                    { _id: userId },
+                    {
+                        _id: userId
+                    },
                     {
                         $unset: {
-                            genre_preference: 1,
-                            // author_preference: ""
+                            genre_prefernce: "",
+                            author_prefernce: ""
                         }
-                    },
-                    {multi: true}
-                );
+                    });
             }
             return updatePreference
         } catch (error) {

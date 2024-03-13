@@ -100,7 +100,8 @@ class AuthService {
         }
     }
 
-    async getAppEbookListService(category, language) {
+    async getAppEbookListService(category, language, userId) {
+        const id = new mongoose.Types.ObjectId(userId)
 
         function calculateRatingStats(reviews) {
             if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -127,7 +128,7 @@ class AuthService {
         try {
             if (category || language) {
 
-                let categoryPipe = []
+                var categoryPipe = []
                 categoryPipe.push(
                     {
                         $match: {
@@ -152,13 +153,14 @@ class AuthService {
                         $sort: { created_at: -1 }
                     }
                 )
+
                 var categoryWiseBookList = await eBook.aggregate(categoryPipe);
 
                 categoryWiseBookList.forEach(book => {
                     const reviews = book.reviewData;
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
                     book.ratings = ratingStats;
-                    book.overallRating = Math.round(overallRating);
+                    book.overallssssRating = Math.round(overallRating);
                     book.reviewUserCount = book.reviewData.length
                     book.reviewData = reviews
                 });
