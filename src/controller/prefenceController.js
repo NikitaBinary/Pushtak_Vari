@@ -36,7 +36,7 @@ class authController {
             return res.json({
                 status: 200,
                 message: "Reset the prefernces successfully!",
-                data: response
+                // data: response
             })
 
 

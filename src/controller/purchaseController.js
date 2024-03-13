@@ -64,6 +64,12 @@ class authController {
         try {
             const userId = req.params.id
             const response = await purchaseService.getMoreItemService(userId)
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
             return res.status(200).send({
                 status: 200,
                 message: "More item book list.",
@@ -83,8 +89,14 @@ class authController {
             const bookId = req.query.bookId
             const totalPages = req.query.totalPages
             const readPages = req.query.readPages
-            const response = await purchaseService.updateBookStatusService(userId, bookId,totalPages,readPages)
+            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages)
 
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
             return res.status(200).send({
                 status: 200,
                 message: "Update book reading status.",
@@ -99,31 +111,48 @@ class authController {
     }
 
     async progressbookController(req, res) {
-       try {
-        const bookId = req.query.bookId
-        const userId = req.query.userId
+        try {
+            const bookId = req.query.bookId
+            const userId = req.query.userId
 
-        const response = await purchaseService.progressbookService(bookId,userId)
+            const response = await purchaseService.progressbookService(bookId, userId)
 
-        if(response.message){
+            if (response.message) {
+                return res.status(200).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
+
             return res.status(200).send({
-                status: 404,
-                message: response.message
+                status: 200,
+                message: "Get book progress",
+                data: response
             })
-        }
 
-        return res.status(200).send({
-            status: 200,
-            message: "Get book progress",
-            data: response
-        })
-        
-       } catch (error) {
-        return res.status(500).send({
-            status: 500,
-            message: error.message,
-        });
-       }
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async getMyBookController(req, res) {
+        try {
+            const userId = req.params.id
+            const getMyBookList = await purchaseService.getMyBookService(userId)
+            return res.status(200).send({
+                status: 200,
+                message: "Get my book list.",
+                data: getMyBookList
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
     }
 }
 

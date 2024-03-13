@@ -12,5 +12,9 @@ Router.get("/app/getMoreItem/:id", superAdminAuth, purchaseController.getMoreIte
 Router.put("/app/updateBookStatus/:id", superAdminAuth, purchaseController.updateBookStatusController);
 Router.get("/app/progressbook", superAdminAuth, purchaseController.progressbookController);
 
+//----------------my book =====================================
+
+Router.get("/app/getMyBook/:id", superAdminAuth, purchaseController.getMyBookController);
+
 
 module.exports = Router;

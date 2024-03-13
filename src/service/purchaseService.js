@@ -1,7 +1,8 @@
 const mongoose = require("mongoose")
 const purchase = require("../model/bookPurchaseModel");
 const cart = require("../model/cartModel")
-const ebook = require("../model/ebookModel")
+const ebook = require("../model/ebookModel");
+const user = require("../model/userModel");
 
 class AuthService {
     async addToPurchaseService(purchaseData) {
@@ -110,6 +111,12 @@ class AuthService {
 
     async getMoreItemService(userId) {
         try {
+            const userInfo = await user.findOne({
+                _id: userId
+            })
+            if (!userInfo) {
+                return { message: "User not found." }
+            }
             const aggregatePipe = []
             aggregatePipe.push(
                 {
@@ -209,6 +216,7 @@ class AuthService {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
                 book.overallRating = Math.round(overallRating);
+                book.reviewData = ''
             });
 
             return { eBookList }
@@ -238,6 +246,10 @@ class AuthService {
                 const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
 
                 return { overallRating };
+            }
+            const is_UserExist = await user.findOne({ _id: userId })
+            if (!is_UserExist) {
+                return { message: "User Not found" }
             }
             const is_BookExists = await purchase.findOne(
                 {
@@ -289,8 +301,9 @@ class AuthService {
                     const { overallRating } = await calculateRatingStats(reviews);
                     book.overallRating = Math.round(overallRating);
                     book.bookReadingStatus = is_BookExists.bookReadingStatus
+                    book.reviewData = ''
                 });
-                
+
                 return { eBookList }
 
             }
@@ -300,9 +313,18 @@ class AuthService {
             throw error
         }
     }
+
     async updateBookStatusService(userId, bookId, totalPages, readPages) {
         try {
-
+            const is_BookExist = await purchase.findOne(
+                {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    BookId: bookId,
+                    is_purchase: true
+                })
+            if (!is_BookExist) {
+                return { message: "Book not Purchase." }
+            }
             let status = Number((readPages / totalPages) * 100)
             const readingStatusUpdate = await purchase.findOneAndUpdate(
                 {
@@ -319,6 +341,82 @@ class AuthService {
             )
 
             return readingStatusUpdate
+
+        } catch (error) {
+            console.log("error------------->", error)
+            throw error
+        }
+    }
+
+    async getMyBookService(userId) {
+        try {
+            const is_UserExist = await user.findOne({ _id: userId })
+            if (!is_UserExist) {
+                return { message: "User not found." }
+            }
+
+            async function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
+
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+                const totalReviews = reviews.length;
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { overallRating };
+            }
+            const bookAggregate = []
+
+            bookAggregate.push(
+                {
+                    $match: {
+                        userId: new mongoose.Types.ObjectId(userId),
+                        is_purchase: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'ebookdetails',
+                        localField: 'BookId',
+                        foreignField: '_id',
+                        as: "eBookData"
+                    }
+                },
+                {
+                    $unwind: "$eBookData"
+                },
+                {
+                    $lookup: {
+                        from: 'review_lists',
+                        localField: 'eBookData._id',
+                        foreignField: 'bookId',
+                        as: "reviewData"
+                    }
+                },
+                // {
+                //     $project: {
+                //         _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
+                //     }
+                // },
+                {
+                    $sort: { created_at: -1 }
+                }
+            )
+
+            const myBookList = await purchase.aggregate(bookAggregate)
+
+            myBookList.forEach(async (book) => {
+                const reviews = book.reviewData;
+                const { overallRating } = await calculateRatingStats(reviews);
+                book.overallRating = Math.round(overallRating);
+                // book.reviewData = ''
+            });
+            return myBookList
 
         } catch (error) {
             console.log("error------------->", error)
