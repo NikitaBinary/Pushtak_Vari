@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const ebookSchema = new mongoose.Schema({
     bookName: {
         type: String,
-        required: true
+        required: false
     },
     bookLanguage: {
         type: JSON
     },
     authorName: {
         type: String,
-        required: true
+        required: false
     },
     co_authorName: {
         type: String,
@@ -32,11 +32,11 @@ const ebookSchema = new mongoose.Schema({
     category: {
         type: JSON,
         required: false,
-        default: "Other Book"
+        // default: "Other Book"
     },
     bookType: {
         type: JSON,
-        required: true
+        required: false
     },
     videoLink: {
         type: String,
