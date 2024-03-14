@@ -58,15 +58,30 @@ class AuthService {
     async updateEbookService(_id, dataBody, ImageUrl, pdfUrl) {
         try {
             if (ImageUrl || pdfUrl) {
-                dataBody.bookImage = ImageUrl
-                dataBody.bookPdf = pdfUrl
+                dataBody.bookImage = ImageUrl;
+                dataBody.bookPdf = pdfUrl;
+            }
+            if (dataBody.category) {
+                const categoryData = dataBody.category ? await category.findById(dataBody.category, { _id: 1, categoryName: 1 }) : null;
+                dataBody.category = categoryData;
+
+            }
+            if (dataBody.bookType) {
+                const bookType = dataBody.bookType ? await ebookType.findById(dataBody.bookType, { _id: 1, ebookType: 1 }) : null;
+                dataBody.bookType = bookType;
+
+            }
+            if (dataBody.bookLanguage) {
+                const bookLanguage = dataBody.bookLanguage ? await language.findById(dataBody.bookLanguage, { _id: 1, language: 1 }) : null;
+                dataBody.bookLanguage = bookLanguage;
             }
             let eBookDetail = await eBook.findOne({ _id: _id });
             let eBookInfo = await eBook.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
-            return { eBookDetail, eBookInfo }
+            return { eBookDetail, eBookInfo };
         } catch (error) {
             throw error;
         }
+
     }
     async deleteEbookService(_id) {
         try {

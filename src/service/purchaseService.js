@@ -9,6 +9,10 @@ class AuthService {
         try {
             const bookId = purchaseData.BookId
             const userId = purchaseData.userId
+            const is_bookExists = await ebook.findOne({ _id: bookId })
+            if (!is_bookExists) {
+                return { message: "Book not exists." }
+            }
             var purchaseDetail = await purchase.findOne(
                 {
                     BookId: new mongoose.Types.ObjectId(bookId),
@@ -37,7 +41,6 @@ class AuthService {
                     },
                     { new: true }
                 )
-
                 if (bookPurchased) {
                     const bookId = bookPurchased.BookId
                     const userId = bookPurchased.userId
@@ -229,7 +232,7 @@ class AuthService {
 
     }
 
-    async progressbookService(bookId, userId) {
+    async progressbookService(userId) {
         try {
 
             async function calculateRatingStats(reviews) {
@@ -253,17 +256,21 @@ class AuthService {
             }
             const is_BookExists = await purchase.findOne(
                 {
-                    BookId: new mongoose.Types.ObjectId(bookId),
                     userId: new mongoose.Types.ObjectId(userId)
                 })
             if (!is_BookExists) {
-                return { message: "Book Not found" }
+                return { message: "User not purchase book" }
             } else {
-
+                const user_lastUpdateBook = await purchase.findOne(
+                    { userId: new mongoose.Types.ObjectId(userId) }
+                )
+                if (user_lastUpdateBook.BookId) {
+                    var bookId = user_lastUpdateBook.BookId
+                }
                 let eBookList
                 const bookaggregate = []
 
-                if (bookId && userId) {
+                if (bookId) {
                     bookaggregate.push(
                         {
                             $match: {

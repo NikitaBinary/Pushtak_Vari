@@ -5,6 +5,12 @@ class authController {
     async addToPurchaseBookController(req, res) {
         try {
             const response = await purchaseService.addToPurchaseService(req.body)
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
             return res.status(200).send({
                 status: 200,
                 message: "Purchase book detail.",
@@ -112,10 +118,9 @@ class authController {
 
     async progressbookController(req, res) {
         try {
-            const bookId = req.query.bookId
             const userId = req.query.userId
 
-            const response = await purchaseService.progressbookService(bookId, userId)
+            const response = await purchaseService.progressbookService(userId)
 
             if (response.message) {
                 return res.status(200).send({
@@ -124,10 +129,11 @@ class authController {
                 })
             }
 
+            const [result] = response.eBookList
             return res.status(200).send({
                 status: 200,
                 message: "Get book progress",
-                data: response
+                eBookProgress: result
             })
 
         } catch (error) {

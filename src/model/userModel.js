@@ -52,12 +52,12 @@ const singupSchema = new mongoose.Schema({
         type: Date
     },
     genre_prefernce: {
-        type: String,
-        default: ""
+        type: Array,
+        default: []
     },
     author_prefernce: {
-        type: String,
-        default: ""
+        type: Array,
+        default: []
     }
 },
     {
