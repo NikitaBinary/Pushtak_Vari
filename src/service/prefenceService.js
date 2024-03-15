@@ -6,21 +6,52 @@ const user = require("../model/userModel")
 class AuthService {
     async myPrefenceService(prefenceOption, genre, author, userId) {
         try {
+            const is_userExist = await user.findOne({ _id: userId })
+            if (is_userExist) {
+                if (is_userExist.genre_prefernce && prefenceOption == "genre") {
+                    var genrePrefence = is_userExist.genre_prefernce
+                }
+                if (is_userExist.author_prefernce && prefenceOption == "author") {
+                    var authoreprefence = is_userExist.author_prefernce
+                }
+            }
+
             if (prefenceOption == "genre") {
                 var genreList = await category.find({},
                     {
                         _id: 1,
                         categoryImage: 1,
-                        categoryName: 1
+                        categoryName: 1,
+                        is_selected: 1
                     })
+                genreList.map(genre => {
+                    if (genrePrefence.includes(genre.categoryName)) {
+                        genre.is_selected = true;
+                    } else {
+                        genre.is_selected = false;
+                    }
+
+                    return genre;
+                });
             }
             if (prefenceOption == "author") {
                 var authorList = await ebook.find({},
                     {
                         _id: 1,
-                        authorName: 1
+                        authorName: 1,
+                        is_selected: 1
                     }
                 )
+                authorList.map(author => {
+
+                    if (authoreprefence.includes(author.authorName)) {
+                        author.is_selected = true;
+                    } else {
+                        author.is_selected = false;
+                    }
+
+                    return author;
+                });
             }
             if (genre) {
                 const genreItem = await user.findByIdAndUpdate(
