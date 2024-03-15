@@ -311,6 +311,57 @@ class authController {
             });
         }
     }
+
+    async socialMediaSignUpController(req, res) {
+        try {
+            const userData = req.body
+            console.log("cook--33---->",userData)
+
+            const userPassword = userData.password
+
+
+            req.body.password = await getPasswordHash(userData.password, 12);
+
+            if (req.body.userType) {
+                if (!userRoles.USER_ROLES.includes(userData.userType)) {
+                    return res.json({
+                        status: 400,
+                        message: `Invalid User Type Should be [${userRoles.USER_ROLES}]`,
+                    })
+                }
+            }
+
+            const response = await userService.socialMediaService(userData,userPassword)
+           
+            if (response.uniqueEmail) {
+                return res.json({
+                    status: 400,
+                    message: "Email already exists.",
+                })
+
+            }
+            if (response.uniqueMobileNo) {
+                return res.json({
+                    status: 400,
+                    message: "Mobile number already exists.",
+                })
+            }
+            return res.json({
+                status: 201,
+                message: "User has been added successfully!",
+                data: response.userDetail,
+                token:response.token
+            })
+
+
+        } catch (error) {
+            console.log("error--------->",error)
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;
