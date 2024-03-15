@@ -407,7 +407,7 @@ class AuthService {
                 },
                 // {
                 //     $project: {
-                //         _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
+                //         _id: 1, bookName: 1, authorName: 1, bookImage: 1, overallRating: 1, reviewData: 1
                 //     }
                 // },
                 {
@@ -421,7 +421,8 @@ class AuthService {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
                 book.overallRating = Math.round(overallRating);
-                // book.reviewData = ''
+                book.bookReadingStatus = book.bookReadingStatus
+                book.reviewData = ''
             });
             return myBookList
 

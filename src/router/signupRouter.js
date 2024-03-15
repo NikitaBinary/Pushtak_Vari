@@ -49,4 +49,9 @@ Router.get("/app/userList", superAdminAuth, signUPController.userListController)
 Router.get("/app/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/app/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 
+//-----------------social-media apis==================================================================
+
+Router.post("/app/socialMediaSignUp", uploadStorage.single("userImage"), signUPController.socialMediaSignUpController);
+
+
 module.exports = Router;
