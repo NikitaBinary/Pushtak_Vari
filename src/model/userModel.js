@@ -58,6 +58,12 @@ const singupSchema = new mongoose.Schema({
     author_prefernce: {
         type: Array,
         default: []
+    },
+    mediaId:{
+        type:String
+    },
+    mediaType:{
+        type:String
     }
 },
     {
