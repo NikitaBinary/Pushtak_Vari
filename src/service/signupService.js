@@ -58,6 +58,7 @@ class AuthService {
                             userImage: "",
                             createdBy: userBody.createdBy || '',
                         };
+                        break; // Add break here
                     case 'INSTITUTE':
                         newUser = {
                             instituteName: userBody.instituteName,
@@ -75,6 +76,7 @@ class AuthService {
                         throw new Error("Invalid userType");
                 }
                 userDetail = await user.create(newUser);
+                console.log("newUser------------->", userDetail)
 
 
                 if (newUser.createdBy) {
@@ -94,11 +96,11 @@ class AuthService {
                         const userName = email.split('@');
                         const subject = "User Password";
                         const html = `<h3>Hello ${userName[0]}</h3>
-                        <p> Successfully you are registered in Pustak Vari and</p>
-                        <p>  this your password ${userPassword}  for login into Pustak Vari</p>
-                        <br>
-                        <p>Thanks,</p>
-                        <p>Your Pushtak Vari team </p>`;
+                                <p> Successfully you are registered in Pustak Vari and</p>
+                                <p>  this your password ${userPassword}  for login into Pustak Vari</p>
+                                <br>
+                                <p>Thanks,</p>
+                                <p>Your Pushtak Vari team </p>`;
                         await mail.sendMail(email, html, subject);
                     }
                 }
@@ -108,7 +110,6 @@ class AuthService {
             console.log(error);
             throw error;
         }
-
 
     }
 
@@ -351,13 +352,13 @@ class AuthService {
     }
     async socialMediaService(userBody, userPassword) {
         try {
-            let uniqueEmail = await user.findOne({ emailId: userBody.emailId });
-            let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
-            let userDetail;
+            const mediaId = userBody.mediaId
+            const mediaUser = await user.findOne({ mediaId: mediaId })
+            let userInfo;
+            let newUser;
+            let token;
 
-            if (!uniqueEmail && !uniqueMobileNo) {
-                let newUser;
-
+            if (!mediaUser) {
                 switch (userBody.userType) {
                     case 'INSTITUTE_USER':
                         newUser = {
@@ -370,6 +371,8 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
+                            mediaId: userBody.mediaId,
+                            mediaType: userBody.mediaType
                         };
                         break;
                     case 'REGULAR_USER':
@@ -382,35 +385,44 @@ class AuthService {
                             is_instituteUser: false,
                             is_active: true,
                             userImage: "",
-                            // createdBy: userBody.createdBy || '',
-                        };
+                            mediaId: userBody.mediaId,
+                            mediaType: userBody.mediaType
+                        }
                         break;
                     default:
                         throw new Error("Invalid userType");
                 }
-                userDetail = await user.create(newUser);
-                var token = await generateToken(
-                    { email: userDetail.emailId, name: userDetail.fullName }
+                userInfo = await user.create(newUser);
+                token = await generateToken(
+                    { email: userInfo.emailId, name: userInfo.fullName }
                 )
-               
-                if (userPassword) {
-                    const email = userBody.emailId;
-                    let checkPassword = await user.findOne({ emailId: email });
-                    if (checkPassword) {
-                        let mail = new Mail();
-                        const userName = email.split('@');
-                        const subject = "User Password";
-                        const html = `<h3>Hello ${userName[0]}</h3>
+            }
+            else {
+                userInfo = mediaUser
+                token = await generateToken(
+                    { email: userInfo.emailId, name: userInfo.fullName }
+                )
+            }
+
+
+
+            if (userPassword) {
+                const email = userBody.emailId;
+                let checkPassword = await user.findOne({ emailId: email });
+                if (checkPassword) {
+                    let mail = new Mail();
+                    const userName = email.split('@');
+                    const subject = "User Password";
+                    const html = `<h3>Hello ${userName[0]}</h3>
                         <p> Successfully you are registered in Pustak Vari and</p>
                         <p>  this your password ${userPassword}  for login into Pustak Vari</p>
                         <br>
                         <p>Thanks,</p>
                         <p>Your Pushtak Vari team </p>`;
-                        await mail.sendMail(email, html, subject);
-                    }
+                    await mail.sendMail(email, html, subject);
                 }
             }
-            return { userDetail, uniqueEmail, uniqueMobileNo, token };
+            return { token: token, userInfo };
         } catch (error) {
             console.log(error);
             throw error;

@@ -315,8 +315,6 @@ class authController {
     async socialMediaSignUpController(req, res) {
         try {
             const userData = req.body
-            console.log("cook--33---->",userData)
-
             const userPassword = userData.password
 
 
@@ -333,24 +331,10 @@ class authController {
 
             const response = await userService.socialMediaService(userData,userPassword)
            
-            if (response.uniqueEmail) {
-                return res.json({
-                    status: 400,
-                    message: "Email already exists.",
-                })
-
-            }
-            if (response.uniqueMobileNo) {
-                return res.json({
-                    status: 400,
-                    message: "Mobile number already exists.",
-                })
-            }
             return res.json({
                 status: 201,
                 message: "User has been added successfully!",
-                data: response.userDetail,
-                token:response.token
+                data: response
             })
 
 
@@ -365,3 +349,5 @@ class authController {
 }
 
 module.exports = authController;
+
+
