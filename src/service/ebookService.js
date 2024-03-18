@@ -117,6 +117,8 @@ class AuthService {
 
     async getAppEbookListService(category, language, userId) {
         const id = new mongoose.Types.ObjectId(userId)
+        const userInfo = await user.findOne({ _id: id })
+
 
         function calculateRatingStats(reviews) {
             if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -183,6 +185,26 @@ class AuthService {
 
             const newAggregatePipe = []
             if (language) {
+                if (userInfo.genre_prefernce) {
+                    var genreCategory = userInfo.genre_prefernce
+                    newAggregatePipe.push(
+                        {
+                            $match: {
+                                'category.categoryName': { $in: genreCategory }
+                            }
+                        }
+                    )
+                }
+                if (userInfo.genre_prefernce) {
+                    var authorCategory = userInfo.author_prefernce
+                    newAggregatePipe.push(
+                        {
+                            $match: {
+                                'authorName': { $in: authorCategory }
+                            }
+                        }
+                    )
+                }
                 newAggregatePipe.push(
                     {
                         $match: {
