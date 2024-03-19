@@ -182,33 +182,38 @@ class AuthService {
                     book.reviewData = reviews
                 });
             }
-
+            const condition = {}
             const newAggregatePipe = []
+
+            if (userInfo.genre_prefernce.length > 0) {
+                var genreCategory = userInfo.genre_prefernce
+                condition['category.categoryName'] = { $in: genreCategory };
+            }
+            if (userInfo.genre_prefernce.length > 0) {
+                var authorCategory = userInfo.author_prefernce
+                condition.authorName = { $in: authorCategory };
+            }
+
             if (language) {
-                if (userInfo.genre_prefernce) {
-                    var genreCategory = userInfo.genre_prefernce
-                    newAggregatePipe.push(
-                        {
-                            $match: {
-                                'category.categoryName': { $in: genreCategory }
-                            }
-                        }
-                    )
-                }
-                if (userInfo.genre_prefernce) {
-                    var authorCategory = userInfo.author_prefernce
-                    newAggregatePipe.push(
-                        {
-                            $match: {
-                                'authorName': { $in: authorCategory }
-                            }
-                        }
-                    )
-                }
+                console.log('comee elseee')
+                condition['bookLanguage.language'] = language;
+            }
+            if (typeof condition === 'object' && Object.keys(condition).length > 0 || limit) {
                 newAggregatePipe.push(
                     {
-                        $match: {
-                            'bookLanguage.language': language,
+                        $match: condition
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                )
+                newAggregatePipe.push(
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
                         }
                     },
                     {
@@ -216,20 +221,31 @@ class AuthService {
                     }
                 )
             }
-
-            newAggregatePipe.push(
-                {
-                    $lookup: {
-                        from: 'review_lists',
-                        localField: '_id',
-                        foreignField: 'bookId',
-                        as: "reviewData"
+            else {
+                newAggregatePipe.push(
+                    {
+                        $match: {
+                            'bookLanguage.language': language
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
                     }
-                },
-                {
-                    $sort: { created_at: -1 }
-                }
-            )
+                )
+                newAggregatePipe.push(
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                )
+            }
             const newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
 
 
@@ -410,6 +426,15 @@ class AuthService {
             throw error;
         }
 
+    }
+
+    async languageListService() {
+        try {
+            const languageList = await language.find({}, { _id: 1, language: 1 })
+            return languageList
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

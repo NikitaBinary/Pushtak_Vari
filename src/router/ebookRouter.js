@@ -38,6 +38,7 @@ Router.get("/app/exploreBookList", superAdminAuth, ebookController.exploreBookLi
 
 Router.post("/app/addReview", superAdminAuth,ebookController.addReviewController)
 Router.get("/app/e-bookInfo/:id",superAdminAuth,ebookController.eBookInfoController)
+Router.get("/app/languageList",superAdminAuth,ebookController.languageListController)
 
 
 module.exports = Router;

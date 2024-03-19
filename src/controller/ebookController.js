@@ -274,6 +274,25 @@ class authController {
         }
     }
 
+    async languageListController(req, res) {
+        try {
+            const languageList = await ebookService.languageListService();
+
+            return res.json({
+                status: 200,
+                message: "Language list get.",
+                data: languageList
+            })
+
+        } catch (error) {
+            console.log("errorr----------->", error)
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = authController;
