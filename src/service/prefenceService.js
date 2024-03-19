@@ -6,6 +6,15 @@ const user = require("../model/userModel")
 class AuthService {
     async myPrefenceService(prefenceOption, genre, author, userId) {
         try {
+            async function removeDuplicateAuthors(authorList) {
+                const uniqueAuthorsMap = new Map();
+                authorList.forEach(author => {
+                    uniqueAuthorsMap.set(author.authorName, author);
+                });
+                const uniqueAuthorsArray = Array.from(uniqueAuthorsMap.values());
+                return uniqueAuthorsArray;
+            }
+
             const is_userExist = await user.findOne({ _id: userId })
             if (is_userExist) {
                 if (is_userExist.genre_prefernce && prefenceOption == "genre") {
@@ -35,13 +44,16 @@ class AuthService {
                 });
             }
             if (prefenceOption == "author") {
-                var authorList = await ebook.find({},
+                const uniqueAuthorList = await ebook.find({},
                     {
                         _id: 1,
                         authorName: 1,
                         is_selected: 1
                     }
                 )
+
+                var authorList = await removeDuplicateAuthors(uniqueAuthorList);
+
                 authorList.map(author => {
 
                     if (authoreprefence.includes(author.authorName)) {

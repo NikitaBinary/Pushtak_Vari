@@ -352,13 +352,21 @@ class AuthService {
     }
     async socialMediaService(userBody, userPassword) {
         try {
-            const mediaId = userBody.mediaId
-            const mediaUser = await user.findOne({ mediaId: mediaId })
+            const mediaId = userBody.mediaId;
+            const email = userBody.emailId;
+            const mediaUser = await user.findOne({ mediaId: mediaId });
+            const emailExist = await user.findOne({ emailId: email });
+
             let userInfo;
             let newUser;
             let token;
 
-            if (!mediaUser) {
+            if (mediaUser || emailExist) {
+                console.log("User with the given mediaId or emailId already exists.");
+                userInfo = mediaUser || emailExist;
+                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName });
+            } else {
+                console.log("User can be created.");
                 switch (userBody.userType) {
                     case 'INSTITUTE_USER':
                         newUser = {
@@ -387,24 +395,14 @@ class AuthService {
                             userImage: "",
                             mediaId: userBody.mediaId,
                             mediaType: userBody.mediaType
-                        }
+                        };
                         break;
                     default:
                         throw new Error("Invalid userType");
                 }
                 userInfo = await user.create(newUser);
-                token = await generateToken(
-                    { email: userInfo.emailId, name: userInfo.fullName }
-                )
+                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName });
             }
-            else {
-                userInfo = mediaUser
-                token = await generateToken(
-                    { email: userInfo.emailId, name: userInfo.fullName }
-                )
-            }
-
-
 
             if (userPassword) {
                 const email = userBody.emailId;
@@ -424,9 +422,10 @@ class AuthService {
             }
             return { token: token, userInfo };
         } catch (error) {
-            console.log(error);
+            console.log("error=================>", error);
             throw error;
         }
+
     }
 }
 
