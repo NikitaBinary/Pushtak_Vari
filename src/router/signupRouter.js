@@ -52,6 +52,7 @@ Router.delete("/app/deleteUserInfo/:id", superAdminAuth, signUPController.delete
 //-----------------social-media apis==================================================================
 
 Router.post("/app/socialMediaSignUp", uploadStorage.single("userImage"), signUPController.socialMediaSignUpController);
+Router.put("/app/updateDeviceToken/:id", signUPController.updateDeviceTokenController);
 
 
 module.exports = Router;

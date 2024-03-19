@@ -427,6 +427,23 @@ class AuthService {
         }
 
     }
+    async updateDeviceTokenService(fcmToken, userId) {
+        try {
+            const updateuserToken = await user.findOneAndUpdate(
+                { _id: userId },
+                {
+                    $set: {
+                        fcm_token: fcmToken
+                    }
+                },
+                { new: true }
+            )
+            return updateuserToken
+        } catch (error) {
+            console.log("error=================>", error);
+            throw error; s
+        }
+    }
 }
 
 module.exports = AuthService;

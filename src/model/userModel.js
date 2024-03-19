@@ -59,11 +59,14 @@ const singupSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
-    mediaId:{
-        type:String
+    mediaId: {
+        type: String
     },
-    mediaType:{
-        type:String
+    mediaType: {
+        type: String
+    },
+    fcm_token: {
+        type: String
     }
 },
     {

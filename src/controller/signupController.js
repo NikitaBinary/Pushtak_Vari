@@ -329,8 +329,8 @@ class authController {
                 }
             }
 
-            const response = await userService.socialMediaService(userData,userPassword)
-           
+            const response = await userService.socialMediaService(userData, userPassword)
+
             return res.json({
                 status: 201,
                 message: "User has been added successfully!",
@@ -339,7 +339,25 @@ class authController {
 
 
         } catch (error) {
-            console.log("error--------->",error)
+            console.log("error--------->", error)
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async updateDeviceTokenController(req, res) {
+        try {
+            const fcmToken = req.body.fcm_token
+            const userID = req.params.id
+            const response = await userService.updateDeviceTokenService(fcmToken, userID)
+            return res.status(200).send({
+                status: 200,
+                message: "FCM token updated successfully!",
+                data: response
+            })
+        } catch (error) {
             return res.status(500).send({
                 status: 500,
                 message: error.message,
