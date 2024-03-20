@@ -33,7 +33,7 @@ const singupSchema = new mongoose.Schema({
         type: Boolean
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId
+        type: String
     },
     studentList: {
         type: Array,
