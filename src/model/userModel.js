@@ -33,7 +33,7 @@ const singupSchema = new mongoose.Schema({
         type: Boolean
     },
     createdBy: {
-        type: String
+        type: mongoose.Schema.Types.ObjectId
     },
     studentList: {
         type: Array,
@@ -67,6 +67,12 @@ const singupSchema = new mongoose.Schema({
     },
     fcm_token: {
         type: String
+    },
+    select_Subscription: {
+        type: JSON,
+    },
+    ebookSubscription: {
+        type: JSON,
     }
 },
     {

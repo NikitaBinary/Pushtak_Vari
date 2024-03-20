@@ -4,6 +4,7 @@ const institute = require("../model/instituteModel");
 const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
+const subscription = require("../model/subscriptionModel")
 
 
 class AuthService {
@@ -15,6 +16,16 @@ class AuthService {
         try {
             let uniqueEmail = await user.findOne({ emailId: userBody.emailId });
             let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
+
+            if (userBody.userType == 'INSTITUTE') {
+                var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1 }) : null;
+            }
+
+            if (userBody.userType == 'INSTITUTE_USER') {
+                const instituteID = userBody.createdBy
+                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 0, select_Subscription: 1, created_at: 1 }) : null;
+            }
+
             let userDetail;
 
             if (!uniqueEmail && !uniqueMobileNo) {
@@ -44,6 +55,7 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
+                            ebookSubscription: giveSubscription
                         };
                         break;
                     case 'REGULAR_USER':
@@ -69,14 +81,14 @@ class AuthService {
                             is_active: true,
                             studentList: [],
                             instituteImage: institute_Image || "",
-                            studentCount: 0
+                            studentCount: 0,
+                            select_Subscription: subscriptionInfo
                         };
                         break;
                     default:
                         throw new Error("Invalid userType");
                 }
                 userDetail = await user.create(newUser);
-                console.log("newUser------------->", userDetail)
 
 
                 if (newUser.createdBy) {
