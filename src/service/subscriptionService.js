@@ -5,7 +5,7 @@ class AuthService {
 
     async addSubscriptionDurationService(subscriptionData) {
         try {
-            console.log("subscriptionData------------>",subscriptionData)
+            console.log("subscriptionData------------>", subscriptionData)
             const duration = await subscriptionDuration.create(subscriptionData)
 
             return duration
@@ -25,8 +25,6 @@ class AuthService {
 
     async addSubscriptionService(subscriptionData) {
         try {
-            const durationData = await subscriptionDuration.findOne({ _id: subscriptionData.duration }, { _id: 1, duration: 1 })
-            subscriptionData.duration = durationData
             const subscriptionDetail = await subscription.create(subscriptionData)
             return subscriptionDetail
         } catch (error) {

@@ -6,8 +6,7 @@ const subscriptionSchema = new mongoose.Schema({
         required: false
     },
     duration: {
-        type: JSON,
-        required: false
+        type:Number
     },
     rate: {
         type: Number,
