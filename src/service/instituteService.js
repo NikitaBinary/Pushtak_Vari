@@ -119,28 +119,29 @@ class AuthService {
 
     async assignBooktoInstituteService(instituteId, bookId) {
         try {
-            const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
+            const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) });
+        
             if (!is_instituteExists) {
                 const newDoc = {
                     instituteID: instituteId,
-                    BookList: bookId
-                }
-                var bookList = await bookAssign.create(newDoc)
-            }
-            else {
+                    BookList: [bookId] // Initialize the array with the new bookId
+                };
+                var bookList = await bookAssign.create(newDoc);
+            } else {
                 bookList = await bookAssign.findOneAndUpdate(
                     { instituteID: new mongoose.Types.ObjectId(instituteId) },
-                    { BookList: bookId },
+                    { $addToSet: { BookList: { $each: [bookId] } } }, // Add the new bookId(s) to the array if they don't already exist
                     { new: true }
                 );
             }
-
-            return bookList
-
+        
+            return bookList;
         } catch (error) {
-            console.log("error------.", error)
+            console.log("error------.", error);
             throw error;
         }
+        
+        
     }
 
 }
