@@ -3,6 +3,8 @@ const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
 const user = require("../model/userModel")
+const bookAssign = require("../model/instituteAssignBook")
+const mongoose = require("mongoose")
 
 class AuthService {
 
@@ -109,6 +111,32 @@ class AuthService {
             }
 
             return { instituteInfo, institutedata }
+        } catch (error) {
+            console.log("error------.", error)
+            throw error;
+        }
+    }
+
+    async assignBooktoInstituteService(instituteId, bookId) {
+        try {
+            const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
+            if (!is_instituteExists) {
+                const newDoc = {
+                    instituteID: instituteId,
+                    BookList: bookId
+                }
+                var bookList = await bookAssign.create(newDoc)
+            }
+            else {
+                bookList = await bookAssign.findOneAndUpdate(
+                    { instituteID: new mongoose.Types.ObjectId(instituteId) },
+                    { BookList: bookId },
+                    { new: true }
+                );
+            }
+
+            return bookList
+
         } catch (error) {
             console.log("error------.", error)
             throw error;

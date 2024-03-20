@@ -3,19 +3,22 @@ const mongoose = require('mongoose');
 const instituteSchema = new mongoose.Schema({
     instituteName: {
         type: String,
-        required: true
+        required: false
     },
     emailId: {
         type: String,
-        required: true
+        required: false
     },
     mobileNo: {
         type: String,
-        required: true,
+        required: false,
     },
     password: {
         type: String,
-        required: true
+        required: false
+    },
+    select_Subscription: {
+        type: JSON,
     },
     studentCount: {
         type: Number,
@@ -23,7 +26,7 @@ const instituteSchema = new mongoose.Schema({
     },
     is_active: {
         type: Boolean,
-        default: true
+        default: false
     },
     studentList: {
         type: Array,

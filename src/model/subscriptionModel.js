@@ -3,19 +3,27 @@ const mongoose = require('mongoose');
 const subscriptionSchema = new mongoose.Schema({
     subscriptionName: {
         type: String,
-        required: true
+        required: false
     },
     duration: {
         type: JSON,
-        required: true
+        required: false
     },
     rate: {
         type: Number,
-        required: true
+        required: false
     },
     features: {
         type: String,
-        required: true
+        required: false
+    },
+    no_of_Users: {
+        type: Number,
+        required: false
+    },
+    no_of_Books: {
+        type: Number,
+        required: false
     }
 },
     {

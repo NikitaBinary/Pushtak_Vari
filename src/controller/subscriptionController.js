@@ -7,6 +7,8 @@ class authController {
     async addSubscriptionDurationController(req, res) {
         try {
             const data = req.body
+            console.log("data------------>",data)
+
             const response = await subscriptionService.addSubscriptionDurationService(data)
             return res.json({
                 status: 201,
@@ -42,7 +44,7 @@ class authController {
     async addSubscriptionController(req, res) {
         try {
             const data = req.body
-            const subscriptionDetail = await subscriptionService.addSubscriptionDurationService(data)
+            const subscriptionDetail = await subscriptionService.addSubscriptionService(data)
             return res.json({
                 status: 200,
                 message: "Subscription has been added successfully!",

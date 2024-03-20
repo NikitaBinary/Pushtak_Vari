@@ -25,4 +25,8 @@ Router.get("/getInstituteInfo/:id", superAdminAuth, instituteController.getInsti
 Router.delete("/deleteInstituteInfo/:id", superAdminAuth, instituteController.deleteInstituteInfoController)
 Router.put("/instituteStatus/:id", superAdminAuth, instituteController.instituteStatusController)
 
+Router.post("/assignBooktoInstitute/:id", superAdminAuth, instituteController.assignBooktoInstituteController)
+
+
+
 module.exports = Router;

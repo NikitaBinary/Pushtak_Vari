@@ -155,6 +155,24 @@ class authController {
             });
         }
     }
+
+    async assignBooktoInstituteController(req, res) {
+        try {
+            let instituteId = req.params.id
+            let bookId = req.query.bookId
+            const response = await instituteService.assignBooktoInstituteService(instituteId, bookId)
+            return res.status(200).send({
+                status: 200,
+                message: "Institute assign eBook successfully!",
+                data: response
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;
