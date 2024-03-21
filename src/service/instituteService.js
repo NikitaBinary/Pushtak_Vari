@@ -5,6 +5,7 @@ const Mail = require('../helper/mail')
 const user = require("../model/userModel")
 const bookAssign = require("../model/instituteAssignBook")
 const mongoose = require("mongoose")
+const subscription = require("../model/subscriptionModel")
 
 class AuthService {
 
@@ -44,11 +45,16 @@ class AuthService {
     async updateInstituteService(_id, dataBody, ImageUrl) {
         try {
             delete dataBody.email
+            if (dataBody.select_Subscription) {
+                var giveSubscription = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { _id: 0, subscriptionName: 1, duration: 1, lifeTimeAccess: 1 }) : null;
+                dataBody.select_Subscription = giveSubscription
+            }
             if (ImageUrl) {
                 dataBody.instituteImage = ImageUrl
             }
             let instituteDetail = await user.findOne({ _id: _id }, { userType: "INSTITUTE" });
-            let instituteInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
+
+            var instituteInfo = await user.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
 
             return { instituteDetail, instituteInfo }
         } catch (error) {
@@ -61,7 +67,7 @@ class AuthService {
             const instituteList = await user.find({ userType: "INSTITUTE" },
                 {
                     _id: 1, emailId: 1, mobileNo: 1, userType: 1, studentCount: 1, is_active: 1,
-                    instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1
+                    instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1, select_Subscription: 1
                 }).sort({ created_at: -1 })
             return instituteList
         } catch (error) {
@@ -148,8 +154,8 @@ class AuthService {
             if (!is_instituteExists) {
                 return { message: "Institute not exists." }
             }
-            else{
-               var bookList = await bookAssign.findOneAndUpdate(
+            else {
+                var bookList = await bookAssign.findOneAndUpdate(
                     { instituteID: new mongoose.Types.ObjectId(instituteId) },
                     { $pull: { BookList: bookId } },
                     { new: true }
