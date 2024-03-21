@@ -302,10 +302,12 @@ class AuthService {
     async getUserInfoService(_id) {
         try {
             let userDetail = await user.findOne({ _id: _id });
-            if (userDetail) {
-                var userInfo = await user.findOne({ _id: _id }, {});
+            if (!userDetail) {
+                return { message : "User not exists."}
             }
-            return { userDetail, userInfo }
+            else{
+                return userDetail
+            }
         } catch (error) {
             throw error;
         }
@@ -452,6 +454,27 @@ class AuthService {
                 { new: true }
             )
             return updateuserToken
+        } catch (error) {
+            console.log("error=================>", error);
+            throw error; s
+        }
+    }
+    async updateUserLanguageService(language, userId) {
+        try {
+            const userExists = await user.findOne({_id:userId})
+            if(!userExists){
+                return { message : "User not exists."}
+            }
+            const updateUserLanguage = await user.findOneAndUpdate(
+                { _id: userId },
+                {
+                    $set: {
+                        language: language
+                    }
+                },
+                { new: true }
+            )
+            return updateUserLanguage
         } catch (error) {
             console.log("error=================>", error);
             throw error; s

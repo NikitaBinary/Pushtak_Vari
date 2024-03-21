@@ -222,17 +222,19 @@ class authController {
     async getUserInfoController(req, res) {
         try {
             const id = req.params.id
-            const userInfo = await userService.getUserInfoService(id);
-            if (!userInfo.userDetail) {
+            const userDetail = await userService.getUserInfoService(id);
+            if (userDetail.message) {
                 return res.status(404).send({
                     status: 404,
-                    message: "UserId not exists.",
+                    message: userDetail.message
                 });
             }
             return res.status(200).send({
                 status: 200,
                 message: "User detail get.",
-                body: userInfo
+                body: {
+                    userDetail: userDetail
+                }
             });
         } catch (error) {
             return res.status(500).send({
@@ -355,6 +357,30 @@ class authController {
             return res.status(200).send({
                 status: 200,
                 message: "FCM token updated successfully!",
+                data: response
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async updateUserLanguageController(req, res) {
+        try {
+            const userlanguage = req.query.language
+            const userID = req.params.id
+            const response = await userService.updateUserLanguageService(userlanguage, userID)
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                });
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "User language updated successfully!",
                 data: response
             })
         } catch (error) {

@@ -14,6 +14,7 @@ Router.delete("/deleteQuiz/:id", superAdminAuth, quizController.deleteQuizContro
 ///======================app side apis===================================================
 
 Router.get("/app/getQuizList", superAdminAuth, quizController.getAppQuizListController)
+Router.put("/app/updateQuizUserCount/:id", superAdminAuth, quizController.updateQuizUserCountController)
 
 
 module.exports = Router
