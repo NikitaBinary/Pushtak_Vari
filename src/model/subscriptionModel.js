@@ -23,6 +23,10 @@ const subscriptionSchema = new mongoose.Schema({
     no_of_Books: {
         type: Number,
         required: false
+    },
+    lifeTimeAccess: {
+        type: Boolean,
+        default: false
     }
 },
     {

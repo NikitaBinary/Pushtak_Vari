@@ -19,6 +19,7 @@ class AuthService {
 
             if (userBody.userType == 'INSTITUTE') {
                 var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1 }) : null;
+
             }
 
             if (userBody.userType == 'INSTITUTE_USER') {

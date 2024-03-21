@@ -26,6 +26,7 @@ Router.delete("/deleteInstituteInfo/:id", superAdminAuth, instituteController.de
 Router.put("/instituteStatus/:id", superAdminAuth, instituteController.instituteStatusController)
 
 Router.post("/assignBooktoInstitute/:id", superAdminAuth, instituteController.assignBooktoInstituteController)
+Router.delete("/deleteInstituteBook/:id", superAdminAuth, instituteController.deleteInstituteBookController)
 
 
 
