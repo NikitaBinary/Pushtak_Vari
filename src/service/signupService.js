@@ -281,9 +281,22 @@ class AuthService {
         try {
             delete dataBody.email
             let userDetail = await user.findOne({ _id: _id });
+            if (userDetail.userType == 'INSTITUTE' && dataBody.select_Subscription) {
+                var giveSubscription = instituteID ? await user.findOne({ _id: dataBody.select_Subscription }, { _id: 0, select_Subscription: 1, created_at: 1 }) : null;
+
+                var userInfo = await user.findOneAndUpdate(
+                    { _id: id },
+                    {
+                        $set: {
+                            select_Subscription: giveSubscription
+                        }
+                    },
+                    { new: true }
+                )
+            }
             if (userDetail) {
                 var id = userDetail._id
-                var userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
+                userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
                 if (ImageUrl) {
                     userInfo = await user.findOneAndUpdate({ _id: id },
                         {
@@ -303,9 +316,9 @@ class AuthService {
         try {
             let userDetail = await user.findOne({ _id: _id });
             if (!userDetail) {
-                return { message : "User not exists."}
+                return { message: "User not exists." }
             }
-            else{
+            else {
                 return userDetail
             }
         } catch (error) {
@@ -461,9 +474,9 @@ class AuthService {
     }
     async updateUserLanguageService(language, userId) {
         try {
-            const userExists = await user.findOne({_id:userId})
-            if(!userExists){
-                return { message : "User not exists."}
+            const userExists = await user.findOne({ _id: userId })
+            if (!userExists) {
+                return { message: "User not exists." }
             }
             const updateUserLanguage = await user.findOneAndUpdate(
                 { _id: userId },
