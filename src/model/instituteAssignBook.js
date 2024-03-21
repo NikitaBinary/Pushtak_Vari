@@ -2,11 +2,12 @@ const mongoose = require('mongoose');
 
 const instituteAssignBookSchema = new mongoose.Schema({
     instituteID: {
-        type:  mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
     },
-    BookList: {
-        type: Array
-    }
+    BookList: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book' // Assuming Book is your book model
+    }],
 
 },
     {

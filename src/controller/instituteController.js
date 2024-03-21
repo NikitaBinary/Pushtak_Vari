@@ -173,6 +173,31 @@ class authController {
             });
         }
     }
+
+    async deleteInstituteBookController(req, res) {
+        try {
+            let instituteId = req.params.id
+            let bookId = req.query.bookId
+            const response = await instituteService.deleteInstituteBookService(instituteId, bookId)
+
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "Institute assign eBook deleted!",
+                data: response
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;

@@ -120,29 +120,49 @@ class AuthService {
     async assignBooktoInstituteService(instituteId, bookId) {
         try {
             const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) });
-        
+
+            let bookList;
+
             if (!is_instituteExists) {
-                const newDoc = {
+                bookList = await bookAssign.create({
                     instituteID: instituteId,
-                    BookList: [bookId] // Initialize the array with the new bookId
-                };
-                var bookList = await bookAssign.create(newDoc);
+                    BookList: [bookId]
+                });
             } else {
                 bookList = await bookAssign.findOneAndUpdate(
                     { instituteID: new mongoose.Types.ObjectId(instituteId) },
-                    { $addToSet: { BookList: { $each: [bookId] } } }, // Add the new bookId(s) to the array if they don't already exist
+                    { $addToSet: { BookList: bookId } },
                     { new: true }
                 );
             }
-        
-            return bookList;
+            return bookList
         } catch (error) {
             console.log("error------.", error);
             throw error;
         }
-        
-        
     }
+
+    async deleteInstituteBookService(instituteId, bookId) {
+        try {
+            const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) });
+            if (!is_instituteExists) {
+                return { message: "Institute not exists." }
+            }
+            else{
+               var bookList = await bookAssign.findOneAndUpdate(
+                    { instituteID: new mongoose.Types.ObjectId(instituteId) },
+                    { $pull: { BookList: bookId } },
+                    { new: true }
+                );
+            }
+            return bookList
+
+        } catch (error) {
+            console.log("error------.", error);
+            throw error;
+        }
+    }
+
 
 }
 
