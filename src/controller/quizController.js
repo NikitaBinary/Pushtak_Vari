@@ -97,6 +97,29 @@ class authController {
         }
     }
 
+
+    async updateQuizUserCountController(req, res) {
+        try {
+            const quizId = req.params.id
+            const response = await quizService.updateQuizUserCountService(quizId)
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                });
+            }
+            return res.json({
+                status: 200,
+                message: "Update quiz user count.",
+                data: response
+            })
+        } catch (error) {
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
 }
 
 module.exports = authController

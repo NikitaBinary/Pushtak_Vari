@@ -127,6 +127,25 @@ class AuthService {
             throw error;
         }
     }
+
+    async updateQuizUserCountService(quizId) {
+        try {
+            const is_quizExists = await quiz.findOne({ _id: new mongoose.Types.ObjectId(quizId) })
+            if (!is_quizExists) {
+                return { message: "Quiz not exists." }
+            }
+            else {
+                var updateUserCount = await quiz.findOneAndUpdate(
+                    { _id: new mongoose.Types.ObjectId(quizId) },
+                    { $inc: { solveByUser: 1 } },
+                    { new: true }
+                )
+            }
+            return updateUserCount
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = AuthService

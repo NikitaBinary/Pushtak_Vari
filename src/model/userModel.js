@@ -73,6 +73,9 @@ const singupSchema = new mongoose.Schema({
     },
     ebookSubscription: {
         type: JSON,
+    },
+    language: {
+        type: String
     }
 },
     {
