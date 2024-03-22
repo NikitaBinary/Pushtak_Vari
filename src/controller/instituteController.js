@@ -198,6 +198,29 @@ class authController {
             });
         }
     }
+    async instituteBookListController(req, res) {
+        try {
+            let instituteId = req.params.id
+            const response = await instituteService.instituteBookListService(instituteId)
+
+            if (response.message) {
+                return res.status(404).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
+            return res.status(200).send({
+                status: 200,
+                message: "Get institute ebook list.",
+                data: response
+            })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = authController;
