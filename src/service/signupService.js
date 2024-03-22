@@ -24,7 +24,7 @@ class AuthService {
 
             if (userBody.userType == 'INSTITUTE_USER') {
                 const instituteID = userBody.createdBy
-                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 0, select_Subscription: 1, created_at: 1 }) : null;
+                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1 }) : null;
             }
 
             let userDetail;

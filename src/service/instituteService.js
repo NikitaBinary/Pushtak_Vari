@@ -47,7 +47,7 @@ class AuthService {
         try {
             delete dataBody.email
             if (dataBody.select_Subscription) {
-                var giveSubscription = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { _id: 0, subscriptionName: 1, duration: 1, lifeTimeAccess: 1 }) : null;
+                var giveSubscription = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { _id: 1, subscriptionName: 1, duration: 1, lifeTimeAccess: 1 }) : null;
                 dataBody.select_Subscription = giveSubscription
             }
             if (ImageUrl) {
