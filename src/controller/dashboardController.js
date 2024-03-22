@@ -14,6 +14,7 @@ class authController {
             })
 
         } catch (error) {
+            console.log("erorro---------->",error)
             return res.json({
                 status: 500,
                 message: error.message

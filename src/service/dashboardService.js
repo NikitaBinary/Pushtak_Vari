@@ -39,8 +39,14 @@ class AuthService {
                 }
             )
             const bookCount = await eBook.aggregate(aggregatePipe);
-            const [eBook_Count] = bookCount
-            const eBookCount = eBook_Count.eBookCount
+            if (bookCount.length > 0) {
+                const [eBook_Count] = bookCount
+                var eBookCount = eBook_Count.eBookCount
+            }
+            else {
+                eBookCount = 0
+            }
+
 
             const aggregationPipeline = []
 
