@@ -6,6 +6,7 @@ const user = require("../model/userModel")
 const bookAssign = require("../model/instituteAssignBook")
 const mongoose = require("mongoose")
 const subscription = require("../model/subscriptionModel")
+const ebook = require("../model/ebookModel")
 
 class AuthService {
 
@@ -169,7 +170,22 @@ class AuthService {
         }
     }
 
-
+    async instituteBookListService(instituteId) {
+        try {
+            const is_instituteExists = await bookAssign.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) });
+            if (!is_instituteExists) {
+                return { message: "Institute not exists." }
+            }
+            else {
+                const bookIds = is_instituteExists.BookList
+                const ebookList = await ebook.find({ _id: { $in: bookIds } });
+                return ebookList
+            }
+        } catch (error) {
+            console.log("error------.", error);
+            throw error;
+        }
+    }
 }
 
 module.exports = AuthService;
