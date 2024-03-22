@@ -48,9 +48,13 @@ const ebookSchema = new mongoose.Schema({
     price: {
         type: Number
     },
-    is_selected:{
-        type:Boolean,
-        default:false
+    is_selected: {
+        type: Boolean,
+        default: false
+    },
+    readingPercent: {
+        type: Number,
+        default: 0
     }
 },
     {

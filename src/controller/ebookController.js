@@ -215,6 +215,12 @@ class authController {
     async addReviewController(req, res) {
         try {
             const reviewInfo = await ebookService.addReviewService(req.body);
+            if (reviewInfo.message) {
+                return res.json({
+                    status: 404,
+                    message: reviewInfo.message
+                })
+            }
             return res.json({
                 status: 201,
                 message: "E-Book review has been added successfully!",

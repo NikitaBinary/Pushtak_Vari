@@ -199,6 +199,7 @@ class AuthService {
                 condition['bookLanguage.language'] = language;
             }
             if (typeof condition === 'object' && Object.keys(condition).length > 0 || limit) {
+                console.log("comee if objecttt")
                 newAggregatePipe.push(
                     {
                         $match: condition
@@ -222,6 +223,8 @@ class AuthService {
                 )
             }
             else {
+                console.log("comee if elseee")
+
                 newAggregatePipe.push(
                     {
                         $match: {
@@ -306,33 +309,40 @@ class AuthService {
 
     async addReviewService(reviewBody) {
         try {
-            const reviewInfo = await review.create(reviewBody);
-            const id = reviewInfo.userId
-            if (reviewInfo) {
-                const userData = await user.findOne({ _id: id })
-                const reviewInfo = await review.create(reviewBody);
-                const reviewId = reviewInfo._id
-                if (userData) {
-                    const image = userData.userImage
-                    const userName = userData.fullName
-                    const updateData = await review.updateMany(
-                        { _id: reviewId },
-                        {
-                            $set: {
-                                userImage: image,
-                                userName: userName
-                            }
-                        },
-                        {
-                            new: true
-                        }
-                    )
-                    console.log("updateData----------------->", updateData)
-
+            const userwithBookExists = await review.findOne(
+                {
+                    userId: new mongoose.Types.ObjectId(reviewBody.userId),
+                    bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
                 }
-
+            )
+            if (!userwithBookExists) {
+                var reviewInfo = await review.create(reviewBody);
+                const id = reviewInfo.userId
+                if (reviewInfo) {
+                    const userData = await user.findOne({ _id: id })
+                    const reviewId = reviewInfo._id
+                    if (userData) {
+                        const image = userData.userImage
+                        const userName = userData.fullName
+                        const updateData = await review.updateMany(
+                            { _id: reviewId },
+                            {
+                                $set: {
+                                    userImage: image,
+                                    userName: userName
+                                }
+                            },
+                            {
+                                new: true
+                            }
+                        )
+                    }
+                }
+                return reviewInfo
             }
-            return reviewInfo
+            else {
+                return { message: "This user already post review on this book." }
+            }
 
         } catch (error) {
             throw error;

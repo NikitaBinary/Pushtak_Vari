@@ -263,7 +263,8 @@ class AuthService {
             } else {
                 const user_lastUpdateBook = await purchase.findOne(
                     { userId: new mongoose.Types.ObjectId(userId), readingStatus: true }
-                )
+                ).sort({ updated_at: -1 })
+                    .limit(1);
                 if (user_lastUpdateBook.BookId) {
                     var bookId = user_lastUpdateBook.BookId
                 }
@@ -333,7 +334,6 @@ class AuthService {
                 return { message: "Book not Purchase." }
             }
             let status = Number((readPages / totalPages) * 100)
-            let percentDta = Number(status) * 10
             const readingStatusUpdate = await purchase.findOneAndUpdate(
                 {
                     userId: new mongoose.Types.ObjectId(userId),
@@ -342,12 +342,23 @@ class AuthService {
                 },
                 {
                     $set: {
-                        bookReadingStatus: percentDta,
+                        bookReadingStatus: status,
                         readingStatus: readingStatus
                     }
                 },
                 { new: true }
             )
+            if (readingStatusUpdate) {
+                await ebook.findOneAndUpdate(
+                    { _id: bookId },
+                    {
+                        $set: {
+                            readingPercent: status
+                        }
+                    },
+                    { new: true }
+                )
+            }
 
             return readingStatusUpdate
 
