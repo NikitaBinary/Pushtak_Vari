@@ -333,6 +333,7 @@ class AuthService {
                 return { message: "Book not Purchase." }
             }
             let status = Number((readPages / totalPages) * 100)
+            let percentDta = Number(status) * 10
             const readingStatusUpdate = await purchase.findOneAndUpdate(
                 {
                     userId: new mongoose.Types.ObjectId(userId),
@@ -341,7 +342,7 @@ class AuthService {
                 },
                 {
                     $set: {
-                        bookReadingStatus: status,
+                        bookReadingStatus: percentDta,
                         readingStatus: readingStatus
                     }
                 },
