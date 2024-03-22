@@ -262,7 +262,7 @@ class AuthService {
                 return { message: "User not purchase book" }
             } else {
                 const user_lastUpdateBook = await purchase.findOne(
-                    { userId: new mongoose.Types.ObjectId(userId) }
+                    { userId: new mongoose.Types.ObjectId(userId), readingStatus: true }
                 )
                 if (user_lastUpdateBook.BookId) {
                     var bookId = user_lastUpdateBook.BookId
@@ -321,7 +321,7 @@ class AuthService {
         }
     }
 
-    async updateBookStatusService(userId, bookId, totalPages, readPages) {
+    async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus) {
         try {
             const is_BookExist = await purchase.findOne(
                 {
@@ -333,6 +333,7 @@ class AuthService {
                 return { message: "Book not Purchase." }
             }
             let status = Number((readPages / totalPages) * 100)
+            let percentDta = Number(status) * 10
             const readingStatusUpdate = await purchase.findOneAndUpdate(
                 {
                     userId: new mongoose.Types.ObjectId(userId),
@@ -341,7 +342,8 @@ class AuthService {
                 },
                 {
                     $set: {
-                        bookReadingStatus: status
+                        bookReadingStatus: percentDta,
+                        readingStatus: readingStatus
                     }
                 },
                 { new: true }

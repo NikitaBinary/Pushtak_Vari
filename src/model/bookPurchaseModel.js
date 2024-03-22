@@ -25,6 +25,10 @@ const purchaseSchema = new mongoose.Schema({
     },
     bookReadingStatus: {
         type: Number
+    },
+    readingStatus:{
+        type:Boolean,
+        default:false
     }
 },
     {
