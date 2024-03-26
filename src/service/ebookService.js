@@ -209,8 +209,9 @@ class AuthService {
             }
             if (category) {
                 condition['category.categoryName'] = category;
+
             }
-            if (typeof condition === 'object' && Object.keys(condition).length > 0 || limit) {
+            if (typeof condition === 'object' && Object.keys(condition).length > 0) {
                 console.log("comee if objecttt")
                 newAggregatePipe.push(
                     {
