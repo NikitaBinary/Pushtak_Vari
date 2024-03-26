@@ -96,7 +96,7 @@ class authController {
             const totalPages = req.query.totalPages
             const readPages = req.query.readPages
             const readingStatus = req.query.readingStatus
-            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages,readingStatus)
+            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus)
 
             if (response.message) {
                 return res.status(404).send({
@@ -120,7 +120,6 @@ class authController {
     async progressbookController(req, res) {
         try {
             const userId = req.query.userId
-
             const response = await purchaseService.progressbookService(userId)
 
             if (response.message) {
