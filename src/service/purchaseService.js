@@ -98,6 +98,9 @@ class AuthService {
                         updated_at: 1,
                         bookImage: "$bookDetail.bookImage"
                     }
+                },
+                {
+                    $sort: { "updated_at": -1 }
                 }
             ]
             const purchaseBookList = await purchase.aggregate(aggregatePipe)
@@ -295,7 +298,7 @@ class AuthService {
                     },
                     {
                         $project: {
-                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
+                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, bookLanguage: 1
                         }
                     },
                     {

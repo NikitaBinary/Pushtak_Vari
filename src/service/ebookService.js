@@ -4,7 +4,8 @@ const eBook = require("../model/ebookModel")
 const category = require("../model/categoryModel")
 const language = require("../model/ebookLanguageModel")
 const review = require("../model/reviewModel");
-const user = require("../model/userModel")
+const user = require("../model/userModel");
+const instituteBook = require("../model/instituteAssignBook");
 
 
 class AuthService {
@@ -118,7 +119,15 @@ class AuthService {
     async getAppEbookListService(category, language, userId) {
         const id = new mongoose.Types.ObjectId(userId)
         const userInfo = await user.findOne({ _id: id })
+        // if (userInfo.userType == 'INSTITUTE_USER' && userInfo.createdBy != "") {
 
+        //     const instituteId = userInfo.createdBy
+        //     const instituteAssignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
+        //     if (instituteAssignBook) {
+        //         var assignBookIds = instituteAssignBook.BookList
+        //         console.log("assignBookIds---------------.", assignBookIds)
+        //     }
+        // }
 
         function calculateRatingStats(reviews) {
             if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -144,7 +153,6 @@ class AuthService {
         }
         try {
             if (category || language) {
-
                 var categoryPipe = []
                 categoryPipe.push(
                     {
@@ -156,6 +164,7 @@ class AuthService {
                     {
                         $sort: { created_at: -1 }
                     }
+
                 )
                 categoryPipe.push(
                     {
@@ -197,6 +206,9 @@ class AuthService {
             if (language) {
                 console.log('comee elseee')
                 condition['bookLanguage.language'] = language;
+            }
+            if (category) {
+                condition['category.categoryName'] = category;
             }
             if (typeof condition === 'object' && Object.keys(condition).length > 0 || limit) {
                 console.log("comee if objecttt")
