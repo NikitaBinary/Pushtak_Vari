@@ -2,11 +2,15 @@ const questionType = require("../model/questionPatternModel")
 const question = require("../model/quizQuestionModel")
 const quiz = require("../model/quizModel")
 const mongoose = require("mongoose")
+const language = require("../model/ebookLanguageModel")
 
 
 class AuthService {
     async addQuizService(quizData) {
         try {
+            const bookLanguage = await language.findById({ _id: quizData.language }, { _id: 1, language: 1 })
+            quizData.language = bookLanguage
+
             const quizInfo = await quiz.create(quizData);
 
             let questionData = [];

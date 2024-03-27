@@ -1,5 +1,6 @@
 const HttpStatus = require("http-status-codes");
 const authService = require("../service/categoryService");
+const userRoles = require("../helper/userRoles")
 const categoryService = new authService();
 class authController {
     async addCategoryController(req, res) {
@@ -7,14 +8,14 @@ class authController {
             const file = req.file
             const data = req.body
 
-            if(file){
+            if (file) {
                 const webUrl = `${req.protocol}://${req.get('host')}`;
                 var ImageUrl = `${webUrl}/uploads/${file.filename}`
             }
-            
+
             const categoryInfo = await categoryService.addCategoryService(data, ImageUrl);
-           
-            if(categoryInfo.uniqueCategory){
+
+            if (categoryInfo.uniqueCategory) {
                 return res.json({
                     status: 400,
                     message: "Category name already exists.",

@@ -10,6 +10,9 @@ const categorySchema = new mongoose.Schema({
     is_selected:{
         type:Boolean,
         default:false
+    },
+    language:{
+        type: JSON
     }
 },
     {
