@@ -4,4 +4,7 @@ const USER_ROLES = [
     'REGULAR_USER',
     'INSTITUTE'
 ];
-module.exports = { USER_ROLES };
+const CATEGORY = [
+    'Others'
+]
+module.exports = { USER_ROLES, CATEGORY };

@@ -26,9 +26,13 @@ const purchaseSchema = new mongoose.Schema({
     bookReadingStatus: {
         type: Number
     },
-    readingStatus:{
-        type:Boolean,
-        default:false
+    readingStatus: {
+        type: Boolean,
+        default: false
+    },
+    readingProgress: {
+        type: String,
+        default: "InComplete"
     }
 },
     {

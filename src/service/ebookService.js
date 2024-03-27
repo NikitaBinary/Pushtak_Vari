@@ -186,7 +186,7 @@ class AuthService {
                     const reviews = book.reviewData;
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
                     book.ratings = ratingStats;
-                    book.overallssssRating = Math.round(overallRating);
+                    book.overallRating = Math.round(overallRating);
                     book.reviewUserCount = book.reviewData.length
                     book.reviewData = reviews
                 });
@@ -279,7 +279,7 @@ class AuthService {
                 otherAggregatePipe.push(
                     {
                         $match: {
-                            'category.categoryName': "Other Book",
+                            'category.categoryName': "Others",
                             'bookLanguage.language': language,
                         }
                     },

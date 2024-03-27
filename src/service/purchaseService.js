@@ -42,6 +42,17 @@ class AuthService {
                     { new: true }
                 )
                 if (bookPurchased) {
+                    await ebook.findOneAndUpdate(
+                        { _id: new mongoose.Types.ObjectId(is_purchaseDetail.BookId) },
+                        {
+                            $inc: {
+                                userCount: 1,
+                            }
+                        },
+                        { new: true }
+                    )
+                }
+                if (bookPurchased) {
                     const bookId = bookPurchased.BookId
                     const userId = bookPurchased.userId
                     if (bookId && userId) {
@@ -100,7 +111,7 @@ class AuthService {
                     }
                 },
                 {
-                   
+
                     $sort: { "updated_at": -1 }
                 }
             ]
@@ -299,7 +310,7 @@ class AuthService {
                     },
                     {
                         $project: {
-                            _id: 1, bookName: 1, authorName: 1, price:  1, bookImage: 1, overallRating: 1, reviewData: 1, bookLanguage: 1
+                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, bookLanguage: 1
                         }
                     },
                     {

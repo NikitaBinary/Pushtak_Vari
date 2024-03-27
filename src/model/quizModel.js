@@ -15,6 +15,9 @@ const quizSchema = new mongoose.Schema({
     solveByUser: {
         type: Number,
         default: 0
+    },
+    language: {
+        type: JSON
     }
 });
 
