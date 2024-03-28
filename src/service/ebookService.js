@@ -147,6 +147,7 @@ class AuthService {
                 const instituteId = userInfo.createdBy
                 const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
                 if (!assignBook) {
+                    
                     return { message: "This institute not assign any book." }
                 }
                 booklist = assignBook.BookList
