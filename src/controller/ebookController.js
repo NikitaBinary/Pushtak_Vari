@@ -260,11 +260,16 @@ class authController {
 
     async exploreBookListController(req, res) {
         try {
-            const pageSize = Number(req.query.limit) || 10
-            const page = Number(req.query.page) || 1
-            const searchText = req.query.searchText || ""
-            const eBookList = await ebookService.exploreBookListService(pageSize, page, searchText);
 
+            const userId = req.query.userId
+            const searchText = req.query.searchText || ""
+            const eBookList = await ebookService.exploreBookListService(userId, searchText);
+            if (eBookList.message) {
+                return res.json({
+                    status: 404,
+                    message: eBookList.message
+                })
+            }
             return res.json({
                 status: 200,
                 message: "E-Book list get.",
