@@ -57,8 +57,7 @@ const ebookSchema = new mongoose.Schema({
         default: 0
     },
     userCount: {
-        type: Number,
-        default: 0
+        type: Number
     }
 },
     {

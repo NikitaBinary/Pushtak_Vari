@@ -117,43 +117,82 @@ class AuthService {
     }
 
     async getAppEbookListService(category, language, userId) {
-        const id = new mongoose.Types.ObjectId(userId)
-        const userInfo = await user.findOne({ _id: id })
-        // if (userInfo.userType == 'INSTITUTE_USER' && userInfo.createdBy != "") {
-
-        //     const instituteId = userInfo.createdBy
-        //     const instituteAssignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
-        //     if (instituteAssignBook) {
-        //         var assignBookIds = instituteAssignBook.BookList
-        //         console.log("assignBookIds---------------.", assignBookIds)
-        //     }
-        // }
-
-        function calculateRatingStats(reviews) {
-            if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
-
-            let totalRating = 0;
-            const ratingCounts = Array(5).fill(0);
-
-            reviews.forEach(review => {
-                totalRating += review.rating;
-                ratingCounts[review.rating - 1]++;
-            });
-
-            const totalReviews = reviews.length;
-            const ratingStats = ratingCounts.map((count, index) => ({
-                rating: index + 1,
-                count,
-                percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0
-            }));
-
-            const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
-
-            return { ratingStats, overallRating };
-        }
         try {
+            function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
+
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+
+                const totalReviews = reviews.length;
+                const ratingStats = ratingCounts.map((count, index) => ({
+                    rating: index + 1,
+                    count,
+                    percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0
+                }));
+
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { ratingStats, overallRating };
+            }
+            const id = new mongoose.Types.ObjectId(userId)
+            const userInfo = await user.findOne({ _id: id })
+            let booklist
+            if (userInfo.userType == "INSTITUTE_USER") {
+                const instituteId = userInfo.createdBy
+                const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
+                if (!assignBook) {
+                    return { message: "This institute not assign any book." }
+                }
+                booklist = assignBook.BookList
+            }
+            console.log("booklist--------------->", booklist)
+
+            if (category || language) {
+                const condition = {}
+                const treandingBook = []
+                if (language) {
+                    condition['bookLanguage.language'] = language;
+                }
+                if (category) {
+                    condition['category.categoryName'] = category;
+                }
+
+
+
+                if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+                    treandingBook.push(
+                        { $match: { userCount: { $exists: true } } },
+                        {
+                            $match: condition
+                        },
+                        {
+                            $sort: { userCount: -1 }
+                        },
+                        {
+                            $limit: 5
+                        }
+                    )
+                    var treandingBookList = await eBook.aggregate(treandingBook);
+                }
+
+            }
             if (category || language) {
                 var categoryPipe = []
+                if (booklist != undefined && booklist.length > 0) {
+                    categoryPipe.push(
+                        {
+                            $match: {
+                                _id: { $in: booklist }
+                            }
+                        }
+                    )
+                }
                 categoryPipe.push(
                     {
                         $match: {
@@ -194,6 +233,16 @@ class AuthService {
             const condition = {}
             const newAggregatePipe = []
 
+            if (booklist != undefined && booklist.length > 0) {
+                newAggregatePipe.push(
+                    {
+                        $match: {
+                            _id: { $in: booklist }
+                        }
+                    }
+                )
+            }
+
             if (userInfo.genre_prefernce.length > 0) {
                 var genreCategory = userInfo.genre_prefernce
                 condition['category.categoryName'] = { $in: genreCategory };
@@ -204,12 +253,10 @@ class AuthService {
             }
 
             if (language) {
-                console.log('comee elseee')
                 condition['bookLanguage.language'] = language;
             }
             if (category) {
                 condition['category.categoryName'] = category;
-
             }
             if (typeof condition === 'object' && Object.keys(condition).length > 0) {
                 console.log("comee if objecttt")
@@ -236,8 +283,15 @@ class AuthService {
                 )
             }
             else {
-                console.log("comee if elseee")
-
+                if (booklist != undefined && booklist.length > 0) {
+                    newAggregatePipe.push(
+                        {
+                            $match: {
+                                _id: { $in: booklist }
+                            }
+                        }
+                    )
+                }
                 newAggregatePipe.push(
                     {
                         $match: {
@@ -276,6 +330,15 @@ class AuthService {
 
             const otherAggregatePipe = []
             if (language) {
+                if (booklist != undefined && booklist.length > 0) {
+                    otherAggregatePipe.push(
+                        {
+                            $match: {
+                                _id: { $in: booklist }
+                            }
+                        }
+                    )
+                }
                 otherAggregatePipe.push(
                     {
                         $match: {
@@ -313,7 +376,7 @@ class AuthService {
                 book.reviewData = reviews
             });
 
-            return { categoryWiseBookList, newlyAddedBookList, otherBookList }
+            return { treandingBookList, categoryWiseBookList, newlyAddedBookList, otherBookList }
 
         } catch (error) {
             throw error;
@@ -386,7 +449,7 @@ class AuthService {
         }
     }
 
-    async exploreBookListService(pageSize, page, searchText) {
+    async exploreBookListService(userId, searchText) {
         try {
             async function calculateRatingStats(reviews) {
                 if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -403,14 +466,35 @@ class AuthService {
 
                 return { overallRating };
             }
+            if (userId) {
+                const userInfo = await user.findOne({ _id: userId })
+                var userlanguage = userInfo.language || ""
+                if (userInfo.userType == "INSTITUTE_USER") {
+                    const instituteId = userInfo.createdBy
+                    const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
+                    if (!assignBook) {
+                        return { message: "This institute not assign any book." }
+                    }
+                    var booklist = assignBook.BookList
+                }
+            }
             let eBookList
             const bookaggregate = []
-
+            if (booklist != undefined && booklist.length > 0) {
+                bookaggregate.push(
+                    {
+                        $match: {
+                            _id: { $in: booklist }
+                        }
+                    }
+                )
+            }
             if (searchText) {
                 bookaggregate.push(
                     {
                         $match: {
-                            $text: { $search: searchText }
+                            $text: { $search: searchText },
+                            'bookLanguage.language': userlanguage
                         }
                     },
                     {
@@ -419,6 +503,11 @@ class AuthService {
                 )
             }
             bookaggregate.push(
+                {
+                    $match: {
+                        'bookLanguage.language': userlanguage
+                    }
+                },
                 {
                     $lookup: {
                         from: 'review_lists',
