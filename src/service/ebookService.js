@@ -147,13 +147,12 @@ class AuthService {
                 const instituteId = userInfo.createdBy
                 const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
                 if (!assignBook) {
-                    
+
                     return { message: "This institute not assign any book." }
                 }
                 booklist = assignBook.BookList
             }
-            console.log("booklist--------------->", booklist)
-
+        
             if (category || language) {
                 const condition = {}
                 const treandingBook = []

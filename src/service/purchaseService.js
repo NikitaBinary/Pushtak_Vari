@@ -28,12 +28,19 @@ class AuthService {
             throw error
         }
     }
-    async updatePurchaseBookService(id) {
+    async updatePurchaseBookService(bookId, userId) {
         try {
-            const is_purchaseDetail = await purchase.findOne({ _id: new mongoose.Types.ObjectId(id) })
+            let bookPurchased
+            const is_purchaseDetail = await purchase.findOne({
+                BookId: new mongoose.Types.ObjectId(bookId),
+                userId: new mongoose.Types.ObjectId(userId)
+            })
             if (is_purchaseDetail) {
-                const bookPurchased = await purchase.findOneAndUpdate(
-                    { _id: new mongoose.Types.ObjectId(id) },
+                bookPurchased = await purchase.findOneAndUpdate(
+                    {
+                        BookId: new mongoose.Types.ObjectId(bookId),
+                        userId: new mongoose.Types.ObjectId(userId)
+                    },
                     {
                         $set: {
                             is_purchase: true
@@ -64,16 +71,68 @@ class AuthService {
                         )
                     }
                 }
-                return bookPurchased
+                return { bookPurchased }
             }
-            else {
-                return { message: "Purchase detail not found." }
+            if (!bookPurchased) {
+                var cartPurchaseBook = await cart.findOneAndUpdate(
+                    {
+                        BookId: new mongoose.Types.ObjectId(bookId),
+                        userId: new mongoose.Types.ObjectId(userId)
+                    },
+                    {
+                        $set: {
+                            is_purchase: true
+                        }
+                    },
+                    { new: true }
+                )
+                if (cartPurchaseBook) {
+                    await cart.findOneAndDelete(
+                        {
+                            BookId: new mongoose.Types.ObjectId(bookId),
+                            userId: new mongoose.Types.ObjectId(userId)
+                        },
+                        { new: true }
+                    )
+                }
+                return cartPurchaseBook
             }
+
         } catch (error) {
             throw error
         }
     }
 
+    async multiplePurchaseBookService(purchaseBooks, userId) {
+        try {
+            if (purchaseBooks.length > 0) {
+                const purchaseBookInfo = await cart.updateMany(
+                    {
+                        BookId: { $in: purchaseBooks },
+                        userId: new mongoose.Types.ObjectId(userId)
+                    },
+                    {
+                        $set: {
+                            is_purchase: true
+                        }
+                    },
+                    { new: true }
+                )
+                if (purchaseBookInfo) {
+                    await cart.deleteMany(
+                        {
+                            BookId: { $in: purchaseBooks },
+                            userId: new mongoose.Types.ObjectId(userId)
+                        },
+                        { new: true }
+                    )
+                }
+                return purchaseBookInfo
+            }
+        } catch (error) {
+            throw error
+        }
+    }
     async getPurchaseHistoryService(userId) {
         try {
             const id = new mongoose.Types.ObjectId(userId)
@@ -135,6 +194,8 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
+            const userLanguage = userInfo.language
+          
             const aggregatePipe = []
             aggregatePipe.push(
                 {
@@ -199,6 +260,15 @@ class AuthService {
             const bookaggregate = []
 
             if (categoryName) {
+                if (userLanguage) {
+                    bookaggregate.push(
+                        {
+                            $match: {
+                                'bookLanguage.language': userLanguage
+                            }
+                        }
+                    )
+                }
                 bookaggregate.push(
                     {
                         $match: {
