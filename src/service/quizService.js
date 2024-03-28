@@ -3,6 +3,7 @@ const question = require("../model/quizQuestionModel")
 const quiz = require("../model/quizModel")
 const mongoose = require("mongoose")
 const language = require("../model/ebookLanguageModel")
+const user = require("../model/userModel")
 
 
 class AuthService {
@@ -92,10 +93,23 @@ class AuthService {
         }
     }
 
-    async getAppQuizListService() {
+    async getAppQuizListService(userId) {
         try {
-
+            if (userId) {
+                const userInfo = await user.findOne({ _id: userId })
+                if (!userInfo) {
+                    return { message: "User not exists" }
+                }
+                else {
+                    var userLanguage = userInfo.language
+                }
+            }
             const questionAggregate = [
+                {
+                    $match: {
+                        "language.language": userLanguage
+                    }
+                },
                 {
                     $lookup: {
                         from: 'quiz_questions',
