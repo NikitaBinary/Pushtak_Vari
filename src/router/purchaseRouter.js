@@ -6,7 +6,9 @@ const purchaseController = new authController();
 
 
 Router.post("/app/addToPurchaseBook", superAdminAuth, purchaseController.addToPurchaseBookController);
-Router.put("/app/updatePurchaseBook/:id", superAdminAuth, purchaseController.updatePurchaseBookController);
+Router.put("/app/updatePurchaseBook", superAdminAuth, purchaseController.updatePurchaseBookController);
+Router.put("/app/multiplePurchaseBook/:id", superAdminAuth, purchaseController.multiplePurchaseBookController);
+
 Router.get("/app/getPurchaseHistory", superAdminAuth, purchaseController.getPurchaseHistoryController);
 Router.get("/app/getMoreItem/:id", superAdminAuth, purchaseController.getMoreItemController);
 Router.put("/app/updateBookStatus/:id", superAdminAuth, purchaseController.updateBookStatusController);

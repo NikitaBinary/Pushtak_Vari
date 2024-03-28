@@ -147,12 +147,12 @@ class AuthService {
                 const instituteId = userInfo.createdBy
                 const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
                 if (!assignBook) {
+
                     return { message: "This institute not assign any book." }
                 }
                 booklist = assignBook.BookList
             }
-            console.log("booklist--------------->", booklist)
-
+        
             if (category || language) {
                 const condition = {}
                 const treandingBook = []
@@ -175,10 +175,30 @@ class AuthService {
                             $sort: { userCount: -1 }
                         },
                         {
+                            $lookup: {
+                                from: 'review_lists',
+                                localField: '_id',
+                                foreignField: 'bookId',
+                                as: "reviewData"
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        },
+                        {
                             $limit: 5
-                        }
+                        },
                     )
                     var treandingBookList = await eBook.aggregate(treandingBook);
+
+                    treandingBookList.forEach(book => {
+                        const reviews = book.reviewData;
+                        const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                        book.ratings = ratingStats;
+                        book.overallRating = Math.round(overallRating);
+                        book.reviewUserCount = book.reviewData.length
+                        book.reviewData = reviews
+                    });
                 }
 
             }

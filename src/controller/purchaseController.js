@@ -25,14 +25,34 @@ class authController {
     }
     async updatePurchaseBookController(req, res) {
         try {
-            const purchaseId = req.params.id
-            const purchaseDetail = await purchaseService.updatePurchaseBookService(purchaseId)
-            if (purchaseDetail.message) {
-                return res.status(404).send({
-                    status: 404,
-                    message: purchaseDetail.message
-                });
-            }
+            // const purchaseId = req.params.id
+            const bookId = req.query.bookId
+            const userId = req.query.userId
+            const purchaseDetail = await purchaseService.updatePurchaseBookService(bookId, userId)
+            console.log("purchaseDetail--------------->",purchaseDetail)
+            return res.status(200).send({
+                status: 200,
+                message: "Purchase book detail.",
+                data: purchaseDetail
+            })
+
+
+        } catch (error) {
+            console.log("error---------->",error.message)
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+
+    }
+
+    async multiplePurchaseBookController(req, res) {
+        try {
+            const purchaseBooks = req.body.purchaseBookIDs
+            const userId = req.params.id
+            const purchaseDetail = await purchaseService.multiplePurchaseBookService(purchaseBooks, userId)
+
             return res.status(200).send({
                 status: 200,
                 message: "Purchase book detail.",
@@ -48,7 +68,6 @@ class authController {
         }
 
     }
-
     async getPurchaseHistoryController(req, res) {
         try {
             const id = req.query.userId
