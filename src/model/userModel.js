@@ -76,6 +76,13 @@ const singupSchema = new mongoose.Schema({
     },
     language: {
         type: String
+    },
+    subscriptionExpire: {
+        type: Date
+    },
+    is_subscribed: {
+        type: Boolean,
+        default: false
     }
 },
     {

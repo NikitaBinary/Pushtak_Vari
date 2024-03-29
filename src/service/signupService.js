@@ -18,13 +18,19 @@ class AuthService {
             let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
 
             if (userBody.userType == 'INSTITUTE') {
-                var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1 }) : null;
+                var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
+                if (subscriptionInfo) {
+                    const subscriptDate = new Date(subscriptionInfo.created_at)
+                    const subscriptTime = Number(subscriptionInfo.duration)
 
+                    var expiryDate = new Date(subscriptDate);
+                    expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
+                }
             }
 
             if (userBody.userType == 'INSTITUTE_USER') {
                 const instituteID = userBody.createdBy
-                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1 }) : null;
+                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
             }
 
             let userDetail;
@@ -56,7 +62,10 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
-                            ebookSubscription: giveSubscription
+                            ebookSubscription: giveSubscription.select_Subscription,
+                            subscriptionExpire: giveSubscription.subscriptionExpire,
+                            is_subscribed: true
+
                         };
                         break;
                     case 'REGULAR_USER':
@@ -83,7 +92,9 @@ class AuthService {
                             studentList: [],
                             instituteImage: institute_Image || "",
                             studentCount: 0,
-                            select_Subscription: subscriptionInfo
+                            select_Subscription: subscriptionInfo,
+                            subscriptionExpire: expiryDate,
+                            is_subscribed: true
                         };
                         break;
                     default:
@@ -259,7 +270,10 @@ class AuthService {
                 userImage: 1,
                 is_active: 1,
                 created_at: 1,
-                lastLoginDate: 1
+                lastLoginDate: 1,
+                ebookSubscription: 1,
+                subscriptionExpire: 1,
+                is_subscribed: 1
             };
 
             if (instituteId) {
@@ -269,7 +283,6 @@ class AuthService {
             }
             let sortOptions = { created_at: -1 };
             userList = await user.find(query, projection).sort(sortOptions);
-
             return userList;
         } catch (error) {
             throw error;
