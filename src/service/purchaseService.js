@@ -343,7 +343,7 @@ class AuthService {
                 {
                     userId: new mongoose.Types.ObjectId(userId)
                 })
-            if (!is_BookExists) {
+            if (!is_BookExists && is_UserExist.userType != "INSTITUTE_USER" ) {
                 return { message: "User not purchase book" }
             } else {
                 const user_lastUpdateBook = await purchase.findOne(

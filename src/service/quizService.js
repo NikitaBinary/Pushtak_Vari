@@ -95,21 +95,22 @@ class AuthService {
 
     async getAppQuizListService(userId) {
         try {
-            if (userId) {
-                const userInfo = await user.findOne({ _id: userId })
-                if (!userInfo) {
-                    return { message: "User not exists" }
-                }
-                else {
-                    var userLanguage = userInfo.language
-                }
-            }
+            // if (userId) {
+            //     const userInfo = await user.findOne({ _id: userId })
+            //     if (!userInfo) {
+            //         return { message: "User not exists" }
+            //     }
+            //     else {
+            //         var userLanguage = userInfo.language
+            //         console.log("userLanguage------------------>",userLanguage)
+            //     }
+            // }
             const questionAggregate = [
-                {
-                    $match: {
-                        "language.language": userLanguage
-                    }
-                },
+                // {
+                //     $match: {
+                //         "language.language": userLanguage
+                //     }
+                // },
                 {
                     $lookup: {
                         from: 'quiz_questions',
@@ -135,12 +136,6 @@ class AuthService {
             const quizDetail = await quiz.aggregate(questionAggregate)
 
             return quizDetail
-
-            // const quizList = await quiz.find(
-            //     {},
-            //     { _id: 1, quizName: 1, description: 1, questionCount: 1, solveByUser: 1 }
-            // )
-            // return quizList
         } catch (error) {
             throw error;
         }

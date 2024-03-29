@@ -116,7 +116,7 @@ class AuthService {
         }
     }
 
-    async getAppEbookListService(category, language, userId) {
+    async getAppEbookListService(category, userId) {
         try {
             function calculateRatingStats(reviews) {
                 if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -152,13 +152,13 @@ class AuthService {
                 }
                 booklist = assignBook.BookList
             }
-        
+
             if (category || language) {
                 const condition = {}
                 const treandingBook = []
-                if (language) {
-                    condition['bookLanguage.language'] = language;
-                }
+                // if (language) {
+                //     condition['bookLanguage.language'] = language;
+                // }
                 if (category) {
                     condition['category.categoryName'] = category;
                 }
@@ -217,7 +217,7 @@ class AuthService {
                     {
                         $match: {
                             'category.categoryName': category,
-                            'bookLanguage.language': language,
+                            // 'bookLanguage.language': language,
                         }
                     },
                     {
@@ -272,9 +272,9 @@ class AuthService {
                 condition.authorName = { $in: authorCategory };
             }
 
-            if (language) {
-                condition['bookLanguage.language'] = language;
-            }
+            // if (language) {
+            //     condition['bookLanguage.language'] = language;
+            // }
             if (category) {
                 condition['category.categoryName'] = category;
             }
@@ -315,7 +315,7 @@ class AuthService {
                 newAggregatePipe.push(
                     {
                         $match: {
-                            'bookLanguage.language': language
+                            // 'bookLanguage.language': language
                         }
                     },
                     {
@@ -363,7 +363,7 @@ class AuthService {
                     {
                         $match: {
                             'category.categoryName': "Others",
-                            'bookLanguage.language': language,
+                            // 'bookLanguage.language': language,
                         }
                     },
                     {
@@ -488,7 +488,7 @@ class AuthService {
             }
             if (userId) {
                 const userInfo = await user.findOne({ _id: userId })
-                var userlanguage = userInfo.language || ""
+                // var userlanguage = userInfo.language || ""
                 if (userInfo.userType == "INSTITUTE_USER") {
                     const instituteId = userInfo.createdBy
                     const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
@@ -514,7 +514,7 @@ class AuthService {
                     {
                         $match: {
                             $text: { $search: searchText },
-                            'bookLanguage.language': userlanguage
+                            // 'bookLanguage.language': userlanguage
                         }
                     },
                     {
@@ -523,11 +523,11 @@ class AuthService {
                 )
             }
             bookaggregate.push(
-                {
-                    $match: {
-                        'bookLanguage.language': userlanguage
-                    }
-                },
+                // {
+                //     $match: {
+                //         'bookLanguage.language': userlanguage
+                //     }
+                // },
                 {
                     $lookup: {
                         from: 'review_lists',

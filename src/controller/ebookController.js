@@ -192,10 +192,10 @@ class authController {
     async getAppEbookListController(req, res) {
         try {
             const category = req.query.type
-            const language = req.query.language
+            // const language = req.query.language
             const userId = req.query.userId
 
-            const eBookList = await ebookService.getAppEbookListService(category, language, userId);
+            const eBookList = await ebookService.getAppEbookListService(category, userId);
 
             return res.json({
                 status: 200,
