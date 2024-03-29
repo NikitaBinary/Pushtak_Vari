@@ -68,7 +68,8 @@ class AuthService {
             const instituteList = await user.find({ userType: "INSTITUTE" },
                 {
                     _id: 1, emailId: 1, mobileNo: 1, userType: 1, studentCount: 1, is_active: 1,
-                    instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1, select_Subscription: 1
+                    instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1, select_Subscription: 1,
+                    subscriptionExpire: 1, is_subscribed: 1
                 }).sort({ created_at: -1 })
             return instituteList
         } catch (error) {
@@ -82,7 +83,12 @@ class AuthService {
                 let id = instituteDetail._id
                 var instituteInfo = await user.findOne(
                     { _id: id, userType: "INSTITUTE" },
-                    { _id: 1, emailId: 1, mobileNo: 1, userType: 1, is_active: 1, instituteName: 1, studentList: 1, instituteImage: 1, created_at: 1 }
+                    {
+                        _id: 1, emailId: 1, mobileNo: 1, userType: 1, is_active: 1,
+                        instituteName: 1, studentList: 1, instituteImage: 1,
+                        created_at: 1, select_Subscription: 1,
+                        subscriptionExpire: 1, is_subscribed: 1
+                    }
                 );
             }
             return { instituteDetail, instituteInfo }

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 const cart = require("../model/cartModel");
 const ebook = require("../model/ebookModel")
+const purchase = require("../model/bookPurchaseModel")
 
 class AuthService {
     async addBookToCartService(cartBody) {
@@ -16,6 +17,9 @@ class AuthService {
             )
             if (!cartDetail) {
                 cartDetail = await cart.create(cartBody)
+                if (cartDetail) {
+                    await purchase.create(cartDetail)
+                }
             }
             return cartDetail
 
