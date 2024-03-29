@@ -163,43 +163,45 @@ class AuthService {
                     condition['category.categoryName'] = category;
                 }
 
-
-
                 if (typeof condition === 'object' && Object.keys(condition).length > 0) {
                     treandingBook.push(
-                        { $match: { userCount: { $exists: true } } },
                         {
                             $match: condition
-                        },
-                        {
-                            $sort: { userCount: -1 }
-                        },
-                        {
-                            $lookup: {
-                                from: 'review_lists',
-                                localField: '_id',
-                                foreignField: 'bookId',
-                                as: "reviewData"
-                            }
-                        },
-                        {
-                            $sort: { created_at: -1 }
-                        },
-                        {
-                            $limit: 5
-                        },
+                        }
                     )
-                    var treandingBookList = await eBook.aggregate(treandingBook);
-
-                    treandingBookList.forEach(book => {
-                        const reviews = book.reviewData;
-                        const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                        book.ratings = ratingStats;
-                        book.overallRating = Math.round(overallRating);
-                        book.reviewUserCount = book.reviewData.length
-                        book.reviewData = reviews
-                    });
                 }
+                treandingBook.push(
+                    { $match: { userCount: { $exists: true } } },
+
+                    {
+                        $sort: { userCount: -1 }
+                    },
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    },
+                    {
+                        $limit: 5
+                    },
+                )
+                var treandingBookList = await eBook.aggregate(treandingBook);
+
+                treandingBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+
 
             }
             if (category || language) {
@@ -395,7 +397,6 @@ class AuthService {
                 book.reviewUserCount = book.reviewData.length
                 book.reviewData = reviews
             });
-
             return { treandingBookList, categoryWiseBookList, newlyAddedBookList, otherBookList }
 
         } catch (error) {
