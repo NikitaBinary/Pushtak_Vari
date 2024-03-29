@@ -283,16 +283,6 @@ class AuthService {
             }
             let sortOptions = { created_at: -1 };
             userList = await user.find(query, projection).sort(sortOptions);
-
-            await user.updateMany({ userType: 'INSTITUTE_USER' },
-                {
-                    $set: {
-                        is_subscribed: true
-                    }
-                },
-                { new: true }
-            )
-
             return userList;
         } catch (error) {
             throw error;
