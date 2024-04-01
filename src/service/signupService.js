@@ -62,7 +62,7 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
-                            ebookSubscription: giveSubscription.select_Subscription,
+                            select_Subscription: giveSubscription.select_Subscription,
                             subscriptionExpire: giveSubscription.subscriptionExpire,
                             is_subscribed: true
 
@@ -294,22 +294,50 @@ class AuthService {
         try {
             delete dataBody.email
             let userDetail = await user.findOne({ _id: _id });
-            if (userDetail.userType == 'INSTITUTE' && dataBody.select_Subscription) {
-                var giveSubscription = instituteID ? await user.findOne({ _id: dataBody.select_Subscription }, { _id: 0, select_Subscription: 1, created_at: 1 }) : null;
+            if (!userDetail) {
+                return { message: "User not found" }
+            }
 
+            if (userDetail.userType == 'INSTITUTE' && dataBody.select_Subscription) {
+                var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
+                if (subscriptionInfo) {
+                    const subscriptDate = new Date(subscriptionInfo.created_at)
+                    const subscriptTime = Number(subscriptionInfo.duration)
+
+                    var expiryDate = new Date(subscriptDate);
+                    expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
+                }
+                dataBody.select_Subscription = subscriptionInfo
+                dataBody.subscriptionExpire = expiryDate,
+                    dataBody.is_subscribed = true
                 var userInfo = await user.findOneAndUpdate(
-                    { _id: id },
-                    {
-                        $set: {
-                            select_Subscription: giveSubscription
-                        }
-                    },
+                    { _id: _id },
+                    dataBody,
                     { new: true }
                 )
+
+
+                if (userInfo) {
+                    const instituteID = _id
+                    var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
+                    if (giveSubscription) {
+                     await user.updateMany(
+                            { createdBy: instituteID },
+                            {
+                                $set: {
+                                    select_Subscription: giveSubscription.select_Subscription,
+                                    subscriptionExpire: expiryDate,
+                                    is_subscribed: true
+                                }
+                            },
+                            { new: true }
+                        )
+                    }
+
+                }
             }
             if (userDetail) {
                 var id = userDetail._id
-                userInfo = await user.findOneAndUpdate({ _id: id }, dataBody, { new: true });
                 if (ImageUrl) {
                     userInfo = await user.findOneAndUpdate({ _id: id },
                         {
@@ -322,6 +350,7 @@ class AuthService {
             }
             return { userDetail, userInfo }
         } catch (error) {
+            console.log("error--------->", error)
             throw error;
         }
     }

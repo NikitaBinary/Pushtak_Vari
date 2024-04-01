@@ -71,9 +71,9 @@ const singupSchema = new mongoose.Schema({
     select_Subscription: {
         type: JSON,
     },
-    ebookSubscription: {
-        type: JSON,
-    },
+    // ebookSubscription: {
+    //     type: JSON,
+    // },
     language: {
         type: String
     },
