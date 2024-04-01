@@ -199,13 +199,12 @@ class authController {
             }
 
             const userInfo = await userService.updateUserService(id, dataBody, ImageUrl);
-            if (!userInfo.userDetail) {
+            if (userInfo.message) {
                 return res.status(404).send({
                     status: 404,
-                    message: "UserId not exists.",
+                    message: userInfo.message,
                 });
             }
-            delete userInfo.userDetail
             return res.status(200).send({
                 status: 200,
                 message: "User information has been updated successfully!",
