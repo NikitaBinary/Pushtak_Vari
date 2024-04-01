@@ -302,7 +302,9 @@ class AuthService {
                 return { message: "User not found" }
             }
 
-            if (userDetail.userType == 'INSTITUTE' && dataBody.select_Subscription) {
+            if (userDetail.userType == 'INSTITUTE') {
+                console.log("wjfwjfw----------->", dataBody)
+
                 var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
                 let expiryDate
                 if (subscriptionInfo.duration == 0) {
@@ -325,8 +327,6 @@ class AuthService {
                     dataBody,
                     { new: true }
                 )
-
-
                 if (userInfo) {
                     const instituteID = _id
                     var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
@@ -346,8 +346,12 @@ class AuthService {
 
                 }
             }
-            if (userDetail) {
+
+            else if (userDetail) {
                 var id = userDetail._id
+                userInfo = await user.findOneAndUpdate({ _id: id },
+                    dataBody,
+                    { new: true });
                 if (ImageUrl) {
                     userInfo = await user.findOneAndUpdate({ _id: id },
                         {
@@ -358,7 +362,8 @@ class AuthService {
                         { new: true });
                 }
             }
-            return { userDetail, userInfo }
+
+            return { userInfo }
         } catch (error) {
             console.log("error--------->", error)
             throw error;
