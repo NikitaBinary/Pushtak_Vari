@@ -19,11 +19,15 @@ class AuthService {
 
             if (userBody.userType == 'INSTITUTE') {
                 var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
-                if (subscriptionInfo) {
+                let expiryDate
+                if (subscriptionInfo.duration == 0) {
+                    expiryDate = null
+                }
+                else {
                     const subscriptDate = new Date(subscriptionInfo.created_at)
                     const subscriptTime = Number(subscriptionInfo.duration)
 
-                    var expiryDate = new Date(subscriptDate);
+                    expiryDate = new Date(subscriptDate);
                     expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
                 }
             }
@@ -271,7 +275,7 @@ class AuthService {
                 is_active: 1,
                 created_at: 1,
                 lastLoginDate: 1,
-                ebookSubscription: 1,
+                select_Subscription: 1,
                 subscriptionExpire: 1,
                 is_subscribed: 1
             };
@@ -300,13 +304,19 @@ class AuthService {
 
             if (userDetail.userType == 'INSTITUTE' && dataBody.select_Subscription) {
                 var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
-                if (subscriptionInfo) {
+                let expiryDate
+                if (subscriptionInfo.duration == 0) {
+                    expiryDate = null
+                }
+                else {
+                    console.log("comeeee")
                     const subscriptDate = new Date(subscriptionInfo.created_at)
                     const subscriptTime = Number(subscriptionInfo.duration)
 
-                    var expiryDate = new Date(subscriptDate);
+                    expiryDate = new Date(subscriptDate);
                     expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
                 }
+
                 dataBody.select_Subscription = subscriptionInfo
                 dataBody.subscriptionExpire = expiryDate,
                     dataBody.is_subscribed = true
@@ -321,7 +331,7 @@ class AuthService {
                     const instituteID = _id
                     var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
                     if (giveSubscription) {
-                     await user.updateMany(
+                        await user.updateMany(
                             { createdBy: instituteID },
                             {
                                 $set: {
