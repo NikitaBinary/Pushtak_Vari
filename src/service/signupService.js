@@ -39,6 +39,7 @@ class AuthService {
 
             let userDetail;
 
+            
             if (!uniqueEmail && !uniqueMobileNo) {
                 let newUser;
 
