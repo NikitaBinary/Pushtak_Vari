@@ -27,7 +27,8 @@ Router.put("/resetPassword", signUPController.resetPassword);
 // user apis -by SuperAdmin------------------------------
 
 Router.get("/userList", superAdminAuth, signUPController.userListController)
-Router.put("/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"), signUPController.updateUserController)
+Router.put("/updateUser/:id", superAdminAuth,  uploadStorage.fields
+([{ name: 'userImage', maxCount: 1 }, { name: 'instituteImage', maxCount: 1 }]), signUPController.updateUserController)
 Router.get("/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)
 Router.delete("/deleteUserInfo/:id", superAdminAuth, signUPController.deleteUserInfoController)
 Router.put("/userStatus/:id", superAdminAuth, signUPController.userStatusController)
@@ -43,7 +44,8 @@ Router.put("/app/verifyOTP", signUPController.verifyOTP);
 Router.put("/app/resetPassword", signUPController.resetPassword);
 
 Router.put("/app/userStatus/:id", superAdminAuth, signUPController.userStatusController)
-Router.put("/app/updateUser/:id", superAdminAuth, uploadStorage.single("userImage"), signUPController.updateUserController)
+Router.put("/app/updateUser/:id", superAdminAuth, uploadStorage.fields
+([{ name: 'userImage', maxCount: 1 }, { name: 'instituteImage', maxCount: 1 }]), signUPController.updateUserController)
 Router.put("/app/logout/:id", superAdminAuth, signUPController.logoutController)
 Router.get("/app/userList", superAdminAuth, signUPController.userListController)
 Router.get("/app/getUserInfo/:id", superAdminAuth, signUPController.getUserInfoController)

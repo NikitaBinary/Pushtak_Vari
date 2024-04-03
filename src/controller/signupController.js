@@ -191,14 +191,23 @@ class authController {
         try {
             let dataBody = req.body
             const id = req.params.id
-            const file = req.file
+            
+            const userImage = req.files.userImage
+            const instituteImage = req.files.instituteImage
+           
 
-            if (file) {
-                const webUrl = `${req.protocol}://${req.get('host')}`;
-                var ImageUrl = `${webUrl}/uploads/${file.filename}`
+            const webUrl = `${req.protocol}://${req.get('host')}`;
+
+            if (userImage) {
+                const [user_Image] = userImage
+                var imageUrl = `${webUrl}/uploads/${user_Image.filename}`
+            }
+            if (instituteImage) {
+                const [institute_Image] = instituteImage
+                var instituteUrl = `${webUrl}/uploads/${institute_Image.filename}`
             }
 
-            const userInfo = await userService.updateUserService(id, dataBody, ImageUrl);
+            const userInfo = await userService.updateUserService(id, dataBody, imageUrl ,instituteUrl);
             if (userInfo.message) {
                 return res.status(404).send({
                     status: 404,
