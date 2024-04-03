@@ -6,6 +6,7 @@ async function getPasswordHash(password, length) {
 }
 
 async function verifyPassword(password, hash) {
+    console.log("password----------->",password)
     const valid = await bcrypt.compare(password, hash);
     console.log("vaid--------->",valid)
     if (!valid) {

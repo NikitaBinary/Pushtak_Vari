@@ -39,7 +39,7 @@ class AuthService {
 
             let userDetail;
 
-            
+
             if (!uniqueEmail && !uniqueMobileNo) {
                 let newUser;
 
@@ -295,7 +295,7 @@ class AuthService {
 
     }
 
-    async updateUserService(_id, dataBody, ImageUrl) {
+    async updateUserService(_id, dataBody, imageUrl, instituteUrl) {
         try {
             delete dataBody.email
             let userDetail = await user.findOne({ _id: _id });
@@ -304,7 +304,6 @@ class AuthService {
             }
 
             if (userDetail.userType == 'INSTITUTE') {
-                console.log("wjfwjfw----------->", dataBody)
                 if (dataBody.select_Subscription) {
                     var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
                     let expiryDate
@@ -323,11 +322,29 @@ class AuthService {
                     dataBody.select_Subscription = subscriptionInfo
                     dataBody.subscriptionExpire = expiryDate,
                         dataBody.is_subscribed = true
+                    if (instituteUrl) {
+                        dataBody.instituteImage = instituteUrl
+                    }
                     var userInfo = await user.findOneAndUpdate(
                         { _id: _id },
                         dataBody,
                         { new: true }
                     )
+                    if (userInfo) {
+                        const instituteID = _id
+                        // var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1, expiryDate: 1 }) : null;
+                        await user.updateMany(
+                            { createdBy: instituteID },
+                            {
+                                $set: {
+                                    select_Subscription: userInfo.select_Subscription,
+                                    subscriptionExpire: userInfo.subscriptionExpire,
+                                    is_subscribed: true
+                                }
+                            },
+                            { new: true }
+                        )
+                    }
                 }
                 else {
                     var userInfo = await user.findOneAndUpdate(
@@ -336,41 +353,18 @@ class AuthService {
                         { new: true }
                     )
                 }
-
-                if (userInfo) {
-                    const instituteID = _id
-                    var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1, expiryDate: 1 }) : null;
-                    if (giveSubscription) {
-                        await user.updateMany(
-                            { createdBy: instituteID },
-                            {
-                                $set: {
-                                    select_Subscription: giveSubscription.select_Subscription,
-                                    subscriptionExpire: giveSubscription.expiryDate,
-                                    is_subscribed: true
-                                }
-                            },
-                            { new: true }
-                        )
-                    }
-
-                }
             }
 
-            else if (userDetail) {
+            else {
                 var id = userDetail._id
-                userInfo = await user.findOneAndUpdate({ _id: id },
-                    dataBody,
-                    { new: true });
-                if (ImageUrl) {
-                    userInfo = await user.findOneAndUpdate({ _id: id },
-                        {
-                            $set: {
-                                userImage: ImageUrl
-                            }
-                        },
-                        { new: true });
+                if (imageUrl) {
+                    dataBody.userImage = imageUrl
                 }
+                userInfo = await user.findOneAndUpdate(
+                    { _id: id },
+                    dataBody,
+                    { new: true }
+                );
             }
 
             return { userInfo }
