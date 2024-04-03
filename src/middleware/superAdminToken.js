@@ -24,7 +24,7 @@ async function superAdminAuth(req, res, next) {
                     user = await InsiService.verifyUser({ emailId: payload.email });
                 }
                 req.email = user.emailId;
-                // req.userId = user._id;
+                 req.userId = user._id;
                 
             }
             next();

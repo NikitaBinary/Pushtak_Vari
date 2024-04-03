@@ -195,7 +195,7 @@ class AuthService {
                 return { message: "User not found." }
             }
             const userLanguage = userInfo.language
-          
+
             const aggregatePipe = []
             aggregatePipe.push(
                 {
@@ -343,7 +343,7 @@ class AuthService {
                 {
                     userId: new mongoose.Types.ObjectId(userId)
                 })
-            if (!is_BookExists && is_UserExist.userType != "INSTITUTE_USER" ) {
+            if (!is_BookExists && is_UserExist.userType != "INSTITUTE_USER") {
                 return { message: "User not purchase book" }
             } else {
                 const user_lastUpdateBook = await purchase.findOne(
@@ -409,41 +409,43 @@ class AuthService {
 
     async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus) {
         try {
+            let status = Number((readPages / totalPages) * 100)
             const is_BookExist = await purchase.findOne(
                 {
                     userId: new mongoose.Types.ObjectId(userId),
                     BookId: bookId,
                     is_purchase: true
                 })
-            if (!is_BookExist) {
-                return { message: "Book not Purchase." }
-            }
-            let status = Number((readPages / totalPages) * 100)
-            const readingStatusUpdate = await purchase.findOneAndUpdate(
-                {
-                    userId: new mongoose.Types.ObjectId(userId),
-                    BookId: bookId,
-                    is_purchase: true
-                },
-                {
-                    $set: {
-                        bookReadingStatus: status,
-                        readingStatus: readingStatus
-                    }
-                },
-                { new: true }
-            )
-            if (readingStatusUpdate) {
-                await ebook.findOneAndUpdate(
-                    { _id: bookId },
+            if (is_BookExist) {
+                var readingStatusUpdate = await purchase.findOneAndUpdate(
+                    {
+                        userId: new mongoose.Types.ObjectId(userId),
+                        BookId: bookId,
+                        is_purchase: true
+                    },
                     {
                         $set: {
-                            readingPercent: status
+                            bookReadingStatus: status,
+                            readingStatus: readingStatus
                         }
                     },
                     { new: true }
                 )
+                if (readingStatusUpdate) {
+                    await ebook.findOneAndUpdate(
+                        { _id: bookId },
+                        {
+                            $set: {
+                                readingPercent: status
+                            }
+                        },
+                        { new: true }
+                    )
+                }
             }
+            
+            
+           
 
             return readingStatusUpdate
 
