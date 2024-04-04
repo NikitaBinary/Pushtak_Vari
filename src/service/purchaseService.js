@@ -415,7 +415,10 @@ class AuthService {
     async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress) {
         try {
             let status = Number((readPages / totalPages) * 100)
-
+            const bookInfo = await ebook.findOne({ _id: bookId })
+            if (!bookInfo) {
+                return { message: "This book not available" }
+            }
             const userInfo = await user.findOne({ _id: userId }, { userType: 1 })
             if (!userInfo) {
                 return { message: "User not found." }
@@ -442,7 +445,7 @@ class AuthService {
                         books:
                         {
                             bookId: bookId,
-                            bookName: "bookName",
+                            bookName: bookInfo.bookName,
                             readingPercent: status,
                             bookProgress: 'Incomplete'
                         },
@@ -502,7 +505,7 @@ class AuthService {
                         books:
                         {
                             bookId: bookId,
-                            bookName: "bookName",
+                            bookName: bookInfo.bookName,
                             readingPercent: status,
                             bookProgress: 'Incomplete'
                         },
