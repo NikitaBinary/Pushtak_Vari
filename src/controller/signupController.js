@@ -19,7 +19,7 @@ class authController {
             }
 
             req.body.password = await getPasswordHash(data.password, 12);
-
+            
             if (req.body.userType) {
                 if (!userRoles.USER_ROLES.includes(data.userType)) {
                     return res.json({
