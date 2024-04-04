@@ -106,8 +106,9 @@ class AuthService {
 
     async multiplePurchaseBookService(purchaseBooks, userId) {
         try {
+            let bookPurchased
             if (purchaseBooks.length > 0) {
-                const purchaseBookInfo = await cart.updateMany(
+                bookPurchased = await purchase.updateMany(
                     {
                         BookId: { $in: purchaseBooks },
                         userId: new mongoose.Types.ObjectId(userId)
@@ -119,7 +120,19 @@ class AuthService {
                     },
                     { new: true }
                 )
-                if (purchaseBookInfo) {
+                if (bookPurchased) {
+                    await ebook.updateMany(
+                        { _id: { $in: purchaseBooks } },
+                        {
+                            $inc: {
+                                userCount: 1,
+                            }
+                        },
+                        { new: true }
+                    )
+                }
+
+                if (bookPurchased) {
                     await cart.deleteMany(
                         {
                             BookId: { $in: purchaseBooks },
@@ -128,7 +141,7 @@ class AuthService {
                         { new: true }
                     )
                 }
-                return purchaseBookInfo
+                return bookPurchased
             }
         } catch (error) {
             throw error
@@ -585,46 +598,46 @@ class AuthService {
                 return { message: "User not found." }
             }
             let myBookList
-                const bookAggregate = []
-                bookAggregate.push(
-                    {
-                        $match: {
-                            userId: new mongoose.Types.ObjectId(userId),
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: 'ebookdetails',
-                            localField: 'books.bookId',
-                            foreignField: '_id',
-                            as: "eBookData"
-                        }
-                    },
-                    {
-                        $unwind: "$eBookData"
-                    },
-                    {
-                        $lookup: {
-                            from: 'review_lists',
-                            localField: 'eBookData._id',
-                            foreignField: 'bookId',
-                            as: "reviewData"
-                        }
-                    },
-                    {
-                        $sort: { created_at: -1 }
+            const bookAggregate = []
+            bookAggregate.push(
+                {
+                    $match: {
+                        userId: new mongoose.Types.ObjectId(userId),
                     }
-                )
-                 myBookList = await bookStatus.aggregate(bookAggregate)
+                },
+                {
+                    $lookup: {
+                        from: 'ebookdetails',
+                        localField: 'books.bookId',
+                        foreignField: '_id',
+                        as: "eBookData"
+                    }
+                },
+                {
+                    $unwind: "$eBookData"
+                },
+                {
+                    $lookup: {
+                        from: 'review_lists',
+                        localField: 'eBookData._id',
+                        foreignField: 'bookId',
+                        as: "reviewData"
+                    }
+                },
+                {
+                    $sort: { created_at: -1 }
+                }
+            )
+            myBookList = await bookStatus.aggregate(bookAggregate)
 
-                myBookList.forEach(async (book) => {
-                    const reviews = book.reviewData;
-                    const { overallRating } = await calculateRatingStats(reviews);
-                    book.overallRating = Math.round(overallRating);
-                    book.bookReadingStatus = book.bookReadingStatus
-                    book.reviewData = ''
-                });
-             
+            myBookList.forEach(async (book) => {
+                const reviews = book.reviewData;
+                const { overallRating } = await calculateRatingStats(reviews);
+                book.overallRating = Math.round(overallRating);
+                book.bookReadingStatus = book.bookReadingStatus
+                book.reviewData = ''
+            });
+
             return myBookList
 
         } catch (error) {
