@@ -63,8 +63,8 @@ class AuthService {
 
     async getNotificationListService() {
         try {
-            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' } }).sort({ created_at: -1 });
-            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' } }).sort({ created_at: -1 });
+            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' } }).sort({ created_at: -1 });
+            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' } }).sort({ created_at: -1 });
             const notificationList = await notification.find().sort({ created_at: -1 });
 
             return { instituteNotificationList, userNotificationList, notificationList };

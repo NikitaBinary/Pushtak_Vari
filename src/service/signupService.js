@@ -157,6 +157,8 @@ class AuthService {
                     case 'INSTITUTE':
                     case 'REGULAR_USER':
                         data = await user.findOne({ emailId: userBody.emailId });
+                        console.log("data------->", data.password)
+                        console.log("usrr-------->", userBody.password)
                         await verifyPassword(userBody.password, data.password);
 
                         break;

@@ -22,18 +22,8 @@ const purchaseSchema = new mongoose.Schema({
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId
-    },
-    bookReadingStatus: {
-        type: Number
-    },
-    readingStatus: {
-        type: Boolean,
-        default: false
-    },
-    readingProgress: {
-        type: String,
-        default: "InComplete"
     }
+
 },
     {
         timestamps: {
