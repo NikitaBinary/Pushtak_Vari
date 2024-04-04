@@ -10,21 +10,6 @@ class AuthService {
             const bookId = cartBody.BookId
             const userId = cartBody.userId
 
-            const userInfo = await user.findOne({ _id: userId })
-            if (userInfo.userType == 'REGULAR_USER') {
-                var cartDetail = await cart.findOne(
-                    {
-                        BookId: new mongoose.Types.ObjectId(bookId),
-                        userId: new mongoose.Types.ObjectId(userId)
-                    }
-                )
-                if (!cartDetail) {
-                    cartDetail = await cart.create(cartBody)
-                    if (cartDetail) {
-                        await purchase.create(cartDetail)
-                    }
-                }
-            }
             var cartDetail = await cart.findOne(
                 {
                     BookId: new mongoose.Types.ObjectId(bookId),
@@ -37,6 +22,7 @@ class AuthService {
                     await purchase.create(cartBody)
                 }
             }
+
             return cartDetail
 
         } catch (error) {
