@@ -355,8 +355,8 @@ class AuthService {
                     { userId: new mongoose.Types.ObjectId(userId), 'books.bookProgress': 'Incomplete' }
                 ).sort({ updated_at: -1 })
                     .limit(1);
-                if (user_lastUpdateBook.BookId) {
-                    var bookId = user_lastUpdateBook.BookId
+                if (user_lastUpdateBook.books.bookId) {
+                    var bookId = user_lastUpdateBook.books.bookId
                 }
                 let eBookList
                 const bookaggregate = []
@@ -474,7 +474,8 @@ class AuthService {
                         {
                             $set: {
                                 'books.readingPercent': status,
-                                'books.bookProgress': bookProgress
+                                'books.bookProgress': bookProgress,
+                                'books.bookName': bookInfo.bookName
                             }
                         },
                         { new: true }
@@ -533,7 +534,8 @@ class AuthService {
                         {
                             $set: {
                                 'books.readingPercent': status,
-                                'books.bookProgress': bookProgress
+                                'books.bookProgress': bookProgress,
+                                'books.bookName': bookInfo.bookName
                             }
                         },
                         { new: true }
@@ -563,11 +565,6 @@ class AuthService {
 
     async getMyBookService(userId) {
         try {
-            const is_UserExist = await user.findOne({ _id: userId })
-            if (!is_UserExist) {
-                return { message: "User not found." }
-            }
-
             async function calculateRatingStats(reviews) {
                 if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
 
@@ -583,53 +580,51 @@ class AuthService {
 
                 return { overallRating };
             }
-            const bookAggregate = []
-
-            bookAggregate.push(
-                {
-                    $match: {
-                        userId: new mongoose.Types.ObjectId(userId),
-                        is_purchase: true
+            const is_UserExist = await user.findOne({ _id: userId })
+            if (!is_UserExist) {
+                return { message: "User not found." }
+            }
+            let myBookList
+                const bookAggregate = []
+                bookAggregate.push(
+                    {
+                        $match: {
+                            userId: new mongoose.Types.ObjectId(userId),
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'ebookdetails',
+                            localField: 'books.bookId',
+                            foreignField: '_id',
+                            as: "eBookData"
+                        }
+                    },
+                    {
+                        $unwind: "$eBookData"
+                    },
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: 'eBookData._id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
                     }
-                },
-                {
-                    $lookup: {
-                        from: 'ebookdetails',
-                        localField: 'BookId',
-                        foreignField: '_id',
-                        as: "eBookData"
-                    }
-                },
-                {
-                    $unwind: "$eBookData"
-                },
-                {
-                    $lookup: {
-                        from: 'review_lists',
-                        localField: 'eBookData._id',
-                        foreignField: 'bookId',
-                        as: "reviewData"
-                    }
-                },
-                // {
-                //     $project: {
-                //         _id: 1, bookName: 1, authorName: 1, bookImage: 1, overallRating: 1, reviewData: 1
-                //     }
-                // },
-                {
-                    $sort: { created_at: -1 }
-                }
-            )
+                )
+                 myBookList = await bookStatus.aggregate(bookAggregate)
 
-            const myBookList = await purchase.aggregate(bookAggregate)
-
-            myBookList.forEach(async (book) => {
-                const reviews = book.reviewData;
-                const { overallRating } = await calculateRatingStats(reviews);
-                book.overallRating = Math.round(overallRating);
-                book.bookReadingStatus = book.bookReadingStatus
-                book.reviewData = ''
-            });
+                myBookList.forEach(async (book) => {
+                    const reviews = book.reviewData;
+                    const { overallRating } = await calculateRatingStats(reviews);
+                    book.overallRating = Math.round(overallRating);
+                    book.bookReadingStatus = book.bookReadingStatus
+                    book.reviewData = ''
+                });
+             
             return myBookList
 
         } catch (error) {
