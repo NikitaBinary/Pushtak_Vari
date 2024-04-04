@@ -29,7 +29,7 @@ class authController {
             const bookId = req.query.bookId
             const userId = req.query.userId
             const purchaseDetail = await purchaseService.updatePurchaseBookService(bookId, userId)
-            console.log("purchaseDetail--------------->",purchaseDetail)
+            console.log("purchaseDetail--------------->", purchaseDetail)
             return res.status(200).send({
                 status: 200,
                 message: "Purchase book detail.",
@@ -38,7 +38,7 @@ class authController {
 
 
         } catch (error) {
-            console.log("error---------->",error.message)
+            console.log("error---------->", error.message)
             return res.status(500).send({
                 status: 500,
                 message: error.message,
@@ -115,7 +115,8 @@ class authController {
             const totalPages = req.query.totalPages
             const readPages = req.query.readPages
             const readingStatus = req.query.readingStatus
-            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus)
+            const bookProgress = req.query.bookProgress
+            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress)
 
             if (response.message) {
                 return res.status(404).send({
@@ -126,7 +127,7 @@ class authController {
             return res.status(200).send({
                 status: 200,
                 message: "Update book reading status.",
-                bookReadingPercent: response.bookReadingStatus
+                bookReadingPercent: response.readingInfo.books.readingPercent
             })
         } catch (error) {
             return res.status(500).send({

@@ -3,6 +3,7 @@ const purchase = require("../model/bookPurchaseModel");
 const cart = require("../model/cartModel")
 const ebook = require("../model/ebookModel");
 const user = require("../model/userModel");
+const bookStatus = require("../model/readingBookStatus")
 
 class AuthService {
     async addToPurchaseService(purchaseData) {
@@ -339,15 +340,19 @@ class AuthService {
             if (!is_UserExist) {
                 return { message: "User Not found" }
             }
-            const is_BookExists = await purchase.findOne(
+            const is_BookExists = await bookStatus.findOne(
                 {
                     userId: new mongoose.Types.ObjectId(userId)
                 })
-            if (!is_BookExists && is_UserExist.userType != "INSTITUTE_USER") {
-                return { message: "User not purchase book" }
-            } else {
-                const user_lastUpdateBook = await purchase.findOne(
-                    { userId: new mongoose.Types.ObjectId(userId), readingStatus: true }
+            if (!is_BookExists && is_UserExist.userType == "REGULAR_USER") {
+                return { message: "User not start to read any book" }
+            }
+            else if (!is_BookExists && is_UserExist.userType == "INSTITUTE_USER") {
+                return { message: "User not start to read any book" }
+            }
+            else {
+                const user_lastUpdateBook = await bookStatus.findOne(
+                    { userId: new mongoose.Types.ObjectId(userId), 'books.bookProgress': 'Incomplete' }
                 ).sort({ updated_at: -1 })
                     .limit(1);
                 if (user_lastUpdateBook.BookId) {
@@ -380,7 +385,7 @@ class AuthService {
                     },
                     {
                         $project: {
-                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, bookLanguage: 1
+                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, readingPercent: 1, bookLanguage: 1
                         }
                     },
                     {
@@ -407,31 +412,132 @@ class AuthService {
         }
     }
 
-    async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus) {
+    async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress) {
         try {
             let status = Number((readPages / totalPages) * 100)
-            const is_BookExist = await purchase.findOne(
-                {
-                    userId: new mongoose.Types.ObjectId(userId),
-                    BookId: bookId,
-                    is_purchase: true
-                })
-            if (is_BookExist) {
-                var readingStatusUpdate = await purchase.findOneAndUpdate(
+
+            const userInfo = await user.findOne({ _id: userId }, { userType: 1 })
+            if (!userInfo) {
+                return { message: "User not found." }
+            }
+            let readingInfo
+            if (userInfo.userType == 'REGULAR_USER') {
+                const is_BookExist = await purchase.findOne(
                     {
                         userId: new mongoose.Types.ObjectId(userId),
                         BookId: bookId,
                         is_purchase: true
-                    },
+                    })
+                if (!is_BookExist) {
+                    return { message: "User not purchase this book." }
+                }
+                const is_userBookExists = await bookStatus.findOne(
                     {
-                        $set: {
-                            bookReadingStatus: status,
-                            readingStatus: readingStatus
-                        }
-                    },
-                    { new: true }
+                        userId: new mongoose.Types.ObjectId(userId),
+                        'books.bookId': bookId
+                    }
                 )
-                if (readingStatusUpdate) {
+                if (!is_userBookExists) {
+                    let bookObj = {
+                        books:
+                        {
+                            bookId: bookId,
+                            bookName: "bookName",
+                            readingPercent: status,
+                            bookProgress: 'Incomplete'
+                        },
+                        userId: userId
+                    }
+                    readingInfo = await bookStatus.create(bookObj)
+                    if (readingInfo) {
+                        await ebook.findOneAndUpdate(
+                            { _id: bookId },
+                            {
+                                $set: {
+                                    readingPercent: readingInfo.books.readingPercent
+                                }
+                            },
+                            { new: true }
+                        )
+                    }
+                }
+                else {
+
+                    readingInfo = await bookStatus.findOneAndUpdate(
+                        {
+                            userId: new mongoose.Types.ObjectId(userId),
+                            'books.bookId': bookId
+                        },
+                        {
+                            $set: {
+                                'books.readingPercent': status,
+                                'books.bookProgress': bookProgress
+                            }
+                        },
+                        { new: true }
+                    )
+                    if (readingInfo) {
+                        await ebook.findOneAndUpdate(
+                            { _id: bookId },
+                            {
+                                $set: {
+                                    readingPercent: readingInfo.books.readingPercent
+                                }
+                            },
+                            { new: true }
+                        )
+                    }
+                }
+            }
+
+            if (userInfo.userType == 'INSTITUTE_USER') {
+                const is_userBookExists = await bookStatus.findOne(
+                    {
+                        userId: new mongoose.Types.ObjectId(userId),
+                        'books.bookId': bookId
+                    }
+                )
+                if (!is_userBookExists) {
+                    let bookObj = {
+                        books:
+                        {
+                            bookId: bookId,
+                            bookName: "bookName",
+                            readingPercent: status,
+                            bookProgress: 'Incomplete'
+                        },
+                        userId: userId
+                    }
+                    readingInfo = await bookStatus.create(bookObj)
+                    if (readingInfo) {
+                        await ebook.findOneAndUpdate(
+                            { _id: bookId },
+                            {
+                                $set: {
+                                    readingPercent: readingInfo.books.readingPercent
+                                }
+                            },
+                            { new: true }
+                        )
+                    }
+                }
+                else {
+                    readingInfo = await bookStatus.findOneAndUpdate(
+                        {
+                            userId: new mongoose.Types.ObjectId(userId),
+                            'books.bookId': bookId
+                        },
+                        {
+                            $set: {
+                                'books.readingPercent': status,
+                                'books.bookProgress': bookProgress
+                            }
+                        },
+                        { new: true }
+                    )
+                }
+
+                if (readingInfo) {
                     await ebook.findOneAndUpdate(
                         { _id: bookId },
                         {
@@ -443,11 +549,8 @@ class AuthService {
                     )
                 }
             }
-            
-            
-           
 
-            return readingStatusUpdate
+            return { readingInfo }
 
         } catch (error) {
             console.log("error------------->", error)
