@@ -448,7 +448,28 @@ class AuthService {
 
     async eBookInfoService(_id) {
         try {
+            function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
 
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+
+                const totalReviews = reviews.length;
+                const ratingStats = ratingCounts.map((count, index) => ({
+                    rating: index + 1,
+                    count,
+                    percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0
+                }));
+
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { ratingStats, overallRating };
+            }
             let eBookDetail = await eBook.findOne({ _id: new mongoose.Types.ObjectId(_id) });
             if (eBookDetail) {
                 const pipeLine = []
@@ -463,9 +484,18 @@ class AuthService {
                         }
                     })
                 var eBookInfo = await eBook.aggregate(pipeLine);
+                eBookInfo.forEach(book => {
+                    const reviews = book.reviews;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviews.length
+                    book.reviews = reviews
+                });
             }
             return { eBookDetail, eBookInfo }
         } catch (error) {
+            console.log("error------>", error)
             throw error;
         }
     }

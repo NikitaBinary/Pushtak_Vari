@@ -365,7 +365,7 @@ class AuthService {
             }
             else {
                 const user_lastUpdateBook = await bookStatus.findOne(
-                    { userId: new mongoose.Types.ObjectId(userId), 'books.bookProgress': 'Incomplete' }
+                    { userId: new mongoose.Types.ObjectId(userId) }
                 ).sort({ updated_at: -1 })
                     .limit(1);
                 if (user_lastUpdateBook.books.bookId) {
