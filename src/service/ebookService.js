@@ -484,6 +484,7 @@ class AuthService {
                         }
                     })
                 var eBookInfo = await eBook.aggregate(pipeLine);
+                
                 eBookInfo.forEach(book => {
                     const reviews = book.reviews;
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
