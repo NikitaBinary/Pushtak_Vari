@@ -76,7 +76,9 @@ class AuthService {
 
     async getNotificationList(userType) {
         try {
-            const notificationList = await notification.find({ "userType.userType": userType })
+            // const notificationList = await notification.find({ "userType.userType": userType })
+            const notificationList = await notification.find({ "userType.userType": { $in: ['All', userType] } })
+
             return notificationList
         } catch (error) {
             throw error;

@@ -142,6 +142,17 @@ class AuthService {
             }
             const id = new mongoose.Types.ObjectId(userId)
             const userInfo = await user.findOne({ _id: id })
+            const condition = {}
+
+            // if (userInfo.genre_prefernce.length > 0) {
+            //     var genreCategory = userInfo.genre_prefernce
+            //     condition['category.categoryName'] = { $in: genreCategory };
+            // }
+            // if (userInfo.genre_prefernce.length > 0) {
+            //     var authorCategory = userInfo.author_prefernce
+            //     condition.authorName = { $in: authorCategory };
+            // }
+
             let booklist
             if (userInfo.userType == "INSTITUTE_USER") {
                 const instituteId = userInfo.createdBy
@@ -153,74 +164,71 @@ class AuthService {
                 booklist = assignBook.BookList
             }
 
-            if (category || language) {
-                const condition = {}
-                const treandingBook = []
-                // if (language) {
-                //     condition['bookLanguage.language'] = language;
-                // }
-                if (category) {
-                    condition['category.categoryName'] = category;
-                }
-
-                if (typeof condition === 'object' && Object.keys(condition).length > 0) {
-                    treandingBook.push(
-                        {
-                            $match: condition
-                        }
-                    )
-                }
-                treandingBook.push(
-                    { $match: { userCount: { $exists: true } } },
-
-                    {
-                        $sort: { userCount: -1 }
-                    },
-                    {
-                        $lookup: {
-                            from: 'review_lists',
-                            localField: '_id',
-                            foreignField: 'bookId',
-                            as: "reviewData"
-                        }
-                    },
-                    {
-                        $sort: { created_at: -1 }
-                    },
-                    {
-                        $limit: 5
-                    },
-                )
-                var treandingBookList = await eBook.aggregate(treandingBook);
-
-                treandingBookList.forEach(book => {
-                    const reviews = book.reviewData;
-                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                    book.ratings = ratingStats;
-                    book.overallRating = Math.round(overallRating);
-                    book.reviewUserCount = book.reviewData.length
-                    book.reviewData = reviews
-                });
-
-
+            const treandingBook = []
+            // if (language) {
+            //     condition['bookLanguage.language'] = language;
+            // }
+            if (category) {
+                condition['category.categoryName'] = category;
             }
-            if (category || language) {
+
+            if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+                treandingBook.push(
+                    {
+                        $match: condition
+                    }
+                )
+            }
+            treandingBook.push(
+                { $match: { userCount: { $exists: true } } },
+
+                {
+                    $sort: { userCount: -1 }
+                },
+                {
+                    $lookup: {
+                        from: 'review_lists',
+                        localField: '_id',
+                        foreignField: 'bookId',
+                        as: "reviewData"
+                    }
+                },
+                {
+                    $sort: { created_at: -1 }
+                },
+                {
+                    $limit: 5
+                },
+            )
+            var treandingBookList = await eBook.aggregate(treandingBook);
+
+            treandingBookList.forEach(book => {
+                const reviews = book.reviewData;
+                const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                book.ratings = ratingStats;
+                book.overallRating = Math.round(overallRating);
+                book.reviewUserCount = book.reviewData.length
+                book.reviewData = reviews
+            });
+
+            if (category) {
+                condition['category.categoryName'] = category;
                 var categoryPipe = []
+
                 if (booklist != undefined && booklist.length > 0) {
-                    categoryPipe.push(
-                        {
-                            $match: {
-                                _id: { $in: booklist }
-                            }
-                        }
-                    )
+                    condition['_id'] = { $in: booklist }
+
+                    // categoryPipe.push(
+                    //     {
+                    //         $match: {
+                    //             _id: { $in: booklist }
+                    //         }
+                    //     }
+                    // )
                 }
                 categoryPipe.push(
                     {
-                        $match: {
-                            'category.categoryName': category,
-                            // 'bookLanguage.language': language,
-                        }
+                        $match: condition
                     },
                     {
                         $sort: { created_at: -1 }
@@ -252,8 +260,9 @@ class AuthService {
                     book.reviewData = reviews
                 });
             }
-            const condition = {}
-            const newAggregatePipe = []
+            // const condition = {}
+            var newAggregatePipe = []
+
 
             if (booklist != undefined && booklist.length > 0) {
                 newAggregatePipe.push(
@@ -263,15 +272,6 @@ class AuthService {
                         }
                     }
                 )
-            }
-
-            if (userInfo.genre_prefernce.length > 0) {
-                var genreCategory = userInfo.genre_prefernce
-                condition['category.categoryName'] = { $in: genreCategory };
-            }
-            if (userInfo.genre_prefernce.length > 0) {
-                var authorCategory = userInfo.author_prefernce
-                condition.authorName = { $in: authorCategory };
             }
 
             // if (language) {
@@ -484,7 +484,7 @@ class AuthService {
                         }
                     })
                 var eBookInfo = await eBook.aggregate(pipeLine);
-                
+
                 eBookInfo.forEach(book => {
                     const reviews = book.reviews;
                     const { ratingStats, overallRating } = calculateRatingStats(reviews);
