@@ -625,7 +625,7 @@ class AuthService {
                     }
                 },
                 {
-                    $sort: { created_at: -1 }
+                    $sort: { updated_at: -1 }
                 }
             )
             myBookList = await bookStatus.aggregate(bookAggregate)
