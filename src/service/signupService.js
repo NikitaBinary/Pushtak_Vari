@@ -16,29 +16,7 @@ class AuthService {
         try {
             let uniqueEmail = await user.findOne({ emailId: userBody.emailId });
             let uniqueMobileNo = await user.findOne({ mobileNo: userBody.mobileNo });
-
-            if (userBody.userType == 'INSTITUTE') {
-                var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
-                var expiryDate
-                if (subscriptionInfo.duration == 0) {
-                    expiryDate = null
-                }
-                else {
-                    const subscriptDate = new Date(subscriptionInfo.created_at)
-                    const subscriptTime = Number(subscriptionInfo.duration)
-
-                    expiryDate = new Date(subscriptDate);
-                    expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
-                }
-            }
-
-            if (userBody.userType == 'INSTITUTE_USER') {
-                const instituteID = userBody.createdBy
-                var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
-            }
-
             let userDetail;
-
 
             if (!uniqueEmail && !uniqueMobileNo) {
                 let newUser;
@@ -67,9 +45,9 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
-                            select_Subscription: giveSubscription.select_Subscription,
-                            subscriptionExpire: giveSubscription.subscriptionExpire,
-                            is_subscribed: true
+                            // select_Subscription: giveSubscription.select_Subscription,
+                            // subscriptionExpire: giveSubscription.subscriptionExpire,
+                            // is_subscribed: true
 
                         };
                         break;
@@ -97,16 +75,61 @@ class AuthService {
                             studentList: [],
                             instituteImage: institute_Image || "",
                             studentCount: 0,
-                            select_Subscription: subscriptionInfo,
-                            subscriptionExpire: expiryDate,
-                            is_subscribed: true
+                            // select_Subscription: subscriptionInfo,
+                            // subscriptionExpire: expiryDate,
+                            // is_subscribed: true
                         };
                         break;
                     default:
                         throw new Error("Invalid userType");
                 }
                 userDetail = await user.create(newUser);
+                const createDate = userDetail.created_at
+                if (userDetail && userDetail.userType == 'INSTITUTE') {
+                    var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1 }) : null;
+                    var expiryDate
+                    if (subscriptionInfo.duration == 0) {
+                        expiryDate = null
+                    }
+                    else {
+                        const subscriptDate = new Date(createDate)
+                        const subscriptTime = Number(subscriptionInfo.duration)
 
+                        expiryDate = new Date(subscriptDate);
+                        expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
+                    }
+                    userDetail = await user.findOneAndUpdate(
+                        { _id: userDetail._id },
+                        {
+                            $set: {
+                                select_Subscription: subscriptionInfo,
+                                subscriptionExpire: expiryDate,
+                                is_subscribed: true
+                            }
+                        }, {
+                        new: true
+                    }
+                    )
+                }
+
+                if (userDetail && userDetail.userType == 'INSTITUTE_USER') {
+                    const instituteID = userBody.createdBy
+                    var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1 }) : null;
+                    if (giveSubscription) {
+                        userDetail = await user.findOneAndUpdate(
+                            { _id: userDetail._id },
+                            {
+                                $set: {
+                                    select_Subscription: giveSubscription.select_Subscription,
+                                    subscriptionExpire: giveSubscription.subscriptionExpire,
+                                    is_subscribed: true
+                                }
+                            }, {
+                            new: true
+                        }
+                        )
+                    }
+                }
 
                 if (newUser.createdBy) {
                     let id = newUser.createdBy
@@ -194,25 +217,29 @@ class AuthService {
         try {
             const email = body.emailId;
             let checkOtp = await user.findOne({ emailId: email });
-            if (checkOtp) {
-                let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-                console.log("otp--------->", otp)
-                await user.updateOne({ emailId: email }, { $set: { otp: otp } });
-                let mail = new Mail();
-                const userName = email.split('@');
-                const subject = "Forgot Password";
-                const html = `<h3>Hello ${userName[0]}</h3>
+            if (checkOtp.userType != 'SUPER_ADMIN') {
+                if (checkOtp) {
+                    let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+                    console.log("otp--------->", otp)
+                    await user.updateOne({ emailId: email }, { $set: { otp: otp } });
+                    let mail = new Mail();
+                    const userName = email.split('@');
+                    const subject = "Forgot Password";
+                    const html = `<h3>Hello ${userName[0]}</h3>
                 <p> ${otp} is the otp for your ${email} account.</p>
                 <p> If you didn't ask to reset your password, you can ignore this email.</p>
                 <br>
                 <p>Thanks,</p>
                 <p>Your Pushtak Vari team </p>`;
-                await mail.sendMail(email, html, subject);
-                return true;
+                    await mail.sendMail(email, html, subject);
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
-
             else {
-                return false;
+                return { message: "Not sent OTP for SUPER_ADMIN." }
             }
 
         } catch (error) {
@@ -307,23 +334,9 @@ class AuthService {
 
             if (userDetail.userType == 'INSTITUTE') {
                 if (dataBody.select_Subscription) {
-                    var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, created_at: 1 }) : null;
-                    let expiryDate
-                    if (subscriptionInfo.duration == 0) {
-                        expiryDate = null
-                    }
-                    else {
-                        console.log("comeeee")
-                        const subscriptDate = new Date(subscriptionInfo.created_at)
-                        const subscriptTime = Number(subscriptionInfo.duration)
-
-                        expiryDate = new Date(subscriptDate);
-                        expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
-                    }
-
+                    var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1 }) : null;
                     dataBody.select_Subscription = subscriptionInfo
-                    dataBody.subscriptionExpire = expiryDate,
-                        dataBody.is_subscribed = true
+                    dataBody.is_subscribed = true
                     if (instituteUrl) {
                         dataBody.instituteImage = instituteUrl
                     }
@@ -332,21 +345,6 @@ class AuthService {
                         dataBody,
                         { new: true }
                     )
-                    if (userInfo) {
-                        const instituteID = _id
-                        // var giveSubscription = instituteID ? await user.findOne({ _id: instituteID }, { _id: 1, select_Subscription: 1, created_at: 1, subscriptionExpire: 1, expiryDate: 1 }) : null;
-                        await user.updateMany(
-                            { createdBy: instituteID },
-                            {
-                                $set: {
-                                    select_Subscription: userInfo.select_Subscription,
-                                    subscriptionExpire: userInfo.subscriptionExpire,
-                                    is_subscribed: true
-                                }
-                            },
-                            { new: true }
-                        )
-                    }
                 }
                 else {
                     var userInfo = await user.findOneAndUpdate(
@@ -355,8 +353,42 @@ class AuthService {
                         { new: true }
                     )
                 }
-            }
+                if (userInfo) {
+                    const updateDate = userInfo.updated_at
+                    let expiryDate
+                    if (subscriptionInfo.duration == 0) {
+                        expiryDate = null
+                    }
+                    else {
+                        const subscriptDate = new Date(updateDate)
+                        const subscriptTime = Number(userInfo.select_Subscription.duration)
 
+                        expiryDate = new Date(subscriptDate);
+                        expiryDate.setFullYear(subscriptDate.getFullYear() + subscriptTime);
+                    }
+                    userInfo = await user.findOneAndUpdate(
+                        { _id: _id },
+                        {
+                            $set: {
+                                subscriptionExpire: expiryDate
+                            }
+                        },
+                        { new: true }
+                    )
+                    const instituteID = _id
+                    await user.updateMany(
+                        { createdBy: instituteID },
+                        {
+                            $set: {
+                                select_Subscription: userInfo.select_Subscription,
+                                subscriptionExpire: userInfo.subscriptionExpire,
+                                is_subscribed: true
+                            }
+                        },
+                        { new: true }
+                    )
+                }
+            }
             else {
                 var id = userDetail._id
                 if (imageUrl) {

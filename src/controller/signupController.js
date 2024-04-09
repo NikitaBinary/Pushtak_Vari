@@ -19,7 +19,7 @@ class authController {
             }
 
             req.body.password = await getPasswordHash(data.password, 12);
-            
+
             if (req.body.userType) {
                 if (!userRoles.USER_ROLES.includes(data.userType)) {
                     return res.json({
@@ -103,6 +103,12 @@ class authController {
     async forgotPassordAndOTPController(req, res) {
         try {
             const response = await userService.forgotPassordAndOTPService(req.body);
+            if (response.message) {
+                return res.json({
+                    status: 404,
+                    message: response.message,
+                })
+            }
             if (response) {
                 return res.json({
                     status: 200,
@@ -191,10 +197,10 @@ class authController {
         try {
             let dataBody = req.body
             const id = req.params.id
-            
+
             const userImage = req.files.userImage
             const instituteImage = req.files.instituteImage
-           
+
 
             const webUrl = `${req.protocol}://${req.get('host')}`;
 
@@ -207,7 +213,7 @@ class authController {
                 var instituteUrl = `${webUrl}/uploads/${institute_Image.filename}`
             }
 
-            const userInfo = await userService.updateUserService(id, dataBody, imageUrl ,instituteUrl);
+            const userInfo = await userService.updateUserService(id, dataBody, imageUrl, instituteUrl);
             if (userInfo.message) {
                 return res.status(404).send({
                     status: 404,
