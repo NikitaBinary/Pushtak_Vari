@@ -171,7 +171,7 @@ class AuthService {
             const userInfo = await user.findOne({ emailId: userBody.emailId });
             if (userInfo) {
                 if (userInfo.is_active == false) {
-                    return { message: "Your account has been deactivated." };
+                    return { message: "Your account has been deleted." };
                 }
                 let data;
                 switch (userInfo.userType) {
