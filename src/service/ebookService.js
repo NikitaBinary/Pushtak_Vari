@@ -827,9 +827,8 @@ class AuthService {
             eBookList = await eBook.aggregate(bookaggregate)
 
             const purchasedBooks = await purchase.find({ userId: userId, is_purchase: true });
-            const purchasedBookIds = purchasedBooks.map(book => String(book.bookId));
+            const purchasedBookIds = purchasedBooks.map(book => String(book.BookId));
 
-            console.log("purchasedBooks--------->", purchasedBooks)
             eBookList.forEach(async (book) => {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
