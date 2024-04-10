@@ -826,20 +826,15 @@ class AuthService {
 
             eBookList = await eBook.aggregate(bookaggregate)
 
-            // const purchasedBooks = await purchase.find({ userId: userId, is_purchase: true });
-            const purchasedBookIds = new Set((await purchase.find({ userId: userId, is_purchase: true })).map(book => String(book.bookId)));
+            const purchasedBooks = await purchase.find({ userId: userId, is_purchase: true });
+            const purchasedBookIds = purchasedBooks.map(book => String(book.bookId));
 
-
-            console.log("purchasedBookIds--------->", purchasedBookIds)
+            console.log("purchasedBooks--------->", purchasedBooks)
             eBookList.forEach(async (book) => {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
                 book.overallRating = Math.round(overallRating);
-                // book.purchase = purchasedBooks.includes(book._id.toString())
-                // if (book.purchase) {
-                //     book.purchase = true;
-                // }
-                book.purchase = book._id && purchasedBookIds.has(String(book._id));
+                book.purchase = purchasedBookIds.includes(String(book._id));
             });
 
             return { eBookList }

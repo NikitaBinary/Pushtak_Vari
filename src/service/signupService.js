@@ -356,7 +356,7 @@ class AuthService {
                 if (userInfo) {
                     const updateDate = userInfo.updated_at
                     let expiryDate
-                    if (subscriptionInfo.duration == 0) {
+                    if (userInfo.select_Subscription.duration == 0) {
                         expiryDate = null
                     }
                     else {
@@ -390,6 +390,7 @@ class AuthService {
                 }
             }
             else {
+                console.log("jfsjfosfjso;")
                 var id = userDetail._id
                 if (imageUrl) {
                     dataBody.userImage = imageUrl
