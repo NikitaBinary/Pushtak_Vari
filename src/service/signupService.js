@@ -525,6 +525,16 @@ class AuthService {
                 }
                 userInfo = await user.create(newUser);
                 token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName });
+                await user.findOneAndUpdate(
+                    { emailId: userInfo.emailId },
+                    {
+                        $set: {
+                            loginStatus: true,
+                            lastLoginDate: new Date()
+                        }
+                    },
+                    { new: true }
+                )
             }
 
             if (userPassword) {

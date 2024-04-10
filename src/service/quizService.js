@@ -65,12 +65,21 @@ class AuthService {
     }
 
 
-    async getQuizListService() {
+    async getQuizListService(instituteId) {
         try {
-            const quizList = await quiz.find(
-                {},
-                { _id: 1, quizName: 1, description: 1, questionCount: 1, solveByUser: 1 }
-            )
+            let quizList
+            if (instituteId) {
+                quizList = await quiz.find(
+                    { userId: instituteId },
+                    { _id: 1, quizName: 1, description: 1, questionCount: 1, solveByUser: 1 }
+                )
+            }
+            else {
+                quizList = await quiz.find(
+                    { userId: instituteId },
+                    { _id: 1, quizName: 1, description: 1, questionCount: 1, solveByUser: 1 }
+                )
+            }
             return quizList
         } catch (error) {
             throw error;
