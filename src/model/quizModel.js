@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId
+    },
     quizName: {
         type: String,
         required: true,
