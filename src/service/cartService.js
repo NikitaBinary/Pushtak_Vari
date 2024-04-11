@@ -80,11 +80,14 @@ class AuthService {
         }
     }
 
-    async deleteCartBookService(_id) {
+    async deleteCartBookService(userId, bookId) {
         try {
-            let cartbookInfo = await cart.findOne({ userId: _id });
+            let cartbookInfo = await cart.findOne({ userId: userId, BookId: bookId });
             if (cartbookInfo) {
-                var cartBookData = await cart.findOneAndDelete({ _id });
+                var cartBookData = await cart.findOneAndDelete({
+                    userId: userId,
+                    BookId: bookId
+                });
                 return cartBookData
             }
             return { message: "Cart book not found" }

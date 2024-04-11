@@ -40,8 +40,9 @@ class authController {
 
     async deleteCartBookController(req, res) {
         try {
-            let id = req.params.id
-            const response = await cartService.deleteCartBookService(id);
+            let userId = req.params.id
+            const bookId = req.query.bookId
+            const response = await cartService.deleteCartBookService(userId, bookId);
 
             if (response.message) {
                 return res.status(404).send({
