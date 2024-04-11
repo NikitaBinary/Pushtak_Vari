@@ -38,7 +38,8 @@ class authController {
 
     async getNotificationList(req, res) {
         try {
-            const notificationList = await notifiService.getNotificationListService();
+            const userId = req.query.userId
+            const notificationList = await notifiService.getNotificationListService(userId);
 
             return res.json({
                 status: 200,
@@ -56,8 +57,9 @@ class authController {
 
     async getNotificationListController(req, res) {
         try {
+            const userId = req.query.userId
             const userType = req.query.userType
-            const notificationList = await notifiService.getNotificationList(userType);
+            const notificationList = await notifiService.getNotificationList(userType,userId);
 
             return res.json({
                 status: 200,

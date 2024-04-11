@@ -245,7 +245,7 @@ class AuthService {
                     ))
                 );
             }
-            const uniqueData= new Set(userPurchaseInfo)
+            const uniqueData = new Set(userPurchaseInfo)
 
             // const uniqueData = removeDuplicates(userPurchaseInfo, "category");
             console.log("uniqueData-------------->", uniqueData)
@@ -426,6 +426,7 @@ class AuthService {
     async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress) {
         try {
             let status = Number((readPages / totalPages) * 100)
+            console.log("status----------->", status)
             const bookInfo = await ebook.findOne({ _id: bookId })
             if (!bookInfo) {
                 return { message: "This book not available" }
@@ -476,30 +477,39 @@ class AuthService {
                     }
                 }
                 else {
-
-                    readingInfo = await bookStatus.findOneAndUpdate(
-                        {
-                            userId: new mongoose.Types.ObjectId(userId),
-                            'books.bookId': bookId
-                        },
-                        {
-                            $set: {
-                                'books.readingPercent': status,
-                                'books.bookProgress': bookProgress,
-                                'books.bookName': bookInfo.bookName
-                            }
-                        },
-                        { new: true }
-                    )
-                    if (readingInfo) {
-                        await ebook.findOneAndUpdate(
-                            { _id: bookId },
+                    if (status >= is_userBookExists.books.readingPercent) {
+                        readingInfo = await bookStatus.findOneAndUpdate(
+                            {
+                                userId: new mongoose.Types.ObjectId(userId),
+                                'books.bookId': bookId
+                            },
                             {
                                 $set: {
-                                    readingPercent: readingInfo.books.readingPercent
+                                    'books.readingPercent': status,
+                                    'books.bookProgress': bookProgress,
+                                    'books.bookName': bookInfo.bookName
                                 }
                             },
                             { new: true }
+                        )
+                        if (readingInfo) {
+                            await ebook.findOneAndUpdate(
+                                { _id: bookId },
+                                {
+                                    $set: {
+                                        readingPercent: readingInfo.books.readingPercent
+                                    }
+                                },
+                                { new: true }
+                            )
+                        }
+                    }
+                    else {
+                        readingInfo = await bookStatus.findOneAndUpdate(
+                            {
+                                userId: new mongoose.Types.ObjectId(userId),
+                                'books.bookId': bookId
+                            },
                         )
                     }
                 }
@@ -537,32 +547,41 @@ class AuthService {
                     }
                 }
                 else {
-                    readingInfo = await bookStatus.findOneAndUpdate(
-                        {
-                            userId: new mongoose.Types.ObjectId(userId),
-                            'books.bookId': bookId
-                        },
-                        {
-                            $set: {
-                                'books.readingPercent': status,
-                                'books.bookProgress': bookProgress,
-                                'books.bookName': bookInfo.bookName
-                            }
-                        },
-                        { new: true }
-                    )
-                }
-
-                if (readingInfo) {
-                    await ebook.findOneAndUpdate(
-                        { _id: bookId },
-                        {
-                            $set: {
-                                readingPercent: status
-                            }
-                        },
-                        { new: true }
-                    )
+                    if (status >= is_userBookExists.books.readingPercent) {
+                        readingInfo = await bookStatus.findOneAndUpdate(
+                            {
+                                userId: new mongoose.Types.ObjectId(userId),
+                                'books.bookId': bookId
+                            },
+                            {
+                                $set: {
+                                    'books.readingPercent': status,
+                                    'books.bookProgress': bookProgress,
+                                    'books.bookName': bookInfo.bookName
+                                }
+                            },
+                            { new: true }
+                        )
+                        if (readingInfo) {
+                            await ebook.findOneAndUpdate(
+                                { _id: bookId },
+                                {
+                                    $set: {
+                                        readingPercent: status
+                                    }
+                                },
+                                { new: true }
+                            )
+                        }
+                    }
+                    else {
+                        readingInfo = await bookStatus.findOneAndUpdate(
+                            {
+                                userId: new mongoose.Types.ObjectId(userId),
+                                'books.bookId': bookId
+                            },
+                        )
+                    }
                 }
             }
 
