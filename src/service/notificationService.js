@@ -61,23 +61,28 @@ class AuthService {
         }
     }
 
-    async getNotificationListService() {
+    async getNotificationListService(userId) {
         try {
-            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' } }).sort({ created_at: -1 });
-            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' } }).sort({ created_at: -1 });
-            const notificationList = await notification.find().sort({ created_at: -1 });
+            const userInfo = await user.findOne({ _id: userId }, { created_at: 1 });
+            const userCreatedAt = userInfo ? userInfo.created_at : null;
+
+            // Fetch notifications created after user's creation date
+            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
+            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
+            const notificationList = await notification.find({ created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
 
             return { instituteNotificationList, userNotificationList, notificationList };
         } catch (error) {
             throw error;
         }
-
     }
 
-    async getNotificationList(userType) {
+    async getNotificationList(userType, userId) {
         try {
-            // const notificationList = await notification.find({ "userType.userType": userType })
-            const notificationList = await notification.find({ "userType.userType": { $in: ['All', userType] } })
+            const userInfo = await user.findOne({ _id: userId }, { created_at: 1 });
+            const userCreatedAt = userInfo ? userInfo.created_at : null;
+
+            const notificationList = await notification.find({ "userType.userType": { $in: ['All', userType] }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
 
             return notificationList
         } catch (error) {

@@ -130,6 +130,7 @@ class authController {
                 bookReadingPercent: response.readingInfo.books.readingPercent
             })
         } catch (error) {
+            console.log("error--------->",error)
             return res.status(500).send({
                 status: 500,
                 message: error.message,
