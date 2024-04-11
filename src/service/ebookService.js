@@ -100,7 +100,7 @@ class AuthService {
     async getEbookListService() {
         try {
             const eBookList = await eBook.find()
-            return eBookLi
+            return eBookList
         } catch (error) {
             throw error;
         }
