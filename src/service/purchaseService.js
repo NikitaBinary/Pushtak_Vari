@@ -586,7 +586,7 @@ class AuthService {
             }
 
             return { readingInfo }
-
+ 
         } catch (error) {
             console.log("error------------->", error)
             throw error
