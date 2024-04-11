@@ -208,8 +208,6 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            const userLanguage = userInfo.language
-
             const aggregatePipe = []
             aggregatePipe.push(
                 {
@@ -238,7 +236,7 @@ class AuthService {
                     }
                 }
             )
-            const userPurchaseInfo = await purchase.aggregate(aggregatePipe)
+            var userPurchaseInfo = await purchase.aggregate(aggregatePipe)
 
             function removeDuplicates(array, property) {
                 return array.filter((obj, index, self) =>
@@ -247,13 +245,17 @@ class AuthService {
                     ))
                 );
             }
+            const uniqueData= new Set(userPurchaseInfo)
 
-            const uniqueData = removeDuplicates(userPurchaseInfo, "category");
+            // const uniqueData = removeDuplicates(userPurchaseInfo, "category");
+            console.log("uniqueData-------------->", uniqueData)
+
 
             let categoryName
             uniqueData.forEach((ele) => {
                 categoryName = ele.catrgory
             })
+
 
             async function calculateRatingStats(reviews) {
                 if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
@@ -274,15 +276,6 @@ class AuthService {
             const bookaggregate = []
 
             if (categoryName) {
-                if (userLanguage) {
-                    bookaggregate.push(
-                        {
-                            $match: {
-                                'bookLanguage.language': userLanguage
-                            }
-                        }
-                    )
-                }
                 bookaggregate.push(
                     {
                         $match: {
@@ -314,11 +307,16 @@ class AuthService {
             )
 
             eBookList = await ebook.aggregate(bookaggregate)
+
+            const purchasedBooks = await purchase.find({ userId: userId, is_purchase: true });
+            const purchasedBookIds = purchasedBooks.map(book => String(book.BookId));
+
             eBookList.forEach(async (book) => {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
                 book.overallRating = Math.round(overallRating);
-                book.reviewData = ''
+                book.reviewData = '',
+                    book.purchase = purchasedBookIds.includes(String(book._id));
             });
 
             return { eBookList }

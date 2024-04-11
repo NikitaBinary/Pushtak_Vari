@@ -100,7 +100,7 @@ class AuthService {
     async getEbookListService() {
         try {
             const eBookList = await eBook.find()
-            return eBookLi
+            return eBookList
         } catch (error) {
             throw error;
         }
@@ -358,330 +358,54 @@ class AuthService {
         }
     }
 
-    // async getAppEbookListService1(category, userId) {
-    //     try {
-    //         function calculateRatingStats(reviews) {
-    //             if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
-
-    //             let totalRating = 0;
-    //             const ratingCounts = Array(5).fill(0);
-
-    //             reviews.forEach(review => {
-    //                 totalRating += review.rating;
-    //                 ratingCounts[review.rating - 1]++;
-    //             });
-
-    //             const totalReviews = reviews.length;
-    //             const ratingStats = ratingCounts.map((count, index) => ({
-    //                 rating: index + 1,
-    //                 count,
-    //                 percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0
-    //             }));
-
-    //             const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
-
-    //             return { ratingStats, overallRating };
-    //         }
-    //         const id = new mongoose.Types.ObjectId(userId)
-    //         const userInfo = await user.findOne({ _id: id })
-    //         console.log("userInfo---------->", userInfo)
-
-
-    //         const condition = {}
-
-    //         if (userInfo.genre_prefernce.length > 0) {
-    //             var genreCategory = userInfo.genre_prefernce
-    //             condition['category.categoryName'] = { $in: genreCategory };
-    //         }
-    //         if (userInfo.author_prefernce.length > 0) {
-    //             var authorCategory = userInfo.author_prefernce
-    //             condition.authorName = { $in: authorCategory };
-    //         }
-
-    //         let booklist
-    //         if (userInfo.userType == "INSTITUTE_USER") {
-    //             const instituteId = userInfo.createdBy
-    //             const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
-    //             if (!assignBook) {
-
-    //                 return { message: "This institute not assign any book." }
-    //             }
-    //             booklist = assignBook.BookList
-    //         }
-
-    //         const treandingBook = []
-    //         if (category) {
-    //             condition['category.categoryName'] = category;
-    //         }
-
-
-    //         if (typeof condition === 'object' && Object.keys(condition).length > 0) {
-    //             treandingBook.push(
-    //                 {
-    //                     $match: condition
-    //                 }
-    //             )
-    //         }
-    //         treandingBook.push(
-    //             { $match: { userCount: { $exists: true } } },
-
-    //             {
-    //                 $sort: { userCount: -1 }
-    //             },
-    //             {
-    //                 $lookup: {
-    //                     from: 'review_lists',
-    //                     localField: '_id',
-    //                     foreignField: 'bookId',
-    //                     as: "reviewData"
-    //                 }
-    //             },
-    //             {
-    //                 $sort: { created_at: -1 }
-    //             },
-    //             {
-    //                 $limit: 5
-    //             },
-    //         )
-    //         var treandingBookList = await eBook.aggregate(treandingBook);
-
-    //         treandingBookList.forEach(book => {
-    //             const reviews = book.reviewData;
-    //             const { ratingStats, overallRating } = calculateRatingStats(reviews);
-    //             book.ratings = ratingStats;
-    //             book.overallRating = Math.round(overallRating);
-    //             book.reviewUserCount = book.reviewData.length
-    //             book.reviewData = reviews
-    //         });
-
-    //         if (category) {
-    //             condition['category.categoryName'] = category;
-    //             var categoryPipe = []
-
-    //             if (booklist != undefined && booklist.length > 0) {
-    //                 condition['_id'] = { $in: booklist }
-
-    //                 // categoryPipe.push(
-    //                 //     {
-    //                 //         $match: {
-    //                 //             _id: { $in: booklist }
-    //                 //         }
-    //                 //     }
-    //                 // )
-    //             }
-    //             categoryPipe.push(
-    //                 {
-    //                     $match: condition
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-
-    //             )
-    //             categoryPipe.push(
-    //                 {
-    //                     $lookup: {
-    //                         from: 'review_lists',
-    //                         localField: '_id',
-    //                         foreignField: 'bookId',
-    //                         as: "reviewData"
-    //                     }
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-
-    //             var categoryWiseBookList = await eBook.aggregate(categoryPipe);
-
-    //             categoryWiseBookList.forEach(book => {
-    //                 const reviews = book.reviewData;
-    //                 const { ratingStats, overallRating } = calculateRatingStats(reviews);
-    //                 book.ratings = ratingStats;
-    //                 book.overallRating = Math.round(overallRating);
-    //                 book.reviewUserCount = book.reviewData.length
-    //                 book.reviewData = reviews
-    //             });
-    //         }
-    //         // const condition = {}
-    //         var newAggregatePipe = []
-
-
-    //         if (booklist != undefined && booklist.length > 0) {
-    //             newAggregatePipe.push(
-    //                 {
-    //                     $match: {
-    //                         _id: { $in: booklist }
-    //                     }
-    //                 }
-    //             )
-    //         }
-
-    //         // if (language) {
-    //         //     condition['bookLanguage.language'] = language;
-    //         // }
-    //         if (category) {
-    //             condition['category.categoryName'] = category;
-    //         }
-    //         if (typeof condition === 'object' && Object.keys(condition).length > 0) {
-    //             console.log("comee if objecttt")
-    //             newAggregatePipe.push(
-    //                 {
-    //                     $match: condition
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-    //             newAggregatePipe.push(
-    //                 {
-    //                     $lookup: {
-    //                         from: 'review_lists',
-    //                         localField: '_id',
-    //                         foreignField: 'bookId',
-    //                         as: "reviewData"
-    //                     }
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-    //         }
-    //         else {
-    //             if (booklist != undefined && booklist.length > 0) {
-    //                 newAggregatePipe.push(
-    //                     {
-    //                         $match: {
-    //                             _id: { $in: booklist }
-    //                         }
-    //                     }
-    //                 )
-    //             }
-    //             newAggregatePipe.push(
-    //                 {
-    //                     $match: {
-    //                         // 'bookLanguage.language': language
-    //                     }
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-    //             newAggregatePipe.push(
-    //                 {
-    //                     $lookup: {
-    //                         from: 'review_lists',
-    //                         localField: '_id',
-    //                         foreignField: 'bookId',
-    //                         as: "reviewData"
-    //                     }
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-    //         }
-    //         const newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
-
-
-    //         newlyAddedBookList.forEach(book => {
-    //             const reviews = book.reviewData;
-    //             const { ratingStats, overallRating } = calculateRatingStats(reviews);
-    //             book.ratings = ratingStats;
-    //             book.overallRating = Math.round(overallRating);
-    //             book.reviewUserCount = book.reviewData.length
-    //             book.reviewData = reviews
-    //         });
-
-    //         const otherAggregatePipe = []
-    //         if (language) {
-    //             if (booklist != undefined && booklist.length > 0) {
-    //                 otherAggregatePipe.push(
-    //                     {
-    //                         $match: {
-    //                             _id: { $in: booklist }
-    //                         }
-    //                     }
-    //                 )
-    //             }
-    //             otherAggregatePipe.push(
-    //                 {
-    //                     $match: {
-    //                         'category.categoryName': "Others",
-    //                         // 'bookLanguage.language': language,
-    //                     }
-    //                 },
-    //                 {
-    //                     $sort: { created_at: -1 }
-    //                 }
-    //             )
-    //         }
-
-    //         otherAggregatePipe.push(
-    //             {
-    //                 $lookup: {
-    //                     from: 'review_lists',
-    //                     localField: '_id',
-    //                     foreignField: 'bookId',
-    //                     as: "reviewData"
-    //                 }
-    //             },
-    //             {
-    //                 $sort: { created_at: -1 }
-    //             }
-    //         )
-    //         const otherBookList = await eBook.aggregate(otherAggregatePipe)
-
-    //         otherBookList.forEach(book => {
-    //             const reviews = book.reviewData;
-    //             const { ratingStats, overallRating } = calculateRatingStats(reviews);
-    //             book.ratings = ratingStats;
-    //             book.overallRating = Math.round(overallRating);
-    //             book.reviewUserCount = book.reviewData.length
-    //             book.reviewData = reviews
-    //         });
-    //         return { treandingBookList, categoryWiseBookList, newlyAddedBookList, otherBookList }
-
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
+    
     async addReviewService(reviewBody) {
         try {
+            const is_BookPurchase = await purchase.findOne(
+                {
+                    userId: new mongoose.Types.ObjectId(reviewBody.userId),
+                    BookId: new mongoose.Types.ObjectId(reviewBody.bookId),
+                    is_purchase: true
+                }
+            )
             const userwithBookExists = await review.findOne(
                 {
                     userId: new mongoose.Types.ObjectId(reviewBody.userId),
                     bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
                 }
             )
-            if (!userwithBookExists) {
-                var reviewInfo = await review.create(reviewBody);
-                const id = reviewInfo.userId
-                if (reviewInfo) {
-                    const userData = await user.findOne({ _id: id })
-                    const reviewId = reviewInfo._id
-                    if (userData) {
-                        const image = userData.userImage
-                        const userName = userData.fullName
-                        const updateData = await review.updateMany(
-                            { _id: reviewId },
-                            {
-                                $set: {
-                                    userImage: image,
-                                    userName: userName
+            if (is_BookPurchase) {
+                if (!userwithBookExists) {
+                    var reviewInfo = await review.create(reviewBody);
+                    const id = reviewInfo.userId
+                    if (reviewInfo) {
+                        const userData = await user.findOne({ _id: id })
+                        const reviewId = reviewInfo._id
+                        if (userData) {
+                            const image = userData.userImage
+                            const userName = userData.fullName
+                            const updateData = await review.updateMany(
+                                { _id: reviewId },
+                                {
+                                    $set: {
+                                        userImage: image,
+                                        userName: userName
+                                    }
+                                },
+                                {
+                                    new: true
                                 }
-                            },
-                            {
-                                new: true
-                            }
-                        )
+                            )
+                        }
                     }
+                    return reviewInfo
                 }
-                return reviewInfo
+                else {
+                    return { message: "This user already post review on this book." }
+                }
             }
             else {
-                return { message: "This user already post review on this book." }
+                return { message: "User not purchase this book." }
             }
 
         } catch (error) {
