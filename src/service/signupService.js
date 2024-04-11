@@ -45,9 +45,6 @@ class AuthService {
                             is_active: true,
                             userImage: "",
                             createdBy: userBody.createdBy || '',
-                            // select_Subscription: giveSubscription.select_Subscription,
-                            // subscriptionExpire: giveSubscription.subscriptionExpire,
-                            // is_subscribed: true
 
                         };
                         break;
@@ -75,9 +72,8 @@ class AuthService {
                             studentList: [],
                             instituteImage: institute_Image || "",
                             studentCount: 0,
-                            // select_Subscription: subscriptionInfo,
-                            // subscriptionExpire: expiryDate,
-                            // is_subscribed: true
+                            no_of_user: userBody.no_of_user,
+                            no_of_books: userBody.no_of_books
                         };
                         break;
                     default:

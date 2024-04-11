@@ -81,6 +81,12 @@ const singupSchema = new mongoose.Schema({
     is_subscribed: {
         type: Boolean,
         default: false
+    },
+    no_of_user: {
+        type: Number
+    },
+    no_of_books: {
+        type: Number
     }
 },
     {

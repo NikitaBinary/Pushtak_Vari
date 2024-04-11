@@ -87,7 +87,7 @@ class AuthService {
                         _id: 1, emailId: 1, mobileNo: 1, userType: 1, is_active: 1,
                         instituteName: 1, studentList: 1, instituteImage: 1,
                         created_at: 1, select_Subscription: 1,
-                        subscriptionExpire: 1, is_subscribed: 1
+                        subscriptionExpire: 1, is_subscribed: 1, no_of_books: 1, no_of_user: 1
                     }
                 );
             }
