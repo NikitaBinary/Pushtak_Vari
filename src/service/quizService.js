@@ -144,7 +144,7 @@ class AuthService {
                 const questionAggregate1 = [
                     {
                         $match: {
-                            userId: new mongoose.Types.ObjectId(userId)
+                            userId: { $exists: false }
                         }
                     },
                     {
