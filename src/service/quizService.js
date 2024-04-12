@@ -104,46 +104,72 @@ class AuthService {
 
     async getAppQuizListService(userId) {
         try {
-            // if (userId) {
-            //     const userInfo = await user.findOne({ _id: userId })
-            //     if (!userInfo) {
-            //         return { message: "User not exists" }
-            //     }
-            //     else {
-            //         var userLanguage = userInfo.language
-            //         console.log("userLanguage------------------>",userLanguage)
-            //     }
-            // }
-            const questionAggregate = [
-                // {
-                //     $match: {
-                //         "language.language": userLanguage
-                //     }
-                // },
-                {
-                    $lookup: {
-                        from: 'quiz_questions',
-                        localField: "_id",
-                        foreignField: "quizId",
-                        as: "quizData"
-                    }
-                },
-                {
-                    $unwind: "$quizData"
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        quizName: 1,
-                        description: 1,
-                        questionCount: 1,
-                        question: "$quizData.questions"
-                    }
+            const userInfo = await user.findOne({ _id: userId })
+            let quizDetail
+            if (userInfo.userType == 'INSTITUTE_USER') {
+                const instituteId = userInfo.createdBy
+                if (instituteId) {
+                    const questionAggregate = [
+                        {
+                            $match: {
+                                userId: new mongoose.Types.ObjectId(instituteId)
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'quiz_questions',
+                                localField: "_id",
+                                foreignField: "quizId",
+                                as: "quizData"
+                            }
+                        },
+                        {
+                            $unwind: "$quizData"
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                quizName: 1,
+                                description: 1,
+                                questionCount: 1,
+                                question: "$quizData.questions"
+                            }
+                        }
+                    ]
+                    quizDetail = await quiz.aggregate(questionAggregate)
                 }
-            ]
 
-            const quizDetail = await quiz.aggregate(questionAggregate)
-
+            }
+            else {
+                const questionAggregate1 = [
+                    {
+                        $match: {
+                            userId: new mongoose.Types.ObjectId(userId)
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'quiz_questions',
+                            localField: "_id",
+                            foreignField: "quizId",
+                            as: "quizData"
+                        }
+                    },
+                    {
+                        $unwind: "$quizData"
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            quizName: 1,
+                            description: 1,
+                            questionCount: 1,
+                            question: "$quizData.questions"
+                        }
+                    }
+                ]
+                quizDetail = await quiz.aggregate(questionAggregate1)
+            }
             return quizDetail
         } catch (error) {
             throw error;
