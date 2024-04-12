@@ -202,6 +202,21 @@ class AuthService {
 
     async getMoreItemService(userId) {
         try {
+            async function calculateRatingStats(reviews) {
+                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
+
+                let totalRating = 0;
+                const ratingCounts = Array(5).fill(0);
+
+                reviews.forEach(review => {
+                    totalRating += review.rating;
+                    ratingCounts[review.rating - 1]++;
+                });
+                const totalReviews = reviews.length;
+                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
+
+                return { overallRating };
+            }
             const userInfo = await user.findOne({
                 _id: userId
             })
@@ -238,40 +253,20 @@ class AuthService {
             )
             var userPurchaseInfo = await purchase.aggregate(aggregatePipe)
 
-            function removeDuplicates(array, property) {
-                return array.filter((obj, index, self) =>
-                    index === self.findIndex((t) => (
-                        t[property] === obj[property]
-                    ))
-                );
-            }
-            const uniqueData = new Set(userPurchaseInfo)
+            const uniqueCategories = new Set();
 
-            // const uniqueData = removeDuplicates(userPurchaseInfo, "category");
-            console.log("uniqueData-------------->", uniqueData)
+            const uniqueArray = userPurchaseInfo.filter(item => {
+                if (!uniqueCategories.has(item.catrgory)) {
+                    uniqueCategories.add(item.catrgory);
+                    return true;
+                }
+                return false;
+            });
 
+            const categories = uniqueArray.map(item => item.catrgory);
 
-            let categoryName
-            uniqueData.forEach((ele) => {
-                categoryName = ele.catrgory
-            })
+            const categoryName = [...new Set(categories)];
 
-
-            async function calculateRatingStats(reviews) {
-                if (reviews.length === 0) return { ratingStats: [], overallRating: 0 };
-
-                let totalRating = 0;
-                const ratingCounts = Array(5).fill(0);
-
-                reviews.forEach(review => {
-                    totalRating += review.rating;
-                    ratingCounts[review.rating - 1]++;
-                });
-                const totalReviews = reviews.length;
-                const overallRating = totalReviews > 0 ? (totalRating / totalReviews) * 20 : 0;
-
-                return { overallRating };
-            }
             let eBookList
             const bookaggregate = []
 
@@ -279,7 +274,8 @@ class AuthService {
                 bookaggregate.push(
                     {
                         $match: {
-                            'category.categoryName': categoryName,
+                            'category.categoryName': { $in: categoryName },
+                            // 'category.categoryName': categoryName,
                         }
                     },
                     {
@@ -298,7 +294,7 @@ class AuthService {
                 },
                 {
                     $project: {
-                        _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
+                        _id: 1, bookName: 1, category: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1
                     }
                 },
                 {
@@ -310,13 +306,14 @@ class AuthService {
 
             const purchasedBooks = await purchase.find({ userId: userId, is_purchase: true });
             const purchasedBookIds = purchasedBooks.map(book => String(book.BookId));
+            eBookList = eBookList.filter(book => !purchasedBookIds.includes(String(book._id)));
+
 
             eBookList.forEach(async (book) => {
                 const reviews = book.reviewData;
                 const { overallRating } = await calculateRatingStats(reviews);
                 book.overallRating = Math.round(overallRating);
-                book.reviewData = '',
-                    book.purchase = purchasedBookIds.includes(String(book._id));
+                book.reviewData = ''
             });
 
             return { eBookList }
@@ -586,7 +583,7 @@ class AuthService {
             }
 
             return { readingInfo }
- 
+
         } catch (error) {
             console.log("error------------->", error)
             throw error
