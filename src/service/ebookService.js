@@ -301,7 +301,7 @@ class AuthService {
 
             const otherAggregatePipe = []
             if (booklist != undefined && booklist.length > 0) {
-                
+
                 prefrenceCondition['_id'] = { $in: booklist },
                     prefrenceCondition['category.categoryName'] = "Others"
             }
@@ -364,30 +364,16 @@ class AuthService {
         try {
             const userId = reviewBody.userId
             const userInfo = await user.findOne({ _id: userId })
-            if(userInfo.userType == 'INSTITUTE_USER'){
+            let reviewInfo
+            if (userInfo.userType == 'INSTITUTE_USER') {
                 const userwithBookExists = await review.findOne(
                     {
                         userId: new mongoose.Types.ObjectId(reviewBody.userId),
                         bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
                     }
                 )
-            }
-            const is_BookPurchase = await purchase.findOne(
-                {
-                    userId: new mongoose.Types.ObjectId(reviewBody.userId),
-                    BookId: new mongoose.Types.ObjectId(reviewBody.bookId),
-                    is_purchase: true
-                }
-            )
-            const userwithBookExists = await review.findOne(
-                {
-                    userId: new mongoose.Types.ObjectId(reviewBody.userId),
-                    bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
-                }
-            )
-            if (is_BookPurchase) {
                 if (!userwithBookExists) {
-                    var reviewInfo = await review.create(reviewBody);
+                    reviewInfo = await review.create(reviewBody);
                     const id = reviewInfo.userId
                     if (reviewInfo) {
                         const userData = await user.findOne({ _id: id })
@@ -416,7 +402,52 @@ class AuthService {
                 }
             }
             else {
-                return { message: "User not purchase this book." }
+                const is_BookPurchase = await purchase.findOne(
+                    {
+                        userId: new mongoose.Types.ObjectId(reviewBody.userId),
+                        BookId: new mongoose.Types.ObjectId(reviewBody.bookId),
+                        is_purchase: true
+                    }
+                )
+                const userwithBookExists = await review.findOne(
+                    {
+                        userId: new mongoose.Types.ObjectId(reviewBody.userId),
+                        bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
+                    }
+                )
+                if (is_BookPurchase) {
+                    if (!userwithBookExists) {
+                        reviewInfo = await review.create(reviewBody);
+                        const id = reviewInfo.userId
+                        if (reviewInfo) {
+                            const userData = await user.findOne({ _id: id })
+                            const reviewId = reviewInfo._id
+                            if (userData) {
+                                const image = userData.userImage
+                                const userName = userData.fullName
+                                const updateData = await review.updateMany(
+                                    { _id: reviewId },
+                                    {
+                                        $set: {
+                                            userImage: image,
+                                            userName: userName
+                                        }
+                                    },
+                                    {
+                                        new: true
+                                    }
+                                )
+                            }
+                        }
+                        return reviewInfo
+                    }
+                    else {
+                        return { message: "This user already post review on this book." }
+                    }
+                }
+                else {
+                    return { message: "User not purchase this book." }
+                }
             }
 
         } catch (error) {
