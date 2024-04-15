@@ -29,6 +29,10 @@ const ebookSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    bookVideos:{
+        type: String,
+        required: false
+    },
     category: {
         type: JSON,
         required: false,

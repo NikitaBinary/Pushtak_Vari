@@ -36,7 +36,7 @@ class AuthService {
         }
     }
 
-    async createEbookService(ebookData, imageUrl, pdfUrl) {
+    async createEbookService(ebookData, imageUrl, pdfUrl, videoUrl) {
         try {
             const categoryData = await category.findById({ _id: ebookData.category }, { _id: 1, categoryName: 1 })
             const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
@@ -49,7 +49,8 @@ class AuthService {
             const eBookDetail = await eBook.create({
                 ...ebookData,
                 bookImage: imageUrl,
-                bookPdf: pdfUrl
+                bookPdf: pdfUrl,
+                bookVideos: videoUrl
             });
             return eBookDetail
         } catch (error) {
@@ -57,11 +58,12 @@ class AuthService {
         }
     }
 
-    async updateEbookService(_id, dataBody, ImageUrl, pdfUrl) {
+    async updateEbookService(_id, dataBody, ImageUrl, pdfUrl, videoUrl) {
         try {
-            if (ImageUrl || pdfUrl) {
+            if (ImageUrl || pdfUrl || videoUrl) {
                 dataBody.bookImage = ImageUrl;
                 dataBody.bookPdf = pdfUrl;
+                dataBody.bookVideos = videoUrl;
             }
             if (dataBody.category) {
                 const categoryData = dataBody.category ? await category.findById(dataBody.category, { _id: 1, categoryName: 1 }) : null;
