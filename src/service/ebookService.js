@@ -99,7 +99,7 @@ class AuthService {
     }
     async getEbookListService() {
         try {
-            const eBookList = await eBook.find()
+            const eBookList = await eBook.find().collation({ locale: 'hi' }).sort({ bookName: 1 })
             return eBookList
         } catch (error) {
             throw error;
@@ -143,8 +143,12 @@ class AuthService {
             const id = new mongoose.Types.ObjectId(userId)
             const userInfo = await user.findOne({ _id: id })
 
+            let trendingBookQuery = [];
+            let newAggregatePipe = [];
+            let otherAggregatePipe = [];
             var booklist
             if (userInfo.userType == "INSTITUTE_USER") {
+                let condition = {}
                 const instituteId = userInfo.createdBy
                 const assignBook = await instituteBook.findOne({ instituteID: new mongoose.Types.ObjectId(instituteId) })
                 if (!assignBook) {
@@ -153,61 +157,35 @@ class AuthService {
                 }
                 booklist = assignBook.BookList
 
-            }
+                if (userInfo.genre_prefernce.length > 0) {
+                    var genreCategory = userInfo.genre_prefernce
+                    condition['category.categoryName'] = { $in: genreCategory };
+                }
+                if (userInfo.author_prefernce.length > 0) {
+                    var authorCategory = userInfo.author_prefernce
+                    condition.authorName = { $in: authorCategory };
+                }
+                if (category) {
+                    condition['category.categoryName'] = category;
+                }
+                //--------------trending book -------------------------------------------
 
-            let prefrenceCondition = {}
+                if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+                    trendingBookQuery.push(
+                        {
+                            $match: condition
+                        }
+                    );
+                }
 
-            if (userInfo.genre_prefernce.length > 0) {
-                var genreCategory = userInfo.genre_prefernce
-                prefrenceCondition['category.categoryName'] = { $in: genreCategory };
-            }
-            if (userInfo.author_prefernce.length > 0) {
-                var authorCategory = userInfo.author_prefernce
-                prefrenceCondition.authorName = { $in: authorCategory };
-            }
-            if (category) {
-                prefrenceCondition['category.categoryName'] = category;
-            }
-            if (booklist != undefined && booklist.length > 0) {
-                prefrenceCondition['_id'] = { $in: booklist }
-            }
-            //----------trendingBook---------------------------------------------------------
-            let trendingBookQuery = [];
-            if (typeof prefrenceCondition === 'object' && Object.keys(prefrenceCondition).length > 0) {
                 trendingBookQuery.push(
                     {
-                        $match: prefrenceCondition
+                        $match: {
+                            _id: { $in: booklist }
+                        }
                     }
-                );
-            }
-
-            // Add other pipeline stages for trending books
-            trendingBookQuery.push(
-                {
-                    $sort: { userCount: -1 }
-                },
-                {
-                    $lookup: {
-                        from: 'review_lists',
-                        localField: '_id',
-                        foreignField: 'bookId',
-                        as: "reviewData"
-                    }
-                },
-                {
-                    $sort: { created_at: -1 }
-                },
-                {
-                    $limit: 5
-                }
-            );
-            var treandingBookList = await eBook.aggregate(trendingBookQuery);
-            // If no books match the user preferences, fetch all books
-            if (treandingBookList.length === 0) {
-                trendingBookQuery = [
-                    {
-                        $match: { userCount: { $exists: true } }
-                    },
+                )
+                trendingBookQuery.push(
                     {
                         $sort: { userCount: -1 }
                     },
@@ -225,52 +203,163 @@ class AuthService {
                     {
                         $limit: 5
                     }
-                ];
-                treandingBookList = await eBook.aggregate(trendingBookQuery);
-            }
-            treandingBookList.forEach(book => {
-                const reviews = book.reviewData;
-                const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                book.ratings = ratingStats;
-                book.overallRating = Math.round(overallRating);
-                book.reviewUserCount = book.reviewData.length
-                book.reviewData = reviews
-            });
+                );
+                var treandingBookList = await eBook.aggregate(trendingBookQuery);
+                if (treandingBookList.length === 0) {
+                    trendingBookQuery = [
+                        {
+                            $match: {
+                                userCount: { $exists: true },
+                                _id: { $in: booklist }
+                            }
+                        },
+                        {
+                            $sort: { userCount: -1 }
+                        },
+                        {
+                            $lookup: {
+                                from: 'review_lists',
+                                localField: '_id',
+                                foreignField: 'bookId',
+                                as: "reviewData"
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        },
+                        {
+                            $limit: 5
+                        }
+                    ];
+                    treandingBookList = await eBook.aggregate(trendingBookQuery);
+                }
+                treandingBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+                //-----------------------newadded book---------------------------------------
 
-            ///----------------------------newly book ------------------------
-
-            var newAggregatePipe = []
-
-            if (typeof prefrenceCondition === 'object' && Object.keys(prefrenceCondition).length > 0) {
+                if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+                    newAggregatePipe.push(
+                        {
+                            $match: condition
+                        }
+                    );
+                }
                 newAggregatePipe.push(
                     {
-                        $match: prefrenceCondition
+                        $match: {
+                            _id: { $in: booklist }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
                     }
                 );
-            }
-            // Add other pipeline stages for trending books
-            newAggregatePipe.push(
-                {
-                    $sort: { userCount: -1 }
-                },
-                {
-                    $lookup: {
-                        from: 'review_lists',
-                        localField: '_id',
-                        foreignField: 'bookId',
-                        as: "reviewData"
-                    }
-                },
-                {
-                    $sort: { created_at: -1 }
+                var newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                if (newlyAddedBookList.length === 0) {
+                    newAggregatePipe = [
+                        {
+                            $match: { _id: { $in: booklist } }
+                        },
+                        {
+                            $lookup: {
+                                from: 'review_lists',
+                                localField: '_id',
+                                foreignField: 'bookId',
+                                as: "reviewData"
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        }
+                    ];
+
+                    newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
                 }
-            );
-            var newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
-            if (newlyAddedBookList.length === 0) {
-                newAggregatePipe = [
+                newlyAddedBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+                //-----------------------otherBook-------------------------------------------
+                otherAggregatePipe.push(
                     {
-                        $match: { userCount: { $exists: true } }
+                        $match: {
+                            'category.categoryName': "Others",
+                            _id: { $in: booklist }
+                        }
                     },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                )
+                otherAggregatePipe.push(
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                )
+                var otherBookList = await eBook.aggregate(otherAggregatePipe)
+
+                otherBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+                return { treandingBookList, newlyAddedBookList, otherBookList }
+            }
+            else {
+                let prefrenceCondition = {}
+
+                if (userInfo.genre_prefernce.length > 0) {
+                    var genreCategory = userInfo.genre_prefernce
+                    prefrenceCondition['category.categoryName'] = { $in: genreCategory };
+                }
+                if (userInfo.author_prefernce.length > 0) {
+                    var authorCategory = userInfo.author_prefernce
+                    prefrenceCondition.authorName = { $in: authorCategory };
+                }
+                if (category) {
+                    prefrenceCondition['category.categoryName'] = category;
+                }
+                //----------trendingBook---------------------------------------------------------
+
+                if (typeof prefrenceCondition === 'object' && Object.keys(prefrenceCondition).length > 0) {
+                    trendingBookQuery.push(
+                        {
+                            $match: prefrenceCondition
+                        }
+                    );
+                }
+
+                // Add other pipeline stages for trending books
+                trendingBookQuery.push(
                     {
                         $sort: { userCount: -1 }
                     },
@@ -284,42 +373,98 @@ class AuthService {
                     },
                     {
                         $sort: { created_at: -1 }
+                    },
+                    {
+                        $limit: 5
                     }
-                ];
-
-                newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
-            }
-            newlyAddedBookList.forEach(book => {
-                const reviews = book.reviewData;
-                const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                book.ratings = ratingStats;
-                book.overallRating = Math.round(overallRating);
-                book.reviewUserCount = book.reviewData.length
-                book.reviewData = reviews
-            });
-            //-------------------------other Book----------------------------------------------
-
-            const otherAggregatePipe = []
-            if (booklist != undefined && booklist.length > 0) {
-
-                prefrenceCondition['_id'] = { $in: booklist },
-                    prefrenceCondition['category.categoryName'] = "Others"
-            }
-            otherAggregatePipe.push(
-                {
-                    $lookup: {
-                        from: 'review_lists',
-                        localField: '_id',
-                        foreignField: 'bookId',
-                        as: "reviewData"
-                    }
-                },
-                {
-                    $sort: { created_at: -1 }
+                );
+                var treandingBookList = await eBook.aggregate(trendingBookQuery);
+                // If no books match the user preferences, fetch all books
+                if (treandingBookList.length === 0) {
+                    trendingBookQuery = [
+                        {
+                            $match: { userCount: { $exists: true } }
+                        },
+                        {
+                            $sort: { userCount: -1 }
+                        },
+                        {
+                            $lookup: {
+                                from: 'review_lists',
+                                localField: '_id',
+                                foreignField: 'bookId',
+                                as: "reviewData"
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        },
+                        {
+                            $limit: 5
+                        }
+                    ];
+                    treandingBookList = await eBook.aggregate(trendingBookQuery);
                 }
-            )
-            var otherBookList = await eBook.aggregate(otherAggregatePipe);
-            if (otherBookList.length === 0) {
+                treandingBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+
+                ///----------------------------newly book ------------------------
+
+                if (typeof prefrenceCondition === 'object' && Object.keys(prefrenceCondition).length > 0) {
+                    newAggregatePipe.push(
+                        {
+                            $match: prefrenceCondition
+                        }
+                    );
+                }
+                // Add other pipeline stages for trending books
+                newAggregatePipe.push(
+                    {
+                        $lookup: {
+                            from: 'review_lists',
+                            localField: '_id',
+                            foreignField: 'bookId',
+                            as: "reviewData"
+                        }
+                    },
+                    {
+                        $sort: { created_at: -1 }
+                    }
+                );
+                var newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                if (newlyAddedBookList.length === 0) {
+                    newAggregatePipe = [
+                        {
+                            $lookup: {
+                                from: 'review_lists',
+                                localField: '_id',
+                                foreignField: 'bookId',
+                                as: "reviewData"
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        }
+                    ];
+
+                    newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                }
+                newlyAddedBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+                //-------------------------other Book----------------------------------------------
+
                 otherAggregatePipe.push(
                     {
                         $match: {
@@ -344,16 +489,17 @@ class AuthService {
                     }
                 )
                 otherBookList = await eBook.aggregate(otherAggregatePipe)
+
+                otherBookList.forEach(book => {
+                    const reviews = book.reviewData;
+                    const { ratingStats, overallRating } = calculateRatingStats(reviews);
+                    book.ratings = ratingStats;
+                    book.overallRating = Math.round(overallRating);
+                    book.reviewUserCount = book.reviewData.length
+                    book.reviewData = reviews
+                });
+                return { treandingBookList, newlyAddedBookList, otherBookList }
             }
-            otherBookList.forEach(book => {
-                const reviews = book.reviewData;
-                const { ratingStats, overallRating } = calculateRatingStats(reviews);
-                book.ratings = ratingStats;
-                book.overallRating = Math.round(overallRating);
-                book.reviewUserCount = book.reviewData.length
-                book.reviewData = reviews
-            });
-            return { treandingBookList, newlyAddedBookList, otherBookList }
         } catch (error) {
             throw error;
         }

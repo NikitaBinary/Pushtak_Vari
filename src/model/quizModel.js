@@ -6,7 +6,6 @@ const quizSchema = new mongoose.Schema({
     },
     quizName: {
         type: String,
-        required: true,
     },
     description: {
         type: String,
@@ -19,10 +18,12 @@ const quizSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    language: {
+    languageInfo: {
         type: JSON
     }
 });
+
+quizSchema.index({ quizName: "text" });
 
 const QuizModel = mongoose.model('quiz_detail', quizSchema);
 

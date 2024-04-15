@@ -83,7 +83,8 @@ class authController {
     async getAppQuizListController(req, res) {
         try {
             const userId = req.query.userId
-            const quizList = await quizService.getAppQuizListService(userId);
+            const searchText = req.query.searchText || ""
+            const quizList = await quizService.getAppQuizListService(userId, searchText);
 
             return res.json({
                 status: 200,
