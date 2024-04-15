@@ -152,7 +152,6 @@ class AuthService {
                     )
                     quizDetail = await quiz.aggregate(questionAggregate)
                 }
-
             }
             else {
                 const questionAggregate1 = []
