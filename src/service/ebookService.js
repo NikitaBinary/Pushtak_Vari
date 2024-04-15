@@ -151,7 +151,7 @@ class AuthService {
 
                     return { message: "This institute not assign any book." }
                 }
-                booklist = assignBook.BookListio0
+                booklist = assignBook.BookList
 
             }
 
@@ -301,6 +301,7 @@ class AuthService {
 
             const otherAggregatePipe = []
             if (booklist != undefined && booklist.length > 0) {
+                
                 prefrenceCondition['_id'] = { $in: booklist },
                     prefrenceCondition['category.categoryName'] = "Others"
             }
@@ -358,9 +359,19 @@ class AuthService {
         }
     }
 
-    
+
     async addReviewService(reviewBody) {
         try {
+            const userId = reviewBody.userId
+            const userInfo = await user.findOne({ _id: userId })
+            if(userInfo.userType == 'INSTITUTE_USER'){
+                const userwithBookExists = await review.findOne(
+                    {
+                        userId: new mongoose.Types.ObjectId(reviewBody.userId),
+                        bookId: new mongoose.Types.ObjectId(reviewBody.bookId)
+                    }
+                )
+            }
             const is_BookPurchase = await purchase.findOne(
                 {
                     userId: new mongoose.Types.ObjectId(reviewBody.userId),
