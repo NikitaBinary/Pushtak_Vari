@@ -102,14 +102,28 @@ class AuthService {
         }
     }
 
-    async getAppQuizListService(userId) {
+    async getAppQuizListService(userId, searchText) {
         try {
+            console.log("searchText=========>", searchText)
             const userInfo = await user.findOne({ _id: userId })
             let quizDetail
             if (userInfo.userType == 'INSTITUTE_USER') {
                 const instituteId = userInfo.createdBy
+                const questionAggregate = []
+                if (searchText) {
+                    questionAggregate.push(
+                        {
+                            $match: {
+                                $text: { $search: searchText }
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
+                        }
+                    )
+                }
                 if (instituteId) {
-                    const questionAggregate = [
+                    questionAggregate.push(
                         {
                             $match: {
                                 userId: new mongoose.Types.ObjectId(instituteId)
@@ -135,26 +149,42 @@ class AuthService {
                                 question: "$quizData.questions"
                             }
                         }
-                    ]
+                    )
                     quizDetail = await quiz.aggregate(questionAggregate)
                 }
 
             }
             else {
-                const questionAggregate1 = [
-                    {
-                        $match: {
-                            userId: { $exists: false }
+                const questionAggregate1 = []
+                if (searchText) {
+                    questionAggregate1.push(
+                        {
+                            $match: {
+                                $text: { $search: searchText }
+                            }
+                        },
+                        {
+                            $sort: { created_at: -1 }
                         }
-                    },
-                    {
-                        $lookup: {
-                            from: 'quiz_questions',
-                            localField: "_id",
-                            foreignField: "quizId",
-                            as: "quizData"
-                        }
-                    },
+                    )
+                }
+                else {
+                    questionAggregate1.push(
+                        {
+                            $match: {
+                                userId: { $exists: false }
+                            }
+                        },
+                    )
+                }
+                questionAggregate1.push({
+                    $lookup: {
+                        from: 'quiz_questions',
+                        localField: "_id",
+                        foreignField: "quizId",
+                        as: "quizData"
+                    }
+                },
                     {
                         $unwind: "$quizData"
                     },
@@ -167,7 +197,7 @@ class AuthService {
                             question: "$quizData.questions"
                         }
                     }
-                ]
+                )
                 quizDetail = await quiz.aggregate(questionAggregate1)
             }
             return quizDetail
