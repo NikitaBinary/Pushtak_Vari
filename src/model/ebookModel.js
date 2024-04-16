@@ -30,9 +30,9 @@ const ebookSchema = new mongoose.Schema({
         default: []
     },
     category: {
-        type: JSON,
+        type: Array,
         required: false,
-        // default: "Other Book"
+        default: []
     },
     bookType: {
         type: JSON,
