@@ -114,16 +114,16 @@ class authController {
         try {
             let id = req.params.id
             const response = await instituteService.deleteInstituteInfoService(id);
-            if (!response.instituteInfo) {
+            if (response.message) {
                 return res.status(404).send({
                     status: 404,
-                    message: "Institute not exists",
+                    message: response.message
                 });
             }
             return res.status(200).send({
                 status: 200,
                 message: "Institute information deleted.",
-                data: response.institutedata
+                data: response
             })
         } catch (error) {
             return res.status(500).send({

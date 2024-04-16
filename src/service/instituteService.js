@@ -102,8 +102,19 @@ class AuthService {
             let instituteInfo = await user.findOne({ _id: _id, userType: "INSTITUTE" });
             if (instituteInfo) {
                 var institutedata = await user.findOneAndDelete({ _id, userType: "INSTITUTE" });
+                if (institutedata) {
+                    await user.deleteMany(
+                        {
+                            createdBy: _id,
+                            userType: "INSTITUTE_USER"
+                        }
+                    )
+                }
             }
-            return { instituteInfo, institutedata }
+            else {
+                return { message: "Institute not exists." }
+            }
+            return { institutedata }
         } catch (error) {
             throw error;
         }

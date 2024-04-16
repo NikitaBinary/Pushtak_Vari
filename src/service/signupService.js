@@ -422,6 +422,16 @@ class AuthService {
             let userInfo = await user.findOne({ _id: _id });
             if (userInfo) {
                 var userdata = await user.findOneAndDelete({ _id });
+                if (userdata.userType == 'INSTITUTE_USER') {
+                    const instituteId = userdata.createdBy
+                    await user.findOne(
+                        { _id: instituteId },
+                        {
+                            $inc: { studentCount: -1 }
+                        },
+                        { new: true }
+                    )
+                }
             }
             return { userInfo, userdata }
         } catch (error) {

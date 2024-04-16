@@ -20,10 +20,10 @@ Router.post("/addEbookType", ebookController.addEbookTypeController)
 Router.get("/ebookTypeList", ebookController.ebookTypeListController)
 Router.get("/ebooklanguageList", ebookController.ebooklanguageListController)
 Router.post("/createEbook", superAdminAuth, uploadStorage.fields
-    ([{ name: 'bookImages', maxCount: 10 }, { name: 'bookVideos', maxCount: 10 }, { name: 'bookPdf', maxCount: 1 }]),
+    ([{ name: 'bookImages', maxCount: 10 }, { name: 'bookPdf', maxCount: 1 }]),
     ebookController.createEbookController)
 Router.put("/updateEbook/:id", superAdminAuth, uploadStorage.fields
-    ([{ name: 'bookImages', maxCount: 10 }, { name: 'bookVideos', maxCount: 10 }, { name: 'bookPdf', maxCount: 1 }]), ebookController.updateEbookController)
+    ([{ name: 'bookImages', maxCount: 10 }, { name: 'bookPdf', maxCount: 1 }]), ebookController.updateEbookController)
 Router.delete("/deleteEbook/:id", superAdminAuth, ebookController.deleteEbookController)
 Router.get("/getEbookList", superAdminAuth, ebookController.getEbookListController)
 Router.get("/getEbookInfo/:id", superAdminAuth, ebookController.getEbookInfoController)
