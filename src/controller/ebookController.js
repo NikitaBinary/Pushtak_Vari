@@ -60,7 +60,6 @@ class authController {
         try {
             const pdfFile = req.files.bookPdf
             const imageFile = req.files.bookImages
-            const videoFile = req.files.bookVideos
             const data = req.body
 
             const webUrl = `${req.protocol}://${req.get('host')}`;
@@ -68,14 +67,11 @@ class authController {
             if (imageFile) {
                 var imageUrl = imageFile.map(file => `${webUrl}/uploads/${file.filename}`).join(', ')
             }
-            if (videoFile) {
-                var videoUrl = videoFile.map(file => `${webUrl}/uploads/${file.filename}`).join(', ')
-            }
             if (pdfFile) {
                 const [pdf_file] = pdfFile
                 var pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
             }
-            const ebookDetail = await ebookService.createEbookService(data, imageUrl, pdfUrl, videoUrl);
+            const ebookDetail = await ebookService.createEbookService(data, imageUrl, pdfUrl);
             return res.json({
                 status: 201,
                 message: "E-Book has been added successfully!",
@@ -96,14 +92,8 @@ class authController {
 
             const pdfFile = req.files.bookPdf
             const imageFile = req.files.bookImages
-            const videoFile = req.files.bookVideos
-
             const webUrl = `${req.protocol}://${req.get('host')}`;
 
-            // if (imageFile) {
-            //     const [image_file] = imageFile
-            //     var ImageUrl = `${webUrl}/uploads/${image_file.filename}`
-            // }
             if (pdfFile) {
                 const [pdf_file] = pdfFile
                 var pdfUrl = `${webUrl}/uploads/${pdf_file.filename}`
@@ -112,11 +102,8 @@ class authController {
             if (imageFile) {
                 var imageUrl = imageFile.map(file => `${webUrl}/uploads/${file.filename}`).join(', ')
             }
-            if (videoFile) {
-                var videoUrl = videoFile.map(file => `${webUrl}/uploads/${file.filename}`).join(', ')
-            }
 
-            const eBookInfo = await ebookService.updateEbookService(id, dataBody, imageUrl, pdfUrl, videoUrl);
+            const eBookInfo = await ebookService.updateEbookService(id, dataBody, imageUrl, pdfUrl);
             if (!eBookInfo.eBookDetail) {
                 return res.status(404).send({
                     status: 404,

@@ -26,12 +26,8 @@ const ebookSchema = new mongoose.Schema({
         required: false
     },
     bookImage: {
-        type: String,
-        required: false
-    },
-    bookVideos:{
-        type: String,
-        required: false
+        type: Array,
+        default: []
     },
     category: {
         type: JSON,
@@ -43,8 +39,8 @@ const ebookSchema = new mongoose.Schema({
         required: false
     },
     videoLink: {
-        type: String,
-        required: false
+        type: Array,
+        default: []
     },
     about: {
         type: String
