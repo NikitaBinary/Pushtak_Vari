@@ -316,7 +316,7 @@ class authController {
                 });
             }
             return res.status(200).send({
-                status: 200,
+                status: 440,
                 message: "User logout successfully!",
                 data: response.userdata
             })
