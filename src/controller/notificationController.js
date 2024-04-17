@@ -4,7 +4,12 @@ const notifiService = new authService();
 class authController {
     async createNotificationController(req, res) {
         try {
-            const notificationInfo = await notifiService.createNotificationService(req.body);
+            const imageFile = req.file
+            const webUrl = `${req.protocol}://${req.get('host')}`;
+            if (imageFile) {
+                var imageUrl = `${webUrl}/uploads/${imageFile.filename}`
+            }
+            const notificationInfo = await notifiService.createNotificationService(req.body, imageUrl);
             return res.json({
                 status: 201,
                 message: "Notification has been added successfully!",
@@ -59,7 +64,7 @@ class authController {
         try {
             const userId = req.query.userId
             const userType = req.query.userType
-            const notificationList = await notifiService.getNotificationList(userType,userId);
+            const notificationList = await notifiService.getNotificationList(userType, userId);
 
             return res.json({
                 status: 200,
