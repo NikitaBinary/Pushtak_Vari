@@ -165,6 +165,32 @@ class authController {
         }
     }
 
+    async eBookGraphController(req, res) {
+        try {
+            const userId = req.query.userId
+            const response = await purchaseService.eBookGraphService(userId)
+
+            // if (response.message) {
+            //     return res.status(200).send({
+            //         status: 404,
+            //         message: response.message
+            //     })
+            // }
+
+            return res.status(200).send({
+                status: 200,
+                message: "Get e-book graph.",
+                eBookProgress: response
+            })
+
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
     async getMyBookController(req, res) {
         try {
             const userId = req.params.id

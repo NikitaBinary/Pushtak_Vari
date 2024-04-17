@@ -9,7 +9,7 @@ const user = require("../model/userModel")
 class AuthService {
     async addQuizService(quizData) {
         try {
-            const bookLanguage = await language.findById({ _id: quizData.language }, { _id: 1, language: 1 })
+            const bookLanguage = await language.findById({ _id: quizData.languageInfo }, { _id: 1, language: 1 })
             quizData.languageInfo = bookLanguage
 
             const quizInfo = await quiz.create(quizData);
