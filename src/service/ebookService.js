@@ -43,7 +43,7 @@ class AuthService {
             const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
             const bookLanguage = await language.findById({ _id: ebookData.bookLanguage }, { _id: 1, language: 1 })
 
-            console.log("imageUrl----------->", imageUrl)
+            const imageUrlArray = imageUrl.split(", ").map(url => url.trim());
 
             ebookData.category = categoryData
             ebookData.bookType = bookType
@@ -51,11 +51,11 @@ class AuthService {
 
             const eBookDetail = await eBook.create({
                 ...ebookData,
-                bookImage: imageUrl,
+                bookImage: imageUrlArray,
                 bookPdf: pdfUrl
             });
             return eBookDetail
-            
+
         } catch (error) {
             throw error;
         }
@@ -64,7 +64,8 @@ class AuthService {
     async updateEbookService(_id, dataBody, ImageUrl, pdfUrl) {
         try {
             if (ImageUrl || pdfUrl) {
-                dataBody.bookImage = ImageUrl;
+                const imageUrlArray = ImageUrl.split(", ").map(url => url.trim());
+                dataBody.bookImage = imageUrlArray;
                 dataBody.bookPdf = pdfUrl;
             }
             if (dataBody.category) {
