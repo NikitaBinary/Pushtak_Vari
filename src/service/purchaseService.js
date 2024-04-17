@@ -420,10 +420,34 @@ class AuthService {
         }
     }
 
+    async eBookGraphService(userId) {
+        try {
+            const userCountForEachBook = await bookStatus.aggregate([
+                {
+                    $group: {
+                        _id: '$books.bookId',
+                        bookName: { $first: '$books.bookName' },
+                        userCount: { $addToSet: '$userId' },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        bookName: 1,
+                        userCount: { $size: '$userCount' },
+                    },
+                },
+            ]);
+            return userCountForEachBook
+        } catch (error) {
+            console.log("error------------->", error)
+            throw error
+        }
+    }
+
     async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress) {
         try {
             let status = Number((readPages / totalPages) * 100)
-            console.log("status----------->", status)
             const bookInfo = await ebook.findOne({ _id: bookId })
             if (!bookInfo) {
                 return { message: "This book not available" }

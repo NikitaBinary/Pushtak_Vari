@@ -43,7 +43,7 @@ class AuthService {
             const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
             const bookLanguage = await language.findById({ _id: ebookData.bookLanguage }, { _id: 1, language: 1 })
 
-            console.log("categoryData----------->", categoryData)
+            console.log("imageUrl----------->", imageUrl)
 
             ebookData.category = categoryData
             ebookData.bookType = bookType
