@@ -1,7 +1,7 @@
 const userModel = require("../model/userModel");
 const appUtils = require('./appUtils');
 const fcm = require('./fcm');
- 
+
 exports.sendPushNotification = async (req) => {
     try {
         console.log("sendPushNotificationData body ");
@@ -11,8 +11,9 @@ exports.sendPushNotification = async (req) => {
             type: req.body.type,
             title: req.body.title,
             message: req.body.message,
+            image: req.body.image
         };
- 
+
         if (req.body.usertype === 'csv') {
             await fs.createReadStream(`./public/uploads/csv/${req.file.filename}`)
                 .pipe(parse({ delimiter: ",", from_line: 1 }))
@@ -41,7 +42,7 @@ exports.sendPushNotification = async (req) => {
                     })
                 });
         };
- 
+
         if (req.body.usertype === 'specific') {
             let uservalues = req.body.uservalues;
             console.log("uservalues.length-->", uservalues.length);
@@ -54,17 +55,17 @@ exports.sendPushNotification = async (req) => {
             notificationObject.deviceTokens = appKey;
             console.log("-specific-");
         };
- 
+
         if (req.body.usertype === 'all') {
             // let user = await this.getUser({ appKey: { $ne: '' } });
-            let user = await userModel.find({_id:req.body.uservalues});
+            let user = await userModel.find({ _id: req.body.uservalues });
             for (let memb of user) {
                 appKey.push(memb.fcm_token);
             };
             notificationObject.deviceTokens = appKey;
             console.log("-all->");
         };
- 
+
         await this.PushAllNotifications(notificationObject);
         return {
             success: true,
@@ -78,7 +79,7 @@ exports.sendPushNotification = async (req) => {
         };
     };
 };
- 
+
 exports.PushAllNotifications = async (params) => {
     return new Promise((resolve, reject) => {
         try {
@@ -99,7 +100,7 @@ exports.PushAllNotifications = async (params) => {
             };
             console.log("---deviceTokens-->", params.deviceTokens);
             const tokenChunks = appUtils.splitArrayInToChunks(params.deviceTokens);
- 
+
             if (2 === 2) {
                 const promiseResult = [];
                 for (let i = 0; i < tokenChunks.length; i++) {

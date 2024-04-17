@@ -16,6 +16,9 @@ const notificationSchema = new mongoose.Schema({
     userType: {
         type: JSON,
         required: true
+    },
+    image: {
+        type: String
     }
 },
     {

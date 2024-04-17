@@ -6,10 +6,13 @@ const mongoose = require("mongoose")
 const user = require("../model/userModel")
 
 class AuthService {
-    async createNotificationService(data) {
+    async createNotificationService(data, imageUrl) {
         try {
-            const userTypeData = await userType.findById({ _id: data.userType }, { _id: 1, userType: 1 })
+            const id = data.userType
+            const userTypeData = await userType.findOne({ _id: new mongoose.Types.ObjectId(id) }, { _id: 1, userType: 1 })
+            
             data.userType = userTypeData
+            data.image = imageUrl
             const notificationInfo = await notification.create(data);
 
             if (notificationInfo.userType.userType == 'Users') {
@@ -19,8 +22,8 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
+                        image: notificationInfo.image,
                         usertype: "all",
-                        // uservalues: [new mongoose.Types.ObjectId("65d328e5d9d9a09ad6444ee7"), new mongoose.Types.ObjectId("660518c550caed9eedb0b8bd")]
                         uservalues: regularUserId
 
                     },
@@ -34,6 +37,7 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
+                        image: notificationInfo.image,
                         usertype: "all",
                         uservalues: instituteUserId
 
@@ -48,6 +52,7 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
+                        image: notificationInfo.image,
                         usertype: "all",
                         uservalues: allUserId
 
@@ -57,6 +62,7 @@ class AuthService {
             }
             return notificationInfo
         } catch (error) {
+            console.log("error---------->", error)
             throw error;
         }
     }
