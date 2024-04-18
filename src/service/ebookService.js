@@ -43,7 +43,9 @@ class AuthService {
             const bookType = await ebookType.findById({ _id: ebookData.bookType }, { _id: 1, ebookType: 1 })
             const bookLanguage = await language.findById({ _id: ebookData.bookLanguage }, { _id: 1, language: 1 })
 
-            const imageUrlArray = imageUrl.split(", ").map(url => url.trim());
+            if (imageUrl) {
+                var imageUrlArray = imageUrl.split(", ").map(url => url.trim());
+            }
 
             ebookData.category = categoryData
             ebookData.bookType = bookType
@@ -57,6 +59,7 @@ class AuthService {
             return eBookDetail
 
         } catch (error) {
+            console.log("error---------------->", error)
             throw error;
         }
     }
