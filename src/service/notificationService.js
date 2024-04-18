@@ -10,7 +10,7 @@ class AuthService {
         try {
             const id = data.userType
             const userTypeData = await userType.findOne({ _id: new mongoose.Types.ObjectId(id) }, { _id: 1, userType: 1 })
-            
+
             data.userType = userTypeData
             data.image = imageUrl
             const notificationInfo = await notification.create(data);
@@ -22,7 +22,11 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
-                        image: notificationInfo.image,
+                        android: {
+                            notification: {
+                                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
+                            }
+                        },
                         usertype: "all",
                         uservalues: regularUserId
 
@@ -37,7 +41,11 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
-                        image: notificationInfo.image,
+                        android: {
+                            notification: {
+                                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
+                            }
+                        },
                         usertype: "all",
                         uservalues: instituteUserId
 
@@ -52,10 +60,13 @@ class AuthService {
                         title: notificationInfo.notificationTitle,
                         type: notificationInfo.notificationType,
                         message: notificationInfo.message,
-                        image: notificationInfo.image,
+                        android: {
+                            notification: {
+                                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
+                            }
+                        },
                         usertype: "all",
                         uservalues: allUserId
-
                     },
                 };
                 sendPushNotification(notificationObj).then(() => { }).catch(() => { });
