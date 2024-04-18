@@ -116,7 +116,7 @@ class authController {
             const readPages = req.query.readPages
             const readingStatus = req.query.readingStatus
             const bookProgress = req.query.bookProgress
-            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress)
+            const response = await purchaseService.updateBookStatusService(userId, bookId, totalPages, readPages, bookProgress)
 
             if (response.message) {
                 return res.status(404).send({
