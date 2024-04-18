@@ -54,14 +54,21 @@ class AuthService {
 
     async getNotificationListService(userId) {
         try {
-            const userInfo = await user.findOne({ _id: userId }, { created_at: 1 });
-            const userCreatedAt = userInfo ? userInfo.created_at : null;
+            let instituteNotificationList, userNotificationList, notificationList
+            if (userId) {
+                const userInfo = await user.findOne({ _id: userId }, { created_at: 1 });
+                const userCreatedAt = userInfo ? userInfo.created_at : null;
 
-            // Fetch notifications created after user's creation date
-            const instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
-            const userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
-            const notificationList = await notification.find({ created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
-
+                // Fetch notifications created after user's creation date
+                instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
+                userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' }, created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
+                notificationList = await notification.find({ created_at: { $gt: userCreatedAt } }).sort({ created_at: -1 });
+            }
+            else {
+                instituteNotificationList = await notification.find({ "userType.userType": { $ne: 'Institutes' } }).sort({ created_at: -1 });
+                userNotificationList = await notification.find({ "userType.userType": { $ne: 'Users' } }).sort({ created_at: -1 });
+                notificationList = await notification.find({}).sort({ created_at: -1 });
+            }
             return { instituteNotificationList, userNotificationList, notificationList };
         } catch (error) {
             throw error;
