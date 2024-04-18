@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 
 const uploadStorage = multer({ storage: storage })
 
-Router.post("/createNotification", superAdminAuth, uploadStorage.single("image"), notificationController.createNotificationController);
+Router.post("/createNotification", superAdminAuth, uploadStorage.single("imageUrl"), notificationController.createNotificationController);
 Router.get("/getUserTypeList", notificationController.getUserTypeList);
 Router.get("/getNotificationList",superAdminAuth,notificationController.getNotificationList)
 Router.get("/getNotificationTypeList",notificationController.getNotificationTypeList)

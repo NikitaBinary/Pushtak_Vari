@@ -451,7 +451,7 @@ class AuthService {
         }
     }
 
-    async updateBookStatusService(userId, bookId, totalPages, readPages, readingStatus, bookProgress) {
+    async updateBookStatusService(userId, bookId, totalPages, readPages, bookProgress) {
         try {
             let status = Number((readPages / totalPages) * 100)
             const bookInfo = await ebook.findOne({ _id: bookId })
