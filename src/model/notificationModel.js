@@ -17,7 +17,7 @@ const notificationSchema = new mongoose.Schema({
         type: JSON,
         required: true
     },
-    image: {
+    imageUrl: {
         type: String
     }
 },
