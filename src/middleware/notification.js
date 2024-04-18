@@ -13,9 +13,12 @@ exports.sendPushNotification = async (req) => {
             message: req.body.message,
             android: {
                 notification: {
-                  imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
+                    imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
                 }
-              }
+            },
+            data: {
+                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
+            }
         };
 
         if (req.body.usertype === 'csv') {
