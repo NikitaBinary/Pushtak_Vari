@@ -16,15 +16,15 @@ const readingBookSchema = new mongoose.Schema({
             type: String,
             enum: ['Incomplete', 'Complete'],
             default: 'Incomplete'
+        },
+        lastReadPage: {
+            type: Number,
+            default: 0
         }
     }
     ,
     userId: {
         type: mongoose.Schema.Types.ObjectId
-    },
-    lastReadPage: {
-        type: Number,
-        default: 0
     }
 
 },
