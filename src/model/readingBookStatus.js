@@ -22,6 +22,10 @@ const readingBookSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId
     },
+    lastReadPage: {
+        type: Number,
+        default: 0
+    }
 
 },
     {
