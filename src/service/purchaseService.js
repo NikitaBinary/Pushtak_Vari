@@ -486,7 +486,8 @@ class AuthService {
                             bookId: bookId,
                             bookName: bookInfo.bookName,
                             readingPercent: status,
-                            bookProgress: status == 100 ? 'Complete' : 'Incomplete'
+                            bookProgress: status == 100 ? 'Complete' : 'Incomplete',
+                            lastReadPage: readPages
                         },
                         userId: userId
                     }
@@ -504,40 +505,44 @@ class AuthService {
                     }
                 }
                 else {
-                    if (status > is_userBookExists.books.readingPercent) {
-                        readingInfo = await bookStatus.findOneAndUpdate(
-                            {
-                                userId: new mongoose.Types.ObjectId(userId),
-                                'books.bookId': bookId
-                            },
-                            {
-                                $set: {
-                                    'books.readingPercent': status,
-                                    'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
-                                    'books.bookName': bookInfo.bookName
-                                }
-                            },
-                            { new: true }
-                        )
-                        if (readingInfo) {
-                            await ebook.findOneAndUpdate(
-                                { _id: bookId },
+                    let lastReadPage = is_userBookExists.books.lastReadPage || 0;
+                    if (readPages > lastReadPage) {
+                        if (status > is_userBookExists.books.readingPercent) {
+                            readingInfo = await bookStatus.findOneAndUpdate(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': bookId
+                                },
                                 {
                                     $set: {
-                                        readingPercent: readingInfo.books.readingPercent
+                                        'books.readingPercent': status,
+                                        'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
+                                        'books.bookName': bookInfo.bookName,
+                                        'books.lastReadPage': readPages
                                     }
                                 },
                                 { new: true }
                             )
+                            if (readingInfo) {
+                                await ebook.findOneAndUpdate(
+                                    { _id: bookId },
+                                    {
+                                        $set: {
+                                            readingPercent: readingInfo.books.readingPercent
+                                        }
+                                    },
+                                    { new: true }
+                                )
+                            }
                         }
-                    }
-                    else {
-                        readingInfo = await bookStatus.findOneAndUpdate(
-                            {
-                                userId: new mongoose.Types.ObjectId(userId),
-                                'books.bookId': bookId
-                            },
-                        )
+                        else {
+                            readingInfo = await bookStatus.findOneAndUpdate(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': bookId
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -557,6 +562,7 @@ class AuthService {
                             bookName: bookInfo.bookName,
                             readingPercent: status,
                             bookProgress: status == 100 ? 'Complete' : 'Incomplete',
+                            lastReadPage: readPages
                         },
                         userId: userId
                     }
@@ -574,40 +580,44 @@ class AuthService {
                     }
                 }
                 else {
-                    if (status > is_userBookExists.books.readingPercent) {
-                        readingInfo = await bookStatus.findOneAndUpdate(
-                            {
-                                userId: new mongoose.Types.ObjectId(userId),
-                                'books.bookId': bookId
-                            },
-                            {
-                                $set: {
-                                    'books.readingPercent': status,
-                                    'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
-                                    'books.bookName': bookInfo.bookName
-                                }
-                            },
-                            { new: true }
-                        )
-                        if (readingInfo) {
-                            await ebook.findOneAndUpdate(
-                                { _id: bookId },
+                    let lastReadPage = is_userBookExists.books.lastReadPage || 0;
+                    if (readPages > lastReadPage) {
+                        if (status > is_userBookExists.books.readingPercent) {
+                            readingInfo = await bookStatus.findOneAndUpdate(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': bookId
+                                },
                                 {
                                     $set: {
-                                        readingPercent: status
+                                        'books.readingPercent': status,
+                                        'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
+                                        'books.bookName': bookInfo.bookName,
+                                        'books.lastReadPage': readPages
                                     }
                                 },
                                 { new: true }
                             )
+                            if (readingInfo) {
+                                await ebook.findOneAndUpdate(
+                                    { _id: bookId },
+                                    {
+                                        $set: {
+                                            readingPercent: status
+                                        }
+                                    },
+                                    { new: true }
+                                )
+                            }
                         }
-                    }
-                    else {
-                        readingInfo = await bookStatus.findOneAndUpdate(
-                            {
-                                userId: new mongoose.Types.ObjectId(userId),
-                                'books.bookId': bookId
-                            },
-                        )
+                        else {
+                            readingInfo = await bookStatus.findOneAndUpdate(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': bookId
+                                },
+                            )
+                        }
                     }
                 }
             }
