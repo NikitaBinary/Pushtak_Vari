@@ -5,6 +5,7 @@ const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
 const subscription = require("../model/subscriptionModel")
+const session = require("../model/userSessionModel")
 
 
 class AuthService {
