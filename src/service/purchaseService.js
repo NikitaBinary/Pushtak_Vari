@@ -453,7 +453,7 @@ class AuthService {
 
     async updateBookStatusService(userId, bookId, totalPages, readPages, bookProgress) {
         try {
-            let status = Number((readPages / totalPages) * 100)
+            let status = Math.min(Number((readPages / totalPages) * 100), 100);
             const bookInfo = await ebook.findOne({ _id: bookId })
             if (!bookInfo) {
                 return { message: "This book not available" }
@@ -486,7 +486,7 @@ class AuthService {
                             bookId: bookId,
                             bookName: bookInfo.bookName,
                             readingPercent: status,
-                            bookProgress: 'Incomplete'
+                            bookProgress: status == 100 ? 'Complete' : 'Incomplete'
                         },
                         userId: userId
                     }
@@ -504,7 +504,7 @@ class AuthService {
                     }
                 }
                 else {
-                    if (status >= is_userBookExists.books.readingPercent) {
+                    if (status > is_userBookExists.books.readingPercent) {
                         readingInfo = await bookStatus.findOneAndUpdate(
                             {
                                 userId: new mongoose.Types.ObjectId(userId),
@@ -513,7 +513,7 @@ class AuthService {
                             {
                                 $set: {
                                     'books.readingPercent': status,
-                                    'books.bookProgress': bookProgress,
+                                    'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
                                     'books.bookName': bookInfo.bookName
                                 }
                             },
@@ -556,7 +556,7 @@ class AuthService {
                             bookId: bookId,
                             bookName: bookInfo.bookName,
                             readingPercent: status,
-                            bookProgress: 'Incomplete'
+                            bookProgress: status == 100 ? 'Complete' : 'Incomplete',
                         },
                         userId: userId
                     }
@@ -574,7 +574,7 @@ class AuthService {
                     }
                 }
                 else {
-                    if (status >= is_userBookExists.books.readingPercent) {
+                    if (status > is_userBookExists.books.readingPercent) {
                         readingInfo = await bookStatus.findOneAndUpdate(
                             {
                                 userId: new mongoose.Types.ObjectId(userId),
@@ -583,7 +583,7 @@ class AuthService {
                             {
                                 $set: {
                                     'books.readingPercent': status,
-                                    'books.bookProgress': bookProgress,
+                                    'books.bookProgress': status == 100 ? 'Complete' : 'Incomplete',
                                     'books.bookName': bookInfo.bookName
                                 }
                             },
