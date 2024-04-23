@@ -505,6 +505,7 @@ class AuthService {
                     }
                 }
                 else {
+                    console.log("readPages------------------->", readPages)
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
                     if (readPages > lastReadPage) {
                         if (status > is_userBookExists.books.readingPercent) {
@@ -581,8 +582,8 @@ class AuthService {
                 }
                 else {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
-                    if (readPages > lastReadPage) {
-                        if (status > is_userBookExists.books.readingPercent) {
+                    if (readPages >= lastReadPage) {
+                        if (status >= is_userBookExists.books.readingPercent) {
                             readingInfo = await bookStatus.findOneAndUpdate(
                                 {
                                     userId: new mongoose.Types.ObjectId(userId),
