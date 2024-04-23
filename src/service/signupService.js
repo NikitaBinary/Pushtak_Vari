@@ -5,6 +5,7 @@ const { verifyPassword, getPasswordHash } = require("../helper/passwordHelper");
 const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
 const subscription = require("../model/subscriptionModel")
+const session = require("../model/userSessionModel")
 
 
 class AuthService {
@@ -176,7 +177,11 @@ class AuthService {
                     case 'INSTITUTE':
                     case 'REGULAR_USER':
                         data = await user.findOne({ emailId: userBody.emailId });
-                        console.log("data------->", data.password)
+                        if (data.userType == 'INSTITUTE_USER') {
+                            const instituteId = data.createdBy
+                            var instituteInfo = await user.findOne({ _id: instituteId }, { instituteImage: 1 })
+                            console.log("instituteInfo--------------->", instituteInfo)
+                        }
                         console.log("usrr-------->", userBody.password)
                         await verifyPassword(userBody.password, data.password);
 
@@ -197,6 +202,9 @@ class AuthService {
                     },
                     { new: true }
                 )
+                if (userInfo) {
+                    userInfo.instituteImage = instituteInfo.instituteImage
+                }
                 return {
                     token: token,
                     userInfo
