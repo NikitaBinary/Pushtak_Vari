@@ -189,7 +189,7 @@ class AuthService {
                         return { message: "Invalid user access." };
                 }
                 var token = await generateToken(
-                    { email: userInfo.emailId, name: userInfo.fullName }
+                    { email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '1h' }
                 )
 
                 const existingSession = await session.findOne({ email: userInfo.emailId });
@@ -293,9 +293,9 @@ class AuthService {
             const email = body.emailId;
             let checkOtp = await user.findOne({ emailId: email });
             let instituteCheckOtp = await institute.findOne({ emailId: email });
-            let password 
+            let password
             if (checkOtp) {
-                password  = await getPasswordHash(body.password, 12);
+                password = await getPasswordHash(body.password, 12);
                 let userInfo = await user.updateOne({ _id: checkOtp._id }, { $set: { password: password } }, { new: true });
                 return true;
             }
@@ -361,9 +361,9 @@ class AuthService {
                     var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, no_of_Users: 1, no_of_Books: 1 }) : null;
                     dataBody.select_Subscription = subscriptionInfo
                     dataBody.is_subscribed = subscriptionInfo ? true : false,
-                    dataBody.no_of_user = subscriptionInfo ? subscriptionInfo.no_of_Users : 0,
-                    dataBody.no_of_books =subscriptionInfo ? subscriptionInfo.no_of_Books : 0
-                    
+                        dataBody.no_of_user = subscriptionInfo ? subscriptionInfo.no_of_Users : 0,
+                        dataBody.no_of_books = subscriptionInfo ? subscriptionInfo.no_of_Books : 0
+
                     subscriptionInfo.no_of_books
                     if (instituteUrl) {
                         dataBody.instituteImage = instituteUrl
