@@ -293,13 +293,14 @@ class AuthService {
             const email = body.emailId;
             let checkOtp = await user.findOne({ emailId: email });
             let instituteCheckOtp = await institute.findOne({ emailId: email });
+            let password 
             if (checkOtp) {
-                let password = await getPasswordHash(body.password, 12);
+                password  = await getPasswordHash(body.password, 12);
                 let userInfo = await user.updateOne({ _id: checkOtp._id }, { $set: { password: password } }, { new: true });
                 return true;
             }
             if (instituteCheckOtp) {
-                let password = await getPasswordHash(body.password, 12);
+                password = await getPasswordHash(body.password, 12);
                 let userInfo = await institute.updateOne({ _id: instituteCheckOtp._id }, { $set: { password: password } }, { new: true });
                 return true;
             }
