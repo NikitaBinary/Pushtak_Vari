@@ -193,12 +193,13 @@ class AuthService {
 
                 const existingSession = await session.findOne({ email: userInfo.emailId });
                 if (existingSession) {
+                    await user.findByIdAndUpdate({ _id: existingSession.userId }, { loginStatus: false });
                     // Update existing session
                     await session.updateOne(
                         { email: userInfo.emailId },
                         { token }
                     );
-                    await user.findByIdAndUpdate(existingSession.userId, { loginStatus: false });
+
                 } else {
                     // Create new session
                     await session.create({
