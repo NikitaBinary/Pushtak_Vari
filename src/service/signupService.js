@@ -72,9 +72,7 @@ class AuthService {
                             is_active: true,
                             studentList: [],
                             instituteImage: institute_Image || "",
-                            studentCount: 0,
-                            no_of_user: userBody.no_of_user,
-                            no_of_books: userBody.no_of_books
+                            studentCount: 0
                         };
                         break;
                     default:
@@ -83,7 +81,8 @@ class AuthService {
                 userDetail = await user.create(newUser);
                 const createDate = userDetail.created_at
                 if (userDetail && userDetail.userType == 'INSTITUTE') {
-                    var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1 }) : null;
+                    var subscriptionInfo = userBody.select_Subscription ? await subscription.findOne({ _id: userBody.select_Subscription }, { duration: 1, no_of_Users: 1, no_of_Books: 1 }) : null;
+                    console.log("subscriptionInfo--------------->", subscriptionInfo)
                     var expiryDate
                     if (subscriptionInfo.duration == 0) {
                         expiryDate = null
@@ -101,7 +100,9 @@ class AuthService {
                             $set: {
                                 select_Subscription: subscriptionInfo,
                                 subscriptionExpire: expiryDate,
-                                is_subscribed: true
+                                is_subscribed: subscriptionInfo ? true : false,
+                                no_of_user: subscriptionInfo ? subscriptionInfo.no_of_Users : 0,
+                                no_of_books: subscriptionInfo ? subscriptionInfo.no_of_Books : 0
                             }
                         }, {
                         new: true
@@ -356,9 +357,13 @@ class AuthService {
 
             if (userDetail.userType == 'INSTITUTE') {
                 if (dataBody.select_Subscription) {
-                    var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1 }) : null;
+                    var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, no_of_Users: 1, no_of_Books: 1 }) : null;
                     dataBody.select_Subscription = subscriptionInfo
-                    dataBody.is_subscribed = true
+                    dataBody.is_subscribed = subscriptionInfo ? true : false,
+                    dataBody.no_of_user = subscriptionInfo ? subscriptionInfo.no_of_Users : 0,
+                    dataBody.no_of_books =subscriptionInfo ? subscriptionInfo.no_of_Books : 0
+                    
+                    subscriptionInfo.no_of_books
                     if (instituteUrl) {
                         dataBody.instituteImage = instituteUrl
                     }
@@ -412,7 +417,6 @@ class AuthService {
                 }
             }
             else {
-                console.log("jfsjfosfjso;")
                 var id = userDetail._id
                 if (imageUrl) {
                     dataBody.userImage = imageUrl
