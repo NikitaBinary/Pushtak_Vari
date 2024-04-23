@@ -1,6 +1,7 @@
 const HttpStatus = require('http-status-codes');
 const userService = require('../service/signupService');
 const insitituteService = require('../service/instituteService');
+const Session = require("../model/userSessionModel")
 
 const { verifyToken } = require('../helper/generateToken');
 const useService = new userService()
@@ -15,8 +16,13 @@ async function superAdminAuth(req, res, next) {
             })
         } else {
             const token = req.headers.authorization.split('Bearer')[1].trim();
-
             const payload = await verifyToken(token);
+
+            // Check if session is still valid in MongoDB
+            const session = await Session.findOne({ email: payload.email });
+            if (!session || session.token !== token) {
+                return res.status(401).json({ message: 'Token expire' });
+            }
 
             if (payload.email && payload.name) {
                 let user = await useService.verifyUser({ emailId: payload.email });
@@ -24,8 +30,8 @@ async function superAdminAuth(req, res, next) {
                     user = await InsiService.verifyUser({ emailId: payload.email });
                 }
                 req.email = user.emailId;
-                 req.userId = user._id;
-                
+                req.userId = user._id;
+
             }
             next();
         }

@@ -180,9 +180,7 @@ class AuthService {
                         if (data.userType == 'INSTITUTE_USER') {
                             const instituteId = data.createdBy
                             var instituteInfo = await user.findOne({ _id: instituteId }, { instituteImage: 1 })
-                            console.log("instituteInfo--------------->", instituteInfo)
                         }
-                        console.log("usrr-------->", userBody.password)
                         await verifyPassword(userBody.password, data.password);
 
                         break;
@@ -192,6 +190,60 @@ class AuthService {
                 var token = await generateToken(
                     { email: userInfo.emailId, name: userInfo.fullName }
                 )
+
+                const existingSession = await session.findOne({ email: userInfo.emailId });
+                if (existingSession) {
+                    // Update existing session
+                    let _id = userInfo._id
+                    const logoutDeatil = await user.findByIdAndUpdate(
+                        _id, { loginStatus: false }, { new: true }
+                    );
+                    const newSession = await session.updateOne(
+                        { email: userInfo.emailId },
+                        { token },
+                    );
+                } else {
+                    // Create new session
+                    await session.create({
+                        email: userInfo.emailId,
+                        token,
+                        userId: userInfo._id,
+                        userName: userInfo.fullName
+                    });
+                }
+                // const userSession = await session.findOneAndUpdate(
+                //     { email: userInfo.emailId },
+                //     { token },
+                //     { upsert: true }
+                // );
+                // console.log("token9999999999--------------->", token)
+
+                // if (userSession) {
+                //     console.log("11113331111--------------->", userSession)
+
+                //     let _id = userInfo._id
+                //     const logoutDeatil = await user.findByIdAndUpdate(
+                //         _id, { loginStatus: false }, { new: true }
+                //     );
+                //     if (logoutDeatil) {
+                //         await session.findOneAndDelete({ email: userInfo.emailId });
+                //     }
+                // }
+                // else {
+                //     // Store session token in MongoDB
+                //     let seesionObj = {
+                //         email: userInfo.emailId,
+                //         token: token,
+                //         userId: userInfo._id,
+                //         userName: userInfo.fullName
+                //     }
+                //     const useeee = await session.create(
+                //         seesionObj
+                //     );
+                //     console.log("comeeee2222222222", useeee)
+
+                // }
+
                 await user.findOneAndUpdate(
                     { emailId: userBody.emailId },
                     {
