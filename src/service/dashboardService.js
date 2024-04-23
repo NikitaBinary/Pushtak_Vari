@@ -14,10 +14,9 @@ class AuthService {
 
             if (instituteId) {
                 var instituteUserCount = await user.find({ createdBy: new mongoose.Types.ObjectId(instituteId), userType: "INSTITUTE_USER" }).countDocuments()
-
                 var instituteActiveUserCount = await user.countDocuments({ is_active: true, userType: "INSTITUTE_USER", createdBy: new mongoose.Types.ObjectId(instituteId) })
                 var instituteInactiveUserCount = await user.countDocuments({ is_active: false, userType: "INSTITUTE_USER", createdBy: new mongoose.Types.ObjectId(instituteId) })
-
+                var subcriptionPlan = await user.findOne({ _id: instituteId }, { subscriptionExpire: 1, no_of_user: 1, no_of_books: 1 })
             }
 
 
@@ -132,7 +131,8 @@ class AuthService {
                 instituteInactiveUserCount,
                 totalInstitute,
                 eBookCount,
-                instituteUserCount
+                instituteUserCount,
+                subcriptionPlan
             }
 
             return {
