@@ -220,7 +220,7 @@ class AuthService {
                     },
                     { new: true }
                 )
-                if (userInfo) {
+                if (instituteInfo) {
                     userInfo.instituteImage = instituteInfo.instituteImage
                 }
                 return {
