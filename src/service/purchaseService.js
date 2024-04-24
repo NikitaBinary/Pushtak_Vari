@@ -4,6 +4,7 @@ const cart = require("../model/cartModel")
 const ebook = require("../model/ebookModel");
 const user = require("../model/userModel");
 const bookStatus = require("../model/readingBookStatus")
+const bookAccess_userCount = require("../model/bookAccessCount")
 
 class AuthService {
     async addToPurchaseService(purchaseData) {
@@ -451,17 +452,72 @@ class AuthService {
         }
     }
 
-    async updateBookStatusService(userId, bookId, totalPages, readPages, bookProgress) {
+    async updateBookStatusService(userId, bookId, totalPages, readPages, currentReading) {
         try {
-            let status = Math.min(Number((readPages / totalPages) * 100), 100);
             const bookInfo = await ebook.findOne({ _id: bookId })
             if (!bookInfo) {
                 return { message: "This book not available" }
             }
-            const userInfo = await user.findOne({ _id: userId }, { userType: 1 })
+            const userInfo = await user.findOne({ _id: userId }, { userType: 1, createdBy: 1 })
             if (!userInfo) {
                 return { message: "User not found." }
             }
+            if (userInfo.userType === 'INSTITUTE_USER') {
+                const instituteId = userInfo.createdBy;
+
+                const instituteInfo = await user.findOne(
+                    { _id: new mongoose.Types.ObjectId(instituteId) },
+                    { no_of_user: 1, _id: 1, no_of_books: 1 }
+                );
+
+                if (instituteInfo) {
+                    const bookAccessInfo = await bookAccess_userCount.findOne(
+                        {
+                            bookId: new mongoose.Types.ObjectId(bookId),
+                            instituteId: new mongoose.Types.ObjectId(instituteId),
+                        }
+                    )
+                    if (!bookAccessInfo) {
+                        await bookAccess_userCount.create(
+                            {
+                                bookId: bookId,
+                                instituteId: instituteId,
+                                subscribeUserCount: instituteInfo.no_of_user,
+                                accessUserCount: 1,
+                                currentReading: currentReading
+                            }
+                        )
+                    }
+                    if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
+                        var bookUserAccess = await bookAccess_userCount.findOneAndUpdate(
+                            {
+                                bookId: new mongoose.Types.ObjectId(bookId),
+                                instituteId: new mongoose.Types.ObjectId(instituteId),
+                            },
+                            { $inc: { accessUserCount: 1 } },
+                            { new: true }
+                        );
+                        if (currentReading == 'false') {
+                            await bookAccess_userCount.findOneAndUpdate(
+                                {
+                                    bookId: new mongoose.Types.ObjectId(bookId),
+                                    instituteId: new mongoose.Types.ObjectId(instituteId),
+                                },
+                                { $inc: { accessUserCount: -1 } }
+                            );
+                        }
+                    }
+                    else {
+                        return { message: "Access limit exceeded. Please purchase the book license." }
+                    }
+
+
+
+                }
+            }
+
+            let status = Math.min(Number((readPages / totalPages) * 100), 100);
+
             let readingInfo
             if (userInfo.userType == 'REGULAR_USER') {
                 const is_BookExist = await purchase.findOne(
@@ -476,7 +532,7 @@ class AuthService {
                 const is_userBookExists = await bookStatus.findOne(
                     {
                         userId: new mongoose.Types.ObjectId(userId),
-                        'books.bookId': bookId
+                        'books.bookId': new mongoose.Types.ObjectId(bookId)
                     }
                 )
                 if (!is_userBookExists) {
@@ -492,17 +548,17 @@ class AuthService {
                         userId: userId
                     }
                     readingInfo = await bookStatus.create(bookObj)
-                    if (readingInfo) {
-                        await ebook.findOneAndUpdate(
-                            { _id: bookId },
-                            {
-                                $set: {
-                                    readingPercent: readingInfo.books.readingPercent
-                                }
-                            },
-                            { new: true }
-                        )
-                    }
+                    // if (readingInfo) {
+                    //     await ebook.findOneAndUpdate(
+                    //         { _id: bookId },
+                    //         {
+                    //             $set: {
+                    //                 readingPercent: readingInfo.books.readingPercent
+                    //             }
+                    //         },
+                    //         { new: true }
+                    //     )
+                    // }
                 }
                 else {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
@@ -511,7 +567,7 @@ class AuthService {
                             readingInfo = await bookStatus.findOneAndUpdate(
                                 {
                                     userId: new mongoose.Types.ObjectId(userId),
-                                    'books.bookId': bookId
+                                    'books.bookId': new mongoose.Types.ObjectId(bookId)
                                 },
                                 {
                                     $set: {
@@ -551,7 +607,7 @@ class AuthService {
                 const is_userBookExists = await bookStatus.findOne(
                     {
                         userId: new mongoose.Types.ObjectId(userId),
-                        'books.bookId': bookId
+                        'books.bookId': new mongoose.Types.ObjectId(bookId)
                     }
                 )
                 if (!is_userBookExists) {
@@ -586,7 +642,7 @@ class AuthService {
                             readingInfo = await bookStatus.findOneAndUpdate(
                                 {
                                     userId: new mongoose.Types.ObjectId(userId),
-                                    'books.bookId': bookId
+                                    'books.bookId': new mongoose.Types.ObjectId(bookId)
                                 },
                                 {
                                     $set: {
@@ -598,17 +654,17 @@ class AuthService {
                                 },
                                 { new: true }
                             )
-                            if (readingInfo) {
-                                await ebook.findOneAndUpdate(
-                                    { _id: bookId },
-                                    {
-                                        $set: {
-                                            readingPercent: status
-                                        }
-                                    },
-                                    { new: true }
-                                )
-                            }
+                            // if (readingInfo) {
+                            //     await ebook.findOneAndUpdate(
+                            //         { _id: bookId },
+                            //         {
+                            //             $set: {
+                            //                 readingPercent: status
+                            //             }
+                            //         },
+                            //         { new: true }
+                            //     )
+                            // }
                         }
 
                     }

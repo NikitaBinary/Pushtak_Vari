@@ -784,7 +784,7 @@ class AuthService {
         try {
             let pdfInfo
             if (userId && bookId) {
-                pdfInfo = await pdf_Highlighter.findOne(
+                pdfInfo = await pdf_Highlighter.find(
                     {
                         userId: new mongoose.Types.ObjectId(userId),
                         bookId: new mongoose.Types.ObjectId(bookId)

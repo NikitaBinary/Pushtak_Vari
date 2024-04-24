@@ -6,6 +6,7 @@ const { generateToken } = require('../helper/generateToken');
 const Mail = require('../helper/mail')
 const subscription = require("../model/subscriptionModel")
 const session = require("../model/userSessionModel")
+const bookAccess_userCount = require("../model/bookAccessCount")
 
 
 class AuthService {
@@ -373,6 +374,21 @@ class AuthService {
                         dataBody,
                         { new: true }
                     )
+                    if (userInfo) {
+                        const accessUser_exists = await bookAccess_userCount.findOne({ instituteId: _id })
+                        if (accessUser_exists) {
+                            await bookAccess_userCount.updateMany(
+                                { instituteId: _id },
+                                {
+                                    subscribeUserCount: userInfo.no_of_user
+                                },
+                                { new: true }
+                            )
+                        }
+                        else {
+                            console.log("this institute no one user start reading book.")
+                        }
+                    }
                 }
                 else {
                     var userInfo = await user.findOneAndUpdate(
