@@ -7,6 +7,7 @@ const review = require("../model/reviewModel");
 const user = require("../model/userModel");
 const instituteBook = require("../model/instituteAssignBook");
 const purchase = require("../model/bookPurchaseModel")
+const pdf_Highlighter = require("../model/addPdfHighLighter")
 
 
 class AuthService {
@@ -767,6 +768,33 @@ class AuthService {
         try {
             const languageList = await language.find({}, { _id: 1, language: 1 })
             return languageList
+        } catch (error) {
+            throw error;
+        }
+    }
+    async addPdfCommentService(data) {
+        try {
+            const pdfHighlighterDetail = await pdf_Highlighter.create(data)
+            return pdfHighlighterDetail
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getPdfCommentService(userId, bookId) {
+        try {
+            let pdfInfo
+            if (userId && bookId) {
+                pdfInfo = await pdf_Highlighter.findOne(
+                    {
+                        userId: new mongoose.Types.ObjectId(userId),
+                        bookId: new mongoose.Types.ObjectId(bookId)
+                    }
+                )
+            }
+            else {
+               return {message:"UserId and BookId is required."}
+            }
+            return pdfInfo
         } catch (error) {
             throw error;
         }

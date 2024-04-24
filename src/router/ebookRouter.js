@@ -40,5 +40,9 @@ Router.post("/app/addReview", superAdminAuth, ebookController.addReviewControlle
 Router.get("/app/e-bookInfo/:id", superAdminAuth, ebookController.eBookInfoController)
 Router.get("/app/languageList", superAdminAuth, ebookController.languageListController)
 
+//-----------------------pdf highlighter------------------------------------------------------------
+Router.post("/addPdfComment", superAdminAuth, ebookController.addPdfCommentController)
+Router.get("/getPdfComment", superAdminAuth, ebookController.getPdfCommentController)
+
 
 module.exports = Router;

@@ -523,17 +523,17 @@ class AuthService {
                                 },
                                 { new: true }
                             )
-                            if (readingInfo) {
-                                await ebook.findOneAndUpdate(
-                                    { _id: bookId },
-                                    {
-                                        $set: {
-                                            readingPercent: readingInfo.books.readingPercent
-                                        }
-                                    },
-                                    { new: true }
-                                )
-                            }
+                            // if (readingInfo) {
+                            //     await ebook.findOneAndUpdate(
+                            //         { _id: bookId },
+                            //         {
+                            //             $set: {
+                            //                 readingPercent: readingInfo.books.readingPercent
+                            //             }
+                            //         },
+                            //         { new: true }
+                            //     )
+                            // }
                         }
                     }
                     else {
@@ -567,17 +567,17 @@ class AuthService {
                         userId: userId
                     }
                     readingInfo = await bookStatus.create(bookObj)
-                    if (readingInfo) {
-                        await ebook.findOneAndUpdate(
-                            { _id: bookId },
-                            {
-                                $set: {
-                                    readingPercent: readingInfo.books.readingPercent
-                                }
-                            },
-                            { new: true }
-                        )
-                    }
+                    // if (readingInfo) {
+                    //     await ebook.findOneAndUpdate(
+                    //         { _id: bookId },
+                    //         {
+                    //             $set: {
+                    //                 readingPercent: readingInfo.books.readingPercent
+                    //             }
+                    //         },
+                    //         { new: true }
+                    //     )  
+                    // }
                 }
                 else {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;

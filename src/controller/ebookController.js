@@ -302,6 +302,51 @@ class authController {
         }
     }
 
+    async addPdfCommentController(req, res) {
+        try {
+            const data = req.body
+            const pdfText = await ebookService.addPdfCommentService(data);
+            return res.json({
+                status: 200,
+                message: "Add Pdf points.",
+                data: pdfText
+            })
+
+        } catch (error) {
+            console.log("errorr----------->", error)
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
+    async getPdfCommentController(req, res) {
+        try {
+            const userId = req.query.userId
+            const bookId = req.query.bookId
+            const pdfHighlighterList = await ebookService.getPdfCommentService(userId, bookId);
+
+            if (pdfHighlighterList.message) {
+                return res.json({
+                    status: 400,
+                    message: pdfHighlighterList.message
+                })
+            }
+
+            return res.json({
+                status: 200,
+                message: "Pdf comments list get.",
+                data: pdfHighlighterList
+            })
+
+        } catch (error) {
+            console.log("errorr----------->", error)
+            return res.json({
+                status: 500,
+                message: error.message
+            })
+        }
+    }
 }
 
 module.exports = authController;
