@@ -11,14 +11,7 @@ exports.sendPushNotification = async (req) => {
             type: req.body.type,
             title: req.body.title,
             message: req.body.message,
-            android: {
-                notification: {
-                    imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
-                }
-            },
-            data: {
-                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
-            }
+            imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
         };
 
         if (req.body.usertype === 'csv') {
@@ -96,16 +89,19 @@ exports.PushAllNotifications = async (params) => {
                 type: params.type,
                 notification: {
                     title: params.message,
-                    displayPicture: '',
+
+                    imageUrl: params.imageUrl,
                     type: params.type,
                 },
                 data: {
                     title: params.message,
-                    displayPicture: '',
+                    imageUrl: params.imageUrl,
                     type: params.type,
                 },
             };
             console.log("---deviceTokens-->", params.deviceTokens);
+
+            
             const tokenChunks = appUtils.splitArrayInToChunks(params.deviceTokens);
 
             if (2 === 2) {

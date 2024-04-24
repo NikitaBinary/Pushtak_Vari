@@ -23,11 +23,7 @@ class AuthService {
                     title: notificationInfo.notificationTitle,
                     type: notificationInfo.notificationType,
                     message: notificationInfo.message,
-                    android: {
-                        notification: {
-                            imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png"
-                        }
-                    },
+                    imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
                     usertype: "all",
                     uservalues: []
                 },
