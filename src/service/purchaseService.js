@@ -470,50 +470,60 @@ class AuthService {
                     { no_of_user: 1, _id: 1, no_of_books: 1 }
                 );
 
-                if (instituteInfo) {
-                    const bookAccessInfo = await bookAccess_userCount.findOne(
-                        {
+                if (userInfo.userType === 'INSTITUTE_USER') {
+                    const instituteId = userInfo.createdBy;
+
+                    const instituteInfo = await user.findOne(
+                        { _id: new mongoose.Types.ObjectId(instituteId) },
+                        { no_of_user: 1, _id: 1, no_of_books: 1 }
+                    );
+
+                    if (instituteInfo) {
+                        const bookAccessInfo = await bookAccess_userCount.findOne({
                             bookId: new mongoose.Types.ObjectId(bookId),
                             instituteId: new mongoose.Types.ObjectId(instituteId),
-                        }
-                    )
-                    if (!bookAccessInfo) {
-                        await bookAccess_userCount.create(
-                            {
+                        });
+
+                        if (!bookAccessInfo) {
+                            // Create a new entry if book access info doesn't exist
+                            await bookAccess_userCount.create({
                                 bookId: bookId,
                                 instituteId: instituteId,
                                 subscribeUserCount: instituteInfo.no_of_user,
                                 accessUserCount: 1,
                                 currentReading: currentReading
+                            });
+                        } else {
+                            // Decrement access count if currentReading is false
+                            if (currentReading == 'false') {
+                                console.log("come in falsee")
+                                const data = await bookAccess_userCount.findOneAndUpdate(
+                                    {
+                                        bookId: new mongoose.Types.ObjectId(bookId),
+                                        instituteId: new mongoose.Types.ObjectId(instituteId),
+                                    },
+                                    { $inc: { accessUserCount: -1 } },
+                                    { new: true }
+                                );
                             }
-                        )
-                    }
-                    if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
-                        var bookUserAccess = await bookAccess_userCount.findOneAndUpdate(
-                            {
-                                bookId: new mongoose.Types.ObjectId(bookId),
-                                instituteId: new mongoose.Types.ObjectId(instituteId),
-                            },
-                            { $inc: { accessUserCount: 1 } },
-                            { new: true }
-                        );
-                        if (currentReading == 'false') {
-                            await bookAccess_userCount.findOneAndUpdate(
-                                {
-                                    bookId: new mongoose.Types.ObjectId(bookId),
-                                    instituteId: new mongoose.Types.ObjectId(instituteId),
-                                },
-                                { $inc: { accessUserCount: -1 } }
-                            );
+                            else {
+                                if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
+                                    await bookAccess_userCount.findOneAndUpdate(
+                                        {
+                                            bookId: new mongoose.Types.ObjectId(bookId),
+                                            instituteId: new mongoose.Types.ObjectId(instituteId),
+                                        },
+                                        { $inc: { accessUserCount: 1 } },
+                                        { new: true }
+                                    );
+                                } else {
+                                    return { message: "Access limit exceeded. Please purchase the book license." };
+                                }
+                            }
                         }
                     }
-                    else {
-                        return { message: "Access limit exceeded. Please purchase the book license." }
-                    }
-
-
-
                 }
+
             }
 
             let status = Math.min(Number((readPages / totalPages) * 100), 100);
