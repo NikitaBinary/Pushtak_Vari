@@ -525,7 +525,25 @@ class AuthService {
             if (mediaUser || emailExist) {
                 console.log("User with the given mediaId or emailId already exists.");
                 userInfo = mediaUser || emailExist;
-                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName });
+                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '1h' });
+                const existingSession = await session.findOne({ email: userInfo.emailId });
+                if (existingSession) {
+                    await user.findByIdAndUpdate({ _id: existingSession.userId }, { loginStatus: false });
+                    // Update existing session
+                    await session.updateOne(
+                        { email: userInfo.emailId },
+                        { token }
+                    );
+
+                } else {
+                    // Create new session
+                    await session.create({
+                        email: userInfo.emailId,
+                        token,
+                        userId: userInfo._id,
+                        userName: userInfo.fullName
+                    });
+                }
             } else {
                 console.log("User can be created.");
                 switch (userBody.userType) {
@@ -562,7 +580,25 @@ class AuthService {
                         throw new Error("Invalid userType");
                 }
                 userInfo = await user.create(newUser);
-                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName });
+                token = await generateToken({ email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '1h' });
+                const existingSession = await session.findOne({ email: userInfo.emailId });
+                if (existingSession) {
+                    await user.findByIdAndUpdate({ _id: existingSession.userId }, { loginStatus: false });
+                    // Update existing session
+                    await session.updateOne(
+                        { email: userInfo.emailId },
+                        { token }
+                    );
+
+                } else {
+                    // Create new session
+                    await session.create({
+                        email: userInfo.emailId,
+                        token,
+                        userId: userInfo._id,
+                        userName: userInfo.fullName
+                    });
+                }
                 await user.findOneAndUpdate(
                     { emailId: userInfo.emailId },
                     {
