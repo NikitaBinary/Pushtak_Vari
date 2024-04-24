@@ -89,6 +89,7 @@ exports.PushAllNotifications = async (params) => {
                 type: params.type,
                 notification: {
                     title: params.message,
+                    
                     imageUrl: params.imageUrl,
                     type: params.type,
                 },
