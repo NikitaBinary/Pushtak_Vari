@@ -9,7 +9,7 @@ const pdfSchema = new mongoose.Schema({
     },
     HighlightText: [
         {
-            type: Array,
+            type: Object,
             default: []
         }
     ]
