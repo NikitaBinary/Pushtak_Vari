@@ -89,7 +89,7 @@ exports.PushAllNotifications = async (params) => {
                 type: params.type,
                 notification: {
                     title: params.message,
-                    
+
                     imageUrl: params.imageUrl,
                     type: params.type,
                 },
@@ -100,6 +100,8 @@ exports.PushAllNotifications = async (params) => {
                 },
             };
             console.log("---deviceTokens-->", params.deviceTokens);
+
+            
             const tokenChunks = appUtils.splitArrayInToChunks(params.deviceTokens);
 
             if (2 === 2) {
