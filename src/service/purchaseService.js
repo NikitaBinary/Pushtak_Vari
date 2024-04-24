@@ -518,6 +518,7 @@ class AuthService {
                                     );
                                 } else {
                                     return { message: "Access limit exceeded. Please purchase the book license." };
+                                
                                 }
                             }
                         }
