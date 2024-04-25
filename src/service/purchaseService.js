@@ -365,7 +365,7 @@ class AuthService {
                     { userId: new mongoose.Types.ObjectId(userId) }
                 ).sort({ updated_at: -1 })
                     .limit(1);
-            console.log("user_lastUpdateBook------------------>", user_lastUpdateBook)
+                console.log("user_lastUpdateBook------------------>", user_lastUpdateBook)
 
                 if (user_lastUpdateBook.books.bookId) {
                     var bookId = user_lastUpdateBook.books.bookId
@@ -492,18 +492,18 @@ class AuthService {
                             await bookAccess_userCount.create({
                                 bookId: bookId,
                                 instituteId: instituteId,
-                                subscribeUserCount: instituteInfo.no_of_user,
+                                subscribeUserCount: 10,
                                 accessUserCount: 1,
                                 currentReading: currentReading
                             });
                         } else {
                             // Decrement access count if currentReading is false
                             if (currentReading == 'false') {
-                                console.log("come in falsee")
                                 const data = await bookAccess_userCount.findOneAndUpdate(
                                     {
                                         bookId: new mongoose.Types.ObjectId(bookId),
                                         instituteId: new mongoose.Types.ObjectId(instituteId),
+                                        accessUserCount: { $gt: 0 }
                                     },
                                     { $inc: { accessUserCount: -1 } },
                                     { new: true }
