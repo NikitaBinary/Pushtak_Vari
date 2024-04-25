@@ -352,7 +352,8 @@ class AuthService {
             const is_BookExists = await bookStatus.findOne(
                 {
                     userId: new mongoose.Types.ObjectId(userId)
-                })
+                }
+            )
             if (!is_BookExists && is_UserExist.userType == "REGULAR_USER") {
                 return { message: "User not start to read any book" }
             }
@@ -364,6 +365,8 @@ class AuthService {
                     { userId: new mongoose.Types.ObjectId(userId) }
                 ).sort({ updated_at: -1 })
                     .limit(1);
+            console.log("user_lastUpdateBook------------------>", user_lastUpdateBook)
+
                 if (user_lastUpdateBook.books.bookId) {
                     var bookId = user_lastUpdateBook.books.bookId
                 }
@@ -407,7 +410,7 @@ class AuthService {
                     const reviews = book.reviewData;
                     const { overallRating } = await calculateRatingStats(reviews);
                     book.overallRating = Math.round(overallRating);
-                    book.bookReadingStatus = is_BookExists.bookReadingStatus
+                    book.readingPercent = user_lastUpdateBook.books.readingPercent
                     book.reviewData = ''
                 });
 
@@ -518,7 +521,7 @@ class AuthService {
                                     );
                                 } else {
                                     return { message: "Access limit exceeded. Please purchase the book license." };
-                                
+
                                 }
                             }
                         }
