@@ -534,7 +534,7 @@ class AuthService {
                             bookName: bookInfo.bookName,
                             readingPercent: status,
                             bookProgress: status == 100 ? 'Complete' : 'Incomplete',
-                            lastReadPage: readPages
+                            lastReadPage: readPages || 1
                         },
                         userId: userId
                     }
@@ -544,6 +544,7 @@ class AuthService {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
                     if (readPages > lastReadPage) {
                         if (status > is_userBookExists.books.readingPercent) {
+
                             readingInfo = await bookStatus.findOneAndUpdate(
                                 {
                                     userId: new mongoose.Types.ObjectId(userId),
@@ -558,6 +559,14 @@ class AuthService {
                                     }
                                 },
                                 { new: true }
+                            )
+                        }
+                        else {
+                            readingInfo = await bookStatus.findOne(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': new mongoose.Types.ObjectId(bookId),
+                                },
                             )
                         }
                     }
@@ -587,14 +596,14 @@ class AuthService {
                             bookName: bookInfo.bookName,
                             readingPercent: status,
                             bookProgress: status == 100 ? 'Complete' : 'Incomplete',
-                            lastReadPage: readPages
+                            lastReadPage: readPages || 1
                         },
                         userId: userId
                     }
                     readingInfo = await bookStatus.create(bookObj)
                 }
                 else {
-                    let lastReadPage = is_userBookExists.books.lastReadPage || 0;
+                    let lastReadPage = is_userBookExists.books.lastReadPage;
                     if (readPages > lastReadPage) {
                         if (status > is_userBookExists.books.readingPercent) {
                             readingInfo = await bookStatus.findOneAndUpdate(
@@ -613,6 +622,14 @@ class AuthService {
                                 { new: true }
                             )
                         }
+                        else {
+                            readingInfo = await bookStatus.findOne(
+                                {
+                                    userId: new mongoose.Types.ObjectId(userId),
+                                    'books.bookId': new mongoose.Types.ObjectId(bookId),
+                                },
+                            )
+                        }
                     }
                     else {
                         readingInfo = await bookStatus.findOne(
@@ -624,7 +641,6 @@ class AuthService {
                     }
                 }
             }
-
             return { readingInfo }
 
         } catch (error) {
