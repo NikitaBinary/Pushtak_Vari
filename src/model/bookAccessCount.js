@@ -10,9 +10,6 @@ const bookAccessSchema = new mongoose.Schema({
     subscribeUserCount: {
         type: Number
     },
-    instituteId: {
-        type: mongoose.Schema.Types.ObjectId,
-    },
     currentReading:{
         type:Boolean,
     }
