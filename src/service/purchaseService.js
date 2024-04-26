@@ -465,69 +465,46 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            if (userInfo.userType === 'INSTITUTE_USER') {
-                const instituteId = userInfo.createdBy;
+            if (userInfo.userType == 'INSTITUTE_USER' || userInfo.userType === 'REGULAR_USER') {
+                const bookAccessInfo = await bookAccess_userCount.findOne({
+                    bookId: new mongoose.Types.ObjectId(bookId)
+                });
 
-                const instituteInfo = await user.findOne(
-                    { _id: new mongoose.Types.ObjectId(instituteId) },
-                    { no_of_user: 1, _id: 1, no_of_books: 1 }
-                );
-
-                if (userInfo.userType === 'INSTITUTE_USER') {
-                    const instituteId = userInfo.createdBy;
-
-                    const instituteInfo = await user.findOne(
-                        { _id: new mongoose.Types.ObjectId(instituteId) },
-                        { no_of_user: 1, _id: 1, no_of_books: 1 }
-                    );
-
-                    if (instituteInfo) {
-                        const bookAccessInfo = await bookAccess_userCount.findOne({
-                            bookId: new mongoose.Types.ObjectId(bookId),
-                            instituteId: new mongoose.Types.ObjectId(instituteId),
-                        });
-
-                        if (!bookAccessInfo) {
-                            // Create a new entry if book access info doesn't exist
-                            await bookAccess_userCount.create({
-                                bookId: bookId,
-                                instituteId: instituteId,
-                                subscribeUserCount: 10,
-                                accessUserCount: 1,
-                                currentReading: currentReading
-                            });
+                if (!bookAccessInfo) {
+                    // Create a new entry if book access info doesn't exist
+                    await bookAccess_userCount.create({
+                        bookId: bookId,
+                        subscribeUserCount: 10,
+                        accessUserCount: 1,
+                        currentReading: currentReading
+                    });
+                } else {
+                    // Decrement access count if currentReading is false
+                    if (currentReading == 'false') {
+                        const data = await bookAccess_userCount.findOneAndUpdate(
+                            {
+                                bookId: new mongoose.Types.ObjectId(bookId),
+                                accessUserCount: { $gt: 0 }
+                            },
+                            { $inc: { accessUserCount: -1 } },
+                            { new: true }
+                        );
+                    }
+                    else {
+                        if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
+                            await bookAccess_userCount.findOneAndUpdate(
+                                {
+                                    bookId: new mongoose.Types.ObjectId(bookId)
+                                },
+                                { $inc: { accessUserCount: 1 } },
+                                { new: true }
+                            );
                         } else {
-                            // Decrement access count if currentReading is false
-                            if (currentReading == 'false') {
-                                const data = await bookAccess_userCount.findOneAndUpdate(
-                                    {
-                                        bookId: new mongoose.Types.ObjectId(bookId),
-                                        instituteId: new mongoose.Types.ObjectId(instituteId),
-                                        accessUserCount: { $gt: 0 }
-                                    },
-                                    { $inc: { accessUserCount: -1 } },
-                                    { new: true }
-                                );
-                            }
-                            else {
-                                if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
-                                    await bookAccess_userCount.findOneAndUpdate(
-                                        {
-                                            bookId: new mongoose.Types.ObjectId(bookId),
-                                            instituteId: new mongoose.Types.ObjectId(instituteId),
-                                        },
-                                        { $inc: { accessUserCount: 1 } },
-                                        { new: true }
-                                    );
-                                } else {
-                                    return { message: "Access limit exceeded. Please purchase the book license." };
+                            return { message: "Access limit exceeded. Please purchase the book license." };
 
-                                }
-                            }
                         }
                     }
                 }
-
             }
 
             let status = Math.min(Number((readPages / totalPages) * 100), 100);
@@ -562,17 +539,6 @@ class AuthService {
                         userId: userId
                     }
                     readingInfo = await bookStatus.create(bookObj)
-                    // if (readingInfo) {
-                    //     await ebook.findOneAndUpdate(
-                    //         { _id: bookId },
-                    //         {
-                    //             $set: {
-                    //                 readingPercent: readingInfo.books.readingPercent
-                    //             }
-                    //         },
-                    //         { new: true }
-                    //     )
-                    // }
                 }
                 else {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
@@ -593,17 +559,6 @@ class AuthService {
                                 },
                                 { new: true }
                             )
-                            // if (readingInfo) {
-                            //     await ebook.findOneAndUpdate(
-                            //         { _id: bookId },
-                            //         {
-                            //             $set: {
-                            //                 readingPercent: readingInfo.books.readingPercent
-                            //             }
-                            //         },
-                            //         { new: true }
-                            //     )
-                            // }
                         }
                     }
                     else {
@@ -637,17 +592,6 @@ class AuthService {
                         userId: userId
                     }
                     readingInfo = await bookStatus.create(bookObj)
-                    // if (readingInfo) {
-                    //     await ebook.findOneAndUpdate(
-                    //         { _id: bookId },
-                    //         {
-                    //             $set: {
-                    //                 readingPercent: readingInfo.books.readingPercent
-                    //             }
-                    //         },
-                    //         { new: true }
-                    //     )  
-                    // }
                 }
                 else {
                     let lastReadPage = is_userBookExists.books.lastReadPage || 0;
@@ -668,19 +612,7 @@ class AuthService {
                                 },
                                 { new: true }
                             )
-                            // if (readingInfo) {
-                            //     await ebook.findOneAndUpdate(
-                            //         { _id: bookId },
-                            //         {
-                            //             $set: {
-                            //                 readingPercent: status
-                            //             }
-                            //         },
-                            //         { new: true }
-                            //     )
-                            // }
                         }
-
                     }
                     else {
                         readingInfo = await bookStatus.findOne(
