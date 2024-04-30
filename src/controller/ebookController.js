@@ -2,6 +2,13 @@ const HttpStatus = require("http-status-codes");
 const authService = require("../service/ebookService");
 const { excelToJSON } = require("../helper/json")
 const ebook = require("../model/ebookModel")
+const test = require("../model/testModel")
+const xlsx = require('xlsx');
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
+const writeFileAsync = promisify(fs.writeFile);
+
 const ebookService = new authService();
 
 class authController {
@@ -350,212 +357,183 @@ class authController {
         }
     }
 
-    // async bulkUpdateDevices(req, res) {
+    async bulkUpdateDevices(req, res) {
+        try {
+            const convertExcelDate = (excelDate) => {
+
+                const msPerDay = 24 * 60 * 60 * 1000;
+                const excelEpoch = Date.parse("1899-12-30");
+                const excelTime = (excelDate - 1) * msPerDay;
+                const date = new Date(excelTime + excelEpoch);
+                const formattedDate = date.toISOString().split("T")[0];
+
+                return formattedDate;
+            };
+            const xlsxDevicesUpdater = req.file
+            const excelFilePath = xlsxDevicesUpdater.path;
+            const wb = xlsx.readFile(excelFilePath);
+
+
+            // Get data from the first sheet (assuming only one sheet)
+            const sheetName = wb.SheetNames[0];
+            const worksheet = wb.Sheets[sheetName];
+            const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+            for (let i = 1; i < data.length; i++) {
+                const [
+                    bookName,
+                    bookImage,
+                    authorName,
+                    co_authorName,
+                    publisher,
+                    bookPublishDate,
+                    category,
+                    bookType,
+                    price,
+                    about,
+                    bookPdf,
+                    videoLink,
+                    bookLanguage,
+                ] = data[i];
+
+                const webUrl = `${req.protocol}://${req.get('host')}`;
+
+                //====================images-------------------------------------------------
+                const bookImagesArray = bookImage.split(',').map(image => image.trim());
+                const uploadedImages = [];
+                for (const imageName of bookImagesArray) {
+                    const imagePath = path.join('uploads', imageName);
+                    let found = false;
+                    const extensions = ['.jpg', '.jpeg', '.png'];
+                    for (const ext of extensions) {
+                        if (fs.existsSync(imagePath + ext)) {
+                            console.log("comeem exixts");
+                            var imageUrl = `${webUrl}/uploads/${imageName}${ext}`;
+                            uploadedImages.push(imageUrl);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        console.error(`Image '${imageName}' does not exist in 'uploads' folder.`);
+                    }
+                }
+
+                //---------------------pdf=============================================================
+
+                const fileName = bookPdf.trim();
+
+                const filePath = path.join('uploads', fileName + '.pdf');
+
+                if (fs.existsSync(filePath)) {
+                    console.log("File exists");
+                    var fileUrl = `${webUrl}/uploads/${fileName}.pdf`;
+                    console.log("File URL:", fileUrl);
+
+                    // res.status(200).send('File uploaded and saved successfully.');
+                } else {
+                    console.error(`PDF file '${fileName}' does not exist in 'uploads' folder.`);
+                    // res.status(404).send('PDF file not found.');
+                }
+
+                const ebookTypeObject = { ebookType: bookType };
+                const booklanguage = { language: bookLanguage }
+
+                const correctPublishDate = convertExcelDate(bookPublishDate);
+
+                // const parsedPrice = parseFloat(price.replace(/[^\d.]/g, ''));
+                const parsedPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
+
+                const categoryArray = category.split(',').map(category => {
+                    const [categoryName] = category.split(':');
+                    return { categoryName };
+                });
+
+                const videoLinksArray = videoLink.split(',').map(link => link.replace(/^"(.*)"$/, '$1'));
+
+                const newBook = {
+                    bookName,
+                    bookImage: uploadedImages,
+                    authorName,
+                    co_authorName,
+                    publisher,
+                    bookPublishDate: correctPublishDate,
+                    category: categoryArray,
+                    bookType: ebookTypeObject,
+                    price: isNaN(parsedPrice) ? 0 : parsedPrice,
+                    about,
+                    bookPdf: fileUrl,
+                    videoLink: videoLinksArray,
+                    bookLanguage: booklanguage,
+                    is_selected: false,
+                    userCount: 0
+                };
+                var document = await ebook.insertMany(newBook);
+            }
+            if (document) {
+                return res.json({
+                    status: 200,
+                    message: "Data uploaded and saved to database successfully."
+                })
+            }
+            else {
+                return res.json({
+                    status: 400,
+                    message: "Data not uploaded."
+                })
+            }
+
+
+        } catch (error) {
+            console.error("Error:", error);
+            res.status(500).send('Internal server error.');
+        }
+
+
+    };
+
+
+    // async bulkAddData(req, res) {
     //     try {
-    //         const xlsxDevicesUpdater = req.file;
-    //         console.log("xlsxDevicesUpdater-------------->", req.file)
+    //         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    //         console.log("coee i tryyy---------------->", workbook)
 
-    //         if (!xlsxDevicesUpdater)
-    //             return res.status(400).send({
-    //                 status: 400,
-    //                 error:
-    //                     'devices updater xlsx file is required on xlsx_devices_updater form field.',
-    //             });
-
-    //         const excelParsedList = (
-    //             await excelToJSON(xlsxDevicesUpdater.filename, 'buffer')
-    //         )[0];
-
-    //         if (
-    //             !Array.isArray(excelParsedList) ||
-    //             !excelParsedList ||
-    //             (Array.isArray(excelParsedList) && excelParsedList.length === 0)
-    //         ) {
-    //             throw new Error("There's nothing in sheet to update.");
+    //         // Check if any sheets exist in the workbook
+    //         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+    //             return res.status(400).send('No sheets found in the Excel file.');
     //         }
 
-    //         if (
-    //             excelParsedList.length === 1 &&
-    //             Object.keys(excelParsedList[0]).length === 0
-    //         ) {
-    //             throw new Error("There's nothing in sheet to update.");
-    //         }
+    //         const sheetName = workbook.SheetNames[0];
+    //         const worksheet = workbook.Sheets[sheetName];
+    //         const data = XLSX.utils.sheet_to_json(worksheet);
 
-    //         const acceptedDeviceList = [];
-    //         const rejectedDeviceList = [];
+    //         // Log the data to verify if it's correctly parsed
+    //         console.log("Parsed data:", data);
 
-    //         const promises = [];
+    //         // Transform and insert data into MongoDB
+    //         const books = data.map(item => ({
+    //             bookImage: item.bookImage,
+    //             bookName: item.bookName,
+    //             authorName: item.authorName
+    //         }));
 
-    //         for (let i = 0; i < excelParsedList.length; i++) {
-    //             const currentEBookObj = excelParsedList[i];
+    //         // Insert data into MongoDB
+    //         await test.insertMany(books);
 
-    //             Object.entries(currentEBookObj).forEach(([key, value]) => {
-    //                 if (
-    //                     (value !== 0 && !value) ||
-    //                     (value && `${value}`.trim().length === 0)
-    //                 )
-    //                     delete currentEBookObj[key];
-    //                 if (typeof value === 'string') currentEBookObj[key] = value.trim();
-    //             });
-
-    //             let {
-    //                 device_serial,
-    //                 bookName,
-    //                 // is_device_active,
-    //                 authorName,
-    //                 co_authorName,
-    //                 publisher,
-    //                 bookPdf,
-    //                 price,
-    //                 bookImage,
-    //             } = currentEBookObj;[]
-    //             let { bookName: _, ...restCurrentEBookObj } = currentEBookObj;
-
-    //             // console.log("restCurrentEBookObj-------------->",)
-    //             const rejection = { reason: '', row: i + 2, bookName };
-
-    //             console.log('rejection-------------->', rejection);
-
-    //             if (Object.keys(currentEBookObj).length === 0) {
-    //                 rejection.reason = `empty row`;
-    //                 rejectedDeviceList.push(rejection);
-    //                 continue;
-    //             }
-
-    //             if (Object.keys(restCurrentEBookObj).length === 0) {
-    //                 rejection.reason = `min 1 field value required to update device details`;
-    //                 rejectedDeviceList.push(rejection);
-    //                 continue;
-    //             }
-
-    //             const updateObj = {};
-
-    //             if (!bookName || (bookName && bookName.length < 8)) {
-    //                 rejection.reason = 'Book name is invalid';
-    //                 rejectedDeviceList.push(rejection);
-    //                 continue;
-    //             }
-
-    //             if (authorName) {
-    //                 if (`${authorName}`.length < 3) {
-    //                     rejection.reason = `authorName = ${authorName} must be min 5 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.authorName = authorName;
-    //             }
-    //             if (bookPdf) {
-    //                 if (`${bookPdf}`.length < 3) {
-    //                     rejection.reason = `bookPdf = ${bookPdf} must be min 5 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.bookPdf = bookPdf;
-    //             }
-    //             if (co_authorName) {
-    //                 if (`${co_authorName}`.length < 3) {
-    //                     rejection.reason = `co_authorName = ${co_authorName} must be min 3 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.co_authorName = co_authorName;
-    //             }
-    //             if (publisher) {
-    //                 if (`${publisher}`.length < 3) {
-    //                     rejection.reason = `publisher = ${publisher} must be min 3 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.publisher = publisher;
-    //             }
-
-    //             if (price) {
-    //                 if (`${price}`.length < 7) {
-    //                     rejection.reason = `price must be min 7 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.price = price;
-    //             }
-    //             if (bookImage) {
-    //                 if (`${bookImage}`.length < 1) {
-    //                     rejection.reason = `bookImage must be min 1 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.bookImage = bookImage;
-    //             }
-    //             if (bookName) {
-    //                 if (`${bookName}`.length < 3) {
-    //                     rejection.reason = `bookName must be min 7 characters long`;
-    //                     rejectedDeviceList.push(rejection);
-    //                     continue;
-    //                 }
-    //                 updateObj.bookName = bookName;
-    //             }
-    //             // if (is_device_active >= 0) {
-    //             //     if (typeof is_device_active !== 'number') {
-    //             //         rejection.reason = `is_device_active must be in boolean`;
-    //             //         rejectedDeviceList.push(rejection);
-    //             //         continue;
-    //             //     }
-    //             //     if (is_device_active === 0) {
-
-    //             //         updateObj.is_device_active = false
-    //             //     }
-    //             //     if (is_device_active === 1) {
-    //             //         updateObj.is_device_active = true
-    //             //     }
-    //             // }
-    //             console.log("updateObj---------------->", updateObj)
-    //             promises.push(
-    //                 new Promise(async (resolve, reject) => {
-    //                     try {
-    //                         const doc = await ebook.findOneAndUpdate(
-    //                             { bookName: bookName },
-    //                             { $set: updateObj }
-    //                         ).lean();
-    //                         // if (!doc) throw new Error('BookName not found in database');
-    //                         if (!doc) {
-    //                             const newDoc = await ebook.create(updateObj)
-    //                         }
-    //                         // console.dir({doc, device_serial}, {depth: 100})
-    //                         acceptedDeviceList.push({
-    //                             device_serial,
-    //                             updated_fields: Object.keys(updateObj),
-    //                         });
-    //                         resolve(doc);
-    //                     } catch (error) {
-    //                         // console.dir({device_serial, error})
-    //                         rejection.reason = error.message;
-    //                         rejectedDeviceList.push(rejection);
-    //                         return reject(error);
-    //                     }
-    //                 })
-    //             );
-    //         }
-
-    //         await Promise.allSettled(promises);
-
-    //         const totalCounts = excelParsedList.length;
-    //         const acceptedCounts = acceptedDeviceList.length;
-    //         const rejectedCounts = rejectedDeviceList.length;
-
-    //         res.send({
-    //             status: 200,
-    //             data: {
-    //                 totalCounts,
-    //                 acceptedCounts,
-    //                 rejectedCounts,
-    //                 acceptedDeviceList,
-    //                 rejectedDeviceList,
-    //             },
-    //         });
+    //         res.send('Data uploaded successfully.');
     //     } catch (error) {
-    //         console.log(error);
-    //         res.send({ error: error.message, status: 500 });
+    //         console.error("Error:", error);
+    //         return res.status(500).json({
+    //             status: 500,
+    //             message: "Internal server error"
+    //         });
     //     }
-    // };
+
+
+    // }
+
+
+
 }
 
 

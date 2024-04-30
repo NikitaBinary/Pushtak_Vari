@@ -17,6 +17,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "fcm-node": "^1.6.1",
+    "fs": "^0.0.1-security",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
@@ -25,6 +26,7 @@
     "nodemailer": "^6.9.8",
     "nodemon": "^3.0.2",
     "path": "^0.12.7",
+    "util": "^0.12.5",
     "xlsx": "^0.18.5"
   }
 }
