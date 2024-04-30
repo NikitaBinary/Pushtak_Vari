@@ -1,17 +1,15 @@
 const mongoose = require('mongoose');
 
-const ebookSchema = new mongoose.Schema({
+const testSchema = new mongoose.Schema({
     bookName: {
         type: String,
-        required: false
     },
-    bookLanguage: {
-        type: JSON
-    },
-
     authorName: {
         type: String,
-        required: false
+    },
+    bookImage: {
+        type: Array,
+        default: []
     },
     co_authorName: {
         type: String,
@@ -19,16 +17,16 @@ const ebookSchema = new mongoose.Schema({
     publisher: {
         type: String,
     },
+    bookLanguage: {
+        type: JSON
+    },
+    
     bookPublishDate: {
         type: String
     },
     bookPdf: {
         type: String,
         required: false
-    },
-    bookImage: {
-        type: Array,
-        default: []
     },
     category: {
         type: Array,
@@ -64,7 +62,6 @@ const ebookSchema = new mongoose.Schema({
         }
     });
 
-ebookSchema.index({ bookName: "text", authorName: "text" });
 
-const eBook = mongoose.model("eBookDetail", ebookSchema);
-module.exports = eBook;
+const test = mongoose.model("test_list", testSchema);
+module.exports = test;
