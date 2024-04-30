@@ -46,6 +46,6 @@ Router.get("/getPdfComment", superAdminAuth, ebookController.getPdfCommentContro
 
 //-----------------------------------------------------------------------------------------------------
 
-Router.post('/bulkUpdate',uploadStorage.single("xlsx_devices_updater"), ebookController.bulkUpdateDevices);
+// Router.post('/bulkUpdate',uploadStorage.single("xlsx_devices_updater"), ebookController.bulkUpdateDevices);
 
 module.exports = Router;

@@ -350,212 +350,212 @@ class authController {
         }
     }
 
-    async bulkUpdateDevices(req, res) {
-        try {
-            const xlsxDevicesUpdater = req.file;
-            console.log("xlsxDevicesUpdater-------------->", req.file)
+    // async bulkUpdateDevices(req, res) {
+    //     try {
+    //         const xlsxDevicesUpdater = req.file;
+    //         console.log("xlsxDevicesUpdater-------------->", req.file)
 
-            if (!xlsxDevicesUpdater)
-                return res.status(400).send({
-                    status: 400,
-                    error:
-                        'devices updater xlsx file is required on xlsx_devices_updater form field.',
-                });
+    //         if (!xlsxDevicesUpdater)
+    //             return res.status(400).send({
+    //                 status: 400,
+    //                 error:
+    //                     'devices updater xlsx file is required on xlsx_devices_updater form field.',
+    //             });
 
-            const excelParsedList = (
-                await excelToJSON(xlsxDevicesUpdater.filename, 'buffer')
-            )[0];
+    //         const excelParsedList = (
+    //             await excelToJSON(xlsxDevicesUpdater.filename, 'buffer')
+    //         )[0];
 
-            if (
-                !Array.isArray(excelParsedList) ||
-                !excelParsedList ||
-                (Array.isArray(excelParsedList) && excelParsedList.length === 0)
-            ) {
-                throw new Error("There's nothing in sheet to update.");
-            }
+    //         if (
+    //             !Array.isArray(excelParsedList) ||
+    //             !excelParsedList ||
+    //             (Array.isArray(excelParsedList) && excelParsedList.length === 0)
+    //         ) {
+    //             throw new Error("There's nothing in sheet to update.");
+    //         }
 
-            if (
-                excelParsedList.length === 1 &&
-                Object.keys(excelParsedList[0]).length === 0
-            ) {
-                throw new Error("There's nothing in sheet to update.");
-            }
+    //         if (
+    //             excelParsedList.length === 1 &&
+    //             Object.keys(excelParsedList[0]).length === 0
+    //         ) {
+    //             throw new Error("There's nothing in sheet to update.");
+    //         }
 
-            const acceptedDeviceList = [];
-            const rejectedDeviceList = [];
+    //         const acceptedDeviceList = [];
+    //         const rejectedDeviceList = [];
 
-            const promises = [];
+    //         const promises = [];
 
-            for (let i = 0; i < excelParsedList.length; i++) {
-                const currentEBookObj = excelParsedList[i];
+    //         for (let i = 0; i < excelParsedList.length; i++) {
+    //             const currentEBookObj = excelParsedList[i];
 
-                Object.entries(currentEBookObj).forEach(([key, value]) => {
-                    if (
-                        (value !== 0 && !value) ||
-                        (value && `${value}`.trim().length === 0)
-                    )
-                        delete currentEBookObj[key];
-                    if (typeof value === 'string') currentEBookObj[key] = value.trim();
-                });
+    //             Object.entries(currentEBookObj).forEach(([key, value]) => {
+    //                 if (
+    //                     (value !== 0 && !value) ||
+    //                     (value && `${value}`.trim().length === 0)
+    //                 )
+    //                     delete currentEBookObj[key];
+    //                 if (typeof value === 'string') currentEBookObj[key] = value.trim();
+    //             });
 
-                let {
-                    device_serial,
-                    bookName,
-                    // is_device_active,
-                    authorName,
-                    co_authorName,
-                    publisher,
-                    bookPdf,
-                    price,
-                    bookImage,
-                } = currentEBookObj;[]
-                let { bookName: _, ...restCurrentEBookObj } = currentEBookObj;
+    //             let {
+    //                 device_serial,
+    //                 bookName,
+    //                 // is_device_active,
+    //                 authorName,
+    //                 co_authorName,
+    //                 publisher,
+    //                 bookPdf,
+    //                 price,
+    //                 bookImage,
+    //             } = currentEBookObj;[]
+    //             let { bookName: _, ...restCurrentEBookObj } = currentEBookObj;
 
-                // console.log("restCurrentEBookObj-------------->",)
-                const rejection = { reason: '', row: i + 2, bookName };
+    //             // console.log("restCurrentEBookObj-------------->",)
+    //             const rejection = { reason: '', row: i + 2, bookName };
 
-                console.log('rejection-------------->', rejection);
+    //             console.log('rejection-------------->', rejection);
 
-                if (Object.keys(currentEBookObj).length === 0) {
-                    rejection.reason = `empty row`;
-                    rejectedDeviceList.push(rejection);
-                    continue;
-                }
+    //             if (Object.keys(currentEBookObj).length === 0) {
+    //                 rejection.reason = `empty row`;
+    //                 rejectedDeviceList.push(rejection);
+    //                 continue;
+    //             }
 
-                if (Object.keys(restCurrentEBookObj).length === 0) {
-                    rejection.reason = `min 1 field value required to update device details`;
-                    rejectedDeviceList.push(rejection);
-                    continue;
-                }
+    //             if (Object.keys(restCurrentEBookObj).length === 0) {
+    //                 rejection.reason = `min 1 field value required to update device details`;
+    //                 rejectedDeviceList.push(rejection);
+    //                 continue;
+    //             }
 
-                const updateObj = {};
+    //             const updateObj = {};
 
-                if (!bookName || (bookName && bookName.length < 8)) {
-                    rejection.reason = 'Book name is invalid';
-                    rejectedDeviceList.push(rejection);
-                    continue;
-                }
+    //             if (!bookName || (bookName && bookName.length < 8)) {
+    //                 rejection.reason = 'Book name is invalid';
+    //                 rejectedDeviceList.push(rejection);
+    //                 continue;
+    //             }
 
-                if (authorName) {
-                    if (`${authorName}`.length < 3) {
-                        rejection.reason = `authorName = ${authorName} must be min 5 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.authorName = authorName;
-                }
-                if (bookPdf) {
-                    if (`${bookPdf}`.length < 3) {
-                        rejection.reason = `bookPdf = ${bookPdf} must be min 5 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.bookPdf = bookPdf;
-                }
-                if (co_authorName) {
-                    if (`${co_authorName}`.length < 3) {
-                        rejection.reason = `co_authorName = ${co_authorName} must be min 3 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.co_authorName = co_authorName;
-                }
-                if (publisher) {
-                    if (`${publisher}`.length < 3) {
-                        rejection.reason = `publisher = ${publisher} must be min 3 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.publisher = publisher;
-                }
+    //             if (authorName) {
+    //                 if (`${authorName}`.length < 3) {
+    //                     rejection.reason = `authorName = ${authorName} must be min 5 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.authorName = authorName;
+    //             }
+    //             if (bookPdf) {
+    //                 if (`${bookPdf}`.length < 3) {
+    //                     rejection.reason = `bookPdf = ${bookPdf} must be min 5 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.bookPdf = bookPdf;
+    //             }
+    //             if (co_authorName) {
+    //                 if (`${co_authorName}`.length < 3) {
+    //                     rejection.reason = `co_authorName = ${co_authorName} must be min 3 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.co_authorName = co_authorName;
+    //             }
+    //             if (publisher) {
+    //                 if (`${publisher}`.length < 3) {
+    //                     rejection.reason = `publisher = ${publisher} must be min 3 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.publisher = publisher;
+    //             }
 
-                if (price) {
-                    if (`${price}`.length < 7) {
-                        rejection.reason = `price must be min 7 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.price = price;
-                }
-                if (bookImage) {
-                    if (`${bookImage}`.length < 1) {
-                        rejection.reason = `bookImage must be min 1 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.bookImage = bookImage;
-                }
-                if (bookName) {
-                    if (`${bookName}`.length < 3) {
-                        rejection.reason = `bookName must be min 7 characters long`;
-                        rejectedDeviceList.push(rejection);
-                        continue;
-                    }
-                    updateObj.bookName = bookName;
-                }
-                // if (is_device_active >= 0) {
-                //     if (typeof is_device_active !== 'number') {
-                //         rejection.reason = `is_device_active must be in boolean`;
-                //         rejectedDeviceList.push(rejection);
-                //         continue;
-                //     }
-                //     if (is_device_active === 0) {
+    //             if (price) {
+    //                 if (`${price}`.length < 7) {
+    //                     rejection.reason = `price must be min 7 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.price = price;
+    //             }
+    //             if (bookImage) {
+    //                 if (`${bookImage}`.length < 1) {
+    //                     rejection.reason = `bookImage must be min 1 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.bookImage = bookImage;
+    //             }
+    //             if (bookName) {
+    //                 if (`${bookName}`.length < 3) {
+    //                     rejection.reason = `bookName must be min 7 characters long`;
+    //                     rejectedDeviceList.push(rejection);
+    //                     continue;
+    //                 }
+    //                 updateObj.bookName = bookName;
+    //             }
+    //             // if (is_device_active >= 0) {
+    //             //     if (typeof is_device_active !== 'number') {
+    //             //         rejection.reason = `is_device_active must be in boolean`;
+    //             //         rejectedDeviceList.push(rejection);
+    //             //         continue;
+    //             //     }
+    //             //     if (is_device_active === 0) {
 
-                //         updateObj.is_device_active = false
-                //     }
-                //     if (is_device_active === 1) {
-                //         updateObj.is_device_active = true
-                //     }
-                // }
-                console.log("updateObj---------------->", updateObj)
-                promises.push(
-                    new Promise(async (resolve, reject) => {
-                        try {
-                            const doc = await ebook.findOneAndUpdate(
-                                { bookName: bookName },
-                                { $set: updateObj }
-                            ).lean();
-                            // if (!doc) throw new Error('BookName not found in database');
-                            if (!doc) {
-                                const newDoc = await ebook.create(updateObj)
-                            }
-                            // console.dir({doc, device_serial}, {depth: 100})
-                            acceptedDeviceList.push({
-                                device_serial,
-                                updated_fields: Object.keys(updateObj),
-                            });
-                            resolve(doc);
-                        } catch (error) {
-                            // console.dir({device_serial, error})
-                            rejection.reason = error.message;
-                            rejectedDeviceList.push(rejection);
-                            return reject(error);
-                        }
-                    })
-                );
-            }
+    //             //         updateObj.is_device_active = false
+    //             //     }
+    //             //     if (is_device_active === 1) {
+    //             //         updateObj.is_device_active = true
+    //             //     }
+    //             // }
+    //             console.log("updateObj---------------->", updateObj)
+    //             promises.push(
+    //                 new Promise(async (resolve, reject) => {
+    //                     try {
+    //                         const doc = await ebook.findOneAndUpdate(
+    //                             { bookName: bookName },
+    //                             { $set: updateObj }
+    //                         ).lean();
+    //                         // if (!doc) throw new Error('BookName not found in database');
+    //                         if (!doc) {
+    //                             const newDoc = await ebook.create(updateObj)
+    //                         }
+    //                         // console.dir({doc, device_serial}, {depth: 100})
+    //                         acceptedDeviceList.push({
+    //                             device_serial,
+    //                             updated_fields: Object.keys(updateObj),
+    //                         });
+    //                         resolve(doc);
+    //                     } catch (error) {
+    //                         // console.dir({device_serial, error})
+    //                         rejection.reason = error.message;
+    //                         rejectedDeviceList.push(rejection);
+    //                         return reject(error);
+    //                     }
+    //                 })
+    //             );
+    //         }
 
-            await Promise.allSettled(promises);
+    //         await Promise.allSettled(promises);
 
-            const totalCounts = excelParsedList.length;
-            const acceptedCounts = acceptedDeviceList.length;
-            const rejectedCounts = rejectedDeviceList.length;
+    //         const totalCounts = excelParsedList.length;
+    //         const acceptedCounts = acceptedDeviceList.length;
+    //         const rejectedCounts = rejectedDeviceList.length;
 
-            res.send({
-                status: 200,
-                data: {
-                    totalCounts,
-                    acceptedCounts,
-                    rejectedCounts,
-                    acceptedDeviceList,
-                    rejectedDeviceList,
-                },
-            });
-        } catch (error) {
-            console.log(error);
-            res.send({ error: error.message, status: 500 });
-        }
-    };
+    //         res.send({
+    //             status: 200,
+    //             data: {
+    //                 totalCounts,
+    //                 acceptedCounts,
+    //                 rejectedCounts,
+    //                 acceptedDeviceList,
+    //                 rejectedDeviceList,
+    //             },
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //         res.send({ error: error.message, status: 500 });
+    //     }
+    // };
 }
 
 
