@@ -44,5 +44,8 @@ Router.get("/app/languageList", superAdminAuth, ebookController.languageListCont
 Router.post("/addPdfComment", superAdminAuth, ebookController.addPdfCommentController)
 Router.get("/getPdfComment", superAdminAuth, ebookController.getPdfCommentController)
 
+//-----------------------------------------------------------------------------------------------------
+
+Router.post('/bulkUpdate',uploadStorage.single("xlsx_devices_updater"), ebookController.bulkUpdateDevices);
 
 module.exports = Router;
