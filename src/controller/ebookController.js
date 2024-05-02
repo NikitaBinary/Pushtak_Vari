@@ -468,7 +468,17 @@ class authController {
                     is_selected: false,
                     userCount: 0
                 };
-                var document = await ebook.insertMany(newBook);
+                var exists_doc = await ebook.findOne({ bookName: newBook.bookName })
+                if (exists_doc) {
+                    var document = await ebook.updateMany(
+                        { bookName: newBook.bookName },
+                        newBook,
+                        { new: true }
+                    )
+                }
+                else {
+                    var document = await ebook.insertMany(newBook);
+                }
             }
             if (document) {
                 return res.json({
@@ -491,48 +501,6 @@ class authController {
 
 
     };
-
-
-    // async bulkAddData(req, res) {
-    //     try {
-    //         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-    //         console.log("coee i tryyy---------------->", workbook)
-
-    //         // Check if any sheets exist in the workbook
-    //         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-    //             return res.status(400).send('No sheets found in the Excel file.');
-    //         }
-
-    //         const sheetName = workbook.SheetNames[0];
-    //         const worksheet = workbook.Sheets[sheetName];
-    //         const data = XLSX.utils.sheet_to_json(worksheet);
-
-    //         // Log the data to verify if it's correctly parsed
-    //         console.log("Parsed data:", data);
-
-    //         // Transform and insert data into MongoDB
-    //         const books = data.map(item => ({
-    //             bookImage: item.bookImage,
-    //             bookName: item.bookName,
-    //             authorName: item.authorName
-    //         }));
-
-    //         // Insert data into MongoDB
-    //         await test.insertMany(books);
-
-    //         res.send('Data uploaded successfully.');
-    //     } catch (error) {
-    //         console.error("Error:", error);
-    //         return res.status(500).json({
-    //             status: 500,
-    //             message: "Internal server error"
-    //         });
-    //     }
-
-
-    // }
-
-
 
 }
 
