@@ -95,6 +95,7 @@ exports.PushAllNotifications = async (params) => {
                 },
                 data: {
                     title: params.message,
+                    
                     imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
                     type: params.type,
                 },

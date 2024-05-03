@@ -465,7 +465,7 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            if (userInfo.userType == 'INSTITUTE_USER' || userInfo.userType === 'REGULAR_USER') {
+            if (userInfo.userType == 'INSTITUTE_USER') {
                 const bookAccessInfo = await bookAccess_userCount.findOne({
                     bookId: new mongoose.Types.ObjectId(bookId)
                 });
