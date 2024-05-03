@@ -13,6 +13,8 @@ Router.get("/app/getMoreItem/:id", superAdminAuth, purchaseController.getMoreIte
 Router.put("/app/updateBookStatus/:id", superAdminAuth, purchaseController.updateBookStatusController);
 Router.get("/app/progressbook", superAdminAuth, purchaseController.progressbookController);
 Router.get("/eBookGraph", superAdminAuth, purchaseController.eBookGraphController);
+Router.get("/app/getlastBookProgress", purchaseController.getlastBookProgress);
+
 
 
 //----------------my book =====================================

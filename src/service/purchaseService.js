@@ -397,7 +397,7 @@ class AuthService {
                     },
                     {
                         $project: {
-                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, readingPercent: 1, bookLanguage: 1
+                            _id: 1, bookName: 1, authorName: 1, price: 1, bookImage: 1, overallRating: 1, reviewData: 1, bookLanguage: 1
                         }
                     },
                     {
@@ -713,6 +713,26 @@ class AuthService {
 
             return myBookList
 
+        } catch (error) {
+            console.log("error------------->", error)
+            throw error
+        }
+    }
+
+    async getlastBookProgressService(userId, bookId) {
+        try {
+            const bookDetail = await bookStatus.findOne(
+                {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    'books.bookId': new mongoose.Types.ObjectId(bookId),
+                }
+            )
+            if (!bookDetail) {
+                return { message: "User not start reading book" }
+            }
+            else {
+                return bookDetail
+            }
         } catch (error) {
             console.log("error------------->", error)
             throw error
