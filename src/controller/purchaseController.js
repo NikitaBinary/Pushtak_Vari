@@ -129,7 +129,7 @@ class authController {
                 bookReadingPercent: response.readingInfo.books.readingPercent
             })
         } catch (error) {
-            console.log("error--------->",error)
+            console.log("error--------->", error)
             return res.status(500).send({
                 status: 500,
                 message: error.message,
@@ -199,6 +199,33 @@ class authController {
                 message: "Get my book list.",
                 data: getMyBookList
             })
+        } catch (error) {
+            return res.status(500).send({
+                status: 500,
+                message: error.message,
+            });
+        }
+    }
+
+    async getlastBookProgress(req, res) {
+        try {
+            const userId = req.query.userId
+            const bookId = req.query.bookId
+            const response = await purchaseService.getlastBookProgressService(userId, bookId)
+
+            if (response.message) {
+                return res.status(200).send({
+                    status: 404,
+                    message: response.message
+                })
+            }
+
+            return res.status(200).send({
+                status: 200,
+                message: "Get book progress",
+                eBookProgress: response
+            })
+
         } catch (error) {
             return res.status(500).send({
                 status: 500,
