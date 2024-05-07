@@ -1,5 +1,6 @@
 const FCM = require('fcm-node');
 require('dotenv').config()
+const axios = require('axios');
 
 const fcmServerKey = process.env.Server_Key; // put your server key here
 const fcm = new FCM(fcmServerKey);
@@ -15,6 +16,7 @@ const fcm = new FCM(fcmServerKey);
 //     console.log("b-------->", b)
 
 // })
+
 let fcm_fun = {
     sendPush: async (message) => {
         return new Promise((resolve, reject) => {
@@ -56,4 +58,4 @@ let fcm_fun = {
         });
     }
 }
-module.exports = fcm_fun;
+module.exports = fcm_fun 

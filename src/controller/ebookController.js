@@ -359,16 +359,42 @@ class authController {
 
     async bulkUpdateDevices(req, res) {
         try {
+            // const convertExcelDate = (excelDate) => {
+
+            //     if (excelDate < 1 || excelDate > 2958465) {
+            //         console.error("Excel date is out of range.");
+            //         return null; // or handle the error in an appropriate way
+            //     }
+            //     const msPerDay = 24 * 60 * 60 * 1000;
+            //     const excelEpoch = Date.parse("1899-12-30");
+            //     const excelTime = (excelDate - 1) * msPerDay;
+            //     const date = new Date(excelTime + excelEpoch);
+            //     const formattedDate = date.toISOString().split("T")[0];
+
+            //     return formattedDate;
+            // };
             const convertExcelDate = (excelDate) => {
+                // Check if excelDate is undefined or null
+                if (excelDate === undefined || excelDate === null) {
+                    console.error("excelDate is undefined or null.");
+                    return null; // or handle the error in an appropriate way
+                }
+
+                // Convert excelDate to a string
+                const dateStr = excelDate.toString();
+
+                // Assuming the date is in the format "DD/MM/YYYY"
+                const parts = dateStr.split("/");
+                const dateISO = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
                 const msPerDay = 24 * 60 * 60 * 1000;
                 const excelEpoch = Date.parse("1899-12-30");
-                const excelTime = (excelDate - 1) * msPerDay;
-                const date = new Date(excelTime + excelEpoch);
-                const formattedDate = date.toISOString().split("T")[0];
+                const excelTime = (Date.parse(dateISO) - Date.parse("01/01/1970")) / msPerDay; // Adjusting for UNIX epoch
+                const formattedDate = new Date(excelTime * msPerDay + excelEpoch).toISOString().split("T")[0];
 
                 return formattedDate;
             };
+
             const xlsxDevicesUpdater = req.file
             const excelFilePath = xlsxDevicesUpdater.path;
             const wb = xlsx.readFile(excelFilePath);
@@ -399,7 +425,10 @@ class authController {
                 const webUrl = `${req.protocol}://${req.get('host')}`;
 
                 //====================images-------------------------------------------------
-                const bookImagesArray = bookImage.split(',').map(image => image.trim());
+                console.log("bookImage-------------------->", bookImage)
+                if (bookImage && bookImage != undefined) {
+                    var bookImagesArray = bookImage.split(',').map(image => image.trim());
+                }
                 const uploadedImages = [];
                 for (const imageName of bookImagesArray) {
                     const imagePath = path.join('uploads', imageName);
@@ -420,8 +449,10 @@ class authController {
                 }
 
                 //---------------------pdf=============================================================
-
-                const fileName = bookPdf.trim();
+                console.log("bookPdf----------->", bookPdf)
+                if (bookPdf !== undefined) {
+                    var fileName = bookPdf.trim();
+                }
 
                 const filePath = path.join('uploads', fileName + '.pdf');
 
@@ -444,12 +475,18 @@ class authController {
                 // const parsedPrice = parseFloat(price.replace(/[^\d.]/g, ''));
                 const parsedPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
 
-                const categoryArray = category.split(',').map(category => {
+
+                var categoryArray = category.split(',').map(category => {
                     const [categoryName] = category.split(':');
                     return { categoryName };
                 });
 
-                const videoLinksArray = videoLink.split(',').map(link => link.replace(/^"(.*)"$/, '$1'));
+
+
+
+                if (videoLink && videoLink != undefined) {
+                    var videoLinksArray = videoLink.split(',').map(link => link.replace(/^"(.*)"$/, '$1'));
+                }
 
                 const newBook = {
                     bookName,
@@ -496,7 +533,10 @@ class authController {
 
         } catch (error) {
             console.error("Error:", error);
-            res.status(500).send('Internal server error.');
+            return res.json({
+                status: 500,
+                message: error.message
+            })
         }
 
 
