@@ -481,9 +481,6 @@ class authController {
                     return { categoryName };
                 });
 
-
-
-
                 if (videoLink && videoLink != undefined) {
                     var videoLinksArray = videoLink.split(',').map(link => link.replace(/^"(.*)"$/, '$1'));
                 }
