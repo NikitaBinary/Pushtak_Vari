@@ -15,23 +15,26 @@ exports.sendNotification = async (registrationToken, data) => {
         const response = await axios.post(
             'https://fcm.googleapis.com/fcm/send',
             {
-                "to": registrationToken,
-                "notification": {
-                    type: dataInfo.type,
-                    title: dataInfo.title,
-                    message: dataInfo.message,
-                    image: dataInfo.image
-                    
-                    // "body": "Rich Notification testing (body)",
-                    // "mutable_content": true,
-                    // "sound": "Tri-tone",
-                    // "image": "https://via.placeholder.com/500x500.png?text=Sample+Image",
+                to: registrationToken,
+                notification: {
+                    "title": "notification.title",
+                    "body": "notification.description",
+                    // "sound": "default",
+                    "color": "#53c4bc",
+                    "image": "https://via.placeholder.com/500x500.png?text=Sample+Image",
+                    "mutable_content": true,
+                    "sound": "Tri-tone"
+                    // "apns": {
+                    //   payload: {
+                    //     aps: {
+                    //       'mutable-content': 1
+                    //     }
+                    //   },
+                    // },
                 },
-
-                "data": {
-                    // "url": "https://via.placeholder.com/500x500.png?text=Sample+Image",
-                    // "dl": "<deeplink action on tap of notification>"
-                }
+                android: {},
+                data: {
+                },
             },
 
             {

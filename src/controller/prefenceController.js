@@ -29,10 +29,16 @@ class authController {
     async updateMyPrefenceController(req, res) {
         try {
             const userId = req.params.id
-            const genre = req.query.genre
-            const author = req.query.author
-            const response = await prefenceService.updateMyPrefenceService(userId, genre, author)
+            const type = req.query.type
 
+            const response = await prefenceService.updateMyPrefenceService(userId, type)
+
+            if(response.message){
+                return res.json({
+                    status:404,
+                    message:response.message
+                })
+            }
             return res.json({
                 status: 200,
                 message: "Reset the prefernces successfully!",
