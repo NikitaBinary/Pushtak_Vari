@@ -41,9 +41,11 @@ class AuthService {
             } else if (notificationInfo.userType.userType == 'All') {
                 notificationObj.body.uservalues = await user.find({}, { _id: 1 });
             }
-             console.log("keyyy--------->",notificationObj.body.uservalues)
-             let userKey = notificationObj.body.uservalues
-            await sendNotification(userKey,notificationObj); // Assuming sendPushNotification function works as expected
+            await sendPushNotification(notificationObj)
+            console.log("keyyy--------->", notificationObj.body.uservalues)
+            //  let userKey = notificationObj.body.uservalues
+            // await sendNotification(userKey,notificationObj); 
+
             return notificationInfo;
         } catch (error) {
             console.log("error---------->", error);
