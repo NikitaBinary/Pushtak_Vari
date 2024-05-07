@@ -49,6 +49,7 @@ exports.sendPushNotification = async (req) => {
             type: req.body.type,
             title: req.body.title,
             message: req.body.message,
+            image:req.body.image
         };
 
         if (req.body.usertype === 'csv') {
