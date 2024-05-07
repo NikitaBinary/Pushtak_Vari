@@ -67,10 +67,12 @@ class AuthService {
 
     async updateEbookService(_id, dataBody, ImageUrl, pdfUrl) {
         try {
-            if (ImageUrl || pdfUrl) {
+            if (ImageUrl) {
                 const imageUrlArray = ImageUrl.split(", ").map(url => url.trim());
                 dataBody.bookImage = imageUrlArray;
-                dataBody.bookPdf = pdfUrl;
+            }
+            if (pdfUrl) {
+                dataBody.bookPdf = pdfUrl
             }
             if (dataBody.category) {
                 const categoryIds = dataBody.category
@@ -80,7 +82,6 @@ class AuthService {
             if (dataBody.bookType) {
                 const bookType = dataBody.bookType ? await ebookType.findById(dataBody.bookType, { _id: 1, ebookType: 1 }) : null;
                 dataBody.bookType = bookType;
-
             }
             if (dataBody.bookLanguage) {
                 const bookLanguage = dataBody.bookLanguage ? await language.findById(dataBody.bookLanguage, { _id: 1, language: 1 }) : null;
@@ -90,6 +91,7 @@ class AuthService {
             let eBookInfo = await eBook.findOneAndUpdate({ _id: _id }, dataBody, { new: true });
             return { eBookDetail, eBookInfo };
         } catch (error) {
+
             throw error;
         }
 
@@ -224,7 +226,18 @@ class AuthService {
                 }
 
                 if (!category) {
+                    // if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+                    //     trendingBookQuery.push(
+                    //         {
+                    //             $match: condition
+                    //         }
+                    //     );
+                    //     console.log("condititon--------------->", condition)
+                    // }
                     trendingBookQuery = [
+                        {
+                            $match: condition
+                        },
                         {
                             $match: {
                                 userCount: { $exists: true },
@@ -299,6 +312,9 @@ class AuthService {
                     newAggregatePipe = [
                         {
                             $match: { _id: { $in: booklist } }
+                        },
+                        {
+                            $match: condition
                         },
                         {
                             $lookup: {
@@ -418,6 +434,9 @@ class AuthService {
                 if (!category) {
                     trendingBookQuery = [
                         {
+                            $match: prefrenceCondition
+                        },
+                        {
                             $match: { userCount: { $exists: true } }
                         },
                         {
@@ -485,6 +504,9 @@ class AuthService {
                 }
                 if (!category) {
                     newAggregatePipe = [
+                        {
+                            $match: prefrenceCondition
+                        },
                         {
                             $lookup: {
                                 from: 'review_lists',

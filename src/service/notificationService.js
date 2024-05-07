@@ -2,8 +2,11 @@ const notification = require("../model/notificationModel")
 const userType = require("../model/userTypeModel")
 const notificationType = require("../model/notificationTypeModel")
 const { sendPushNotification } = require("../middleware/notification");
+const { sendNotification } = require("../middleware/notification");
+
 const mongoose = require("mongoose")
 const user = require("../model/userModel")
+
 
 class AuthService {
     async createNotificationService(data, imageUrl) {
@@ -23,7 +26,7 @@ class AuthService {
                     title: notificationInfo.notificationTitle,
                     type: notificationInfo.notificationType,
                     message: notificationInfo.message,
-                    imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                    image: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
                     usertype: "all",
                     uservalues: []
                 },
@@ -38,8 +41,9 @@ class AuthService {
             } else if (notificationInfo.userType.userType == 'All') {
                 notificationObj.body.uservalues = await user.find({}, { _id: 1 });
             }
-
-            await sendPushNotification(notificationObj); // Assuming sendPushNotification function works as expected
+             console.log("keyyy--------->",notificationObj.body.uservalues)
+             let userKey = notificationObj.body.uservalues
+            await sendNotification(userKey,notificationObj); // Assuming sendPushNotification function works as expected
             return notificationInfo;
         } catch (error) {
             console.log("error---------->", error);
