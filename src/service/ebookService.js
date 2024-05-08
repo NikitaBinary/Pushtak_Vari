@@ -226,43 +226,116 @@ class AuthService {
                 }
 
                 if (!category) {
-                    // if (typeof condition === 'object' && Object.keys(condition).length > 0) {
-                    //     trendingBookQuery.push(
-                    //         {
-                    //             $match: condition
-                    //         }
-                    //     );
-                    //     console.log("condititon--------------->", condition)
-                    // }
-                    trendingBookQuery = [
-                        {
-                            $match: condition
-                        },
-                        {
-                            $match: {
-                                userCount: { $exists: true },
-                                _id: { $in: booklist }
+                    if (authorCategory) {
+                        var authorQuery = [
+                            {
+                                $match: {
+                                    authorName: { $in: authorCategory }
+                                }
+                                // condition
+                            },
+                            {
+                                $match: {
+                                    userCount: { $exists: true },
+                                    _id: { $in: booklist }
+                                }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
                             }
-                        },
-                        {
-                            $sort: { userCount: -1 }
-                        },
-                        {
-                            $lookup: {
-                                from: 'review_lists',
-                                localField: '_id',
-                                foreignField: 'bookId',
-                                as: "reviewData"
+                        ];
+                        var AuthorResponse = await eBook.aggregate(authorQuery);
+                    }
+                    if (genreCategory) {
+                        let categoryQuery = [
+                            {
+                                $match: {
+                                    'category.categoryName': { $in: genreCategory },
+                                }
+                                // condition
+                            },
+                            {
+                                $match: {
+                                    userCount: { $exists: true },
+                                    _id: { $in: booklist }
+                                }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
                             }
-                        },
-                        {
-                            $sort: { created_at: -1 }
-                        },
-                        {
-                            $limit: 5
+                        ];
+                        var categoryResponse = await eBook.aggregate(categoryQuery);
+                    }
+                    if (AuthorResponse && categoryResponse) {
+                        const mergedResults = [...AuthorResponse, ...categoryResponse];
+                        treandingBookList = Array.from(new Set(mergedResults.map(result => result._id)))
+                            .map(_id => mergedResults.find(result => result._id === _id));
+                        // treandingBookList = await eBook.aggregate(trendingBookQuery);
+                    }
+                    else {
+                        if (AuthorResponse) {
+                            treandingBookList = AuthorResponse
                         }
-                    ];
-                    treandingBookList = await eBook.aggregate(trendingBookQuery);
+                        if (categoryResponse) {
+                            treandingBookList = categoryResponse
+                        }
+                    }
+                    if (!authorCategory && !genreCategory) {
+                        trendingBookQuery = [
+                            {
+                                $match: {
+                                    userCount: { $exists: true },
+                                    _id: { $in: booklist }
+                                }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
+                            }
+                        ]
+                        treandingBookList = await eBook.aggregate(trendingBookQuery);
+                    }
                 }
                 treandingBookList.forEach(book => {
                     const reviews = book.reviewData;
@@ -309,27 +382,87 @@ class AuthService {
                 }
 
                 if (!category) {
-                    newAggregatePipe = [
-                        {
-                            $match: { _id: { $in: booklist } }
-                        },
-                        {
-                            $match: condition
-                        },
-                        {
-                            $lookup: {
-                                from: 'review_lists',
-                                localField: '_id',
-                                foreignField: 'bookId',
-                                as: "reviewData"
+                    if (!authorCategory && !genreCategory) {
+                        newAggregatePipe = [
+                            {
+                                $match: { _id: { $in: booklist } }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
                             }
-                        },
-                        {
-                            $sort: { created_at: -1 }
-                        }
-                    ];
+                        ];
+                        newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                    }
 
-                    newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                    if (authorCategory) {
+                        var authorQuery = [
+                            {
+                                $match: {
+                                    authorName: { $in: authorCategory }
+                                }
+                            },
+                            {
+                                $match: { _id: { $in: booklist } }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            }
+                        ]
+                        var authorData = await eBook.aggregate(authorQuery);
+                    }
+                    if (genreCategory) {
+                        let categoryQuery = [
+                            {
+                                $match: {
+                                    'category.categoryName': { $in: genreCategory },
+                                }
+                            },
+                            {
+                                $match: { _id: { $in: booklist } }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            }
+                        ]
+                        var categoryData = await eBook.aggregate(categoryQuery);
+                    }
+                    if (authorData && categoryData) {
+                        const mergedResults = [...authorData, ...categoryData];
+                        newlyAddedBookList = Array.from(new Set(mergedResults.map(result => result._id)))
+                            .map(_id => mergedResults.find(result => result._id === _id));
+                    }
+                    else {
+                        if (authorData) {
+                            newlyAddedBookList = authorData
+                        }
+                        if (categoryData) {
+                            newlyAddedBookList = categoryData
+                        }
+                    }
                 }
                 newlyAddedBookList.forEach(book => {
                     const reviews = book.reviewData;
@@ -340,6 +473,15 @@ class AuthService {
                     book.reviewData = reviews
                 });
                 //-----------------------otherBook-------------------------------------------
+                if (authorCategory) {
+                    otherAggregatePipe.push(
+                        {
+                            $match: {
+                                authorName: { $in: authorCategory }
+                            }
+                        },
+                    )
+                }
                 otherAggregatePipe.push(
                     {
                         $match: {
@@ -432,32 +574,105 @@ class AuthService {
                 }
                 // If no books match the user preferences, fetch all books
                 if (!category) {
-                    trendingBookQuery = [
-                        {
-                            $match: prefrenceCondition
-                        },
-                        {
-                            $match: { userCount: { $exists: true } }
-                        },
-                        {
-                            $sort: { userCount: -1 }
-                        },
-                        {
-                            $lookup: {
-                                from: 'review_lists',
-                                localField: '_id',
-                                foreignField: 'bookId',
-                                as: "reviewData"
+                    if (!authorCategory && !genreCategory) {
+                        trendingBookQuery = [
+                            {
+                                $match: { userCount: { $exists: true } }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
                             }
-                        },
-                        {
-                            $sort: { created_at: -1 }
-                        },
-                        {
-                            $limit: 5
+                        ];
+                        treandingBookList = await eBook.aggregate(trendingBookQuery);
+                    }
+                    if (authorCategory) {
+                        var authorQuery = [
+                            {
+                                $match: {
+                                    authorName: { $in: authorCategory }
+                                }
+                            },
+                            {
+                                $match: { userCount: { $exists: true } }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
+                            }
+                        ];
+                        var AuthorResponse = await eBook.aggregate(authorQuery);
+                    }
+                    if (genreCategory) {
+                        let categoryQuery = [
+                            {
+                                $match: {
+                                    'category.categoryName': { $in: genreCategory },
+                                }
+                            },
+                            {
+                                $match: { userCount: { $exists: true } }
+                            },
+                            {
+                                $sort: { userCount: -1 }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            },
+                            {
+                                $limit: 5
+                            }
+                        ];
+                        var categoryResponse = await eBook.aggregate(categoryQuery);
+                    }
+                    if (AuthorResponse && categoryResponse) {
+                        const mergedResults = [...AuthorResponse, ...categoryResponse];
+                        treandingBookList = Array.from(new Set(mergedResults.map(result => result._id)))
+                            .map(_id => mergedResults.find(result => result._id === _id));
+                        // treandingBookList = await eBook.aggregate(trendingBookQuery);
+                    }
+                    else {
+                        if (AuthorResponse) {
+                            treandingBookList = AuthorResponse
                         }
-                    ];
-                    treandingBookList = await eBook.aggregate(trendingBookQuery);
+                        if (categoryResponse) {
+                            treandingBookList = categoryResponse
+                        }
+                    }
                 }
                 treandingBookList.forEach(book => {
                     const reviews = book.reviewData;
@@ -503,24 +718,78 @@ class AuthService {
                     }
                 }
                 if (!category) {
-                    newAggregatePipe = [
-                        {
-                            $match: prefrenceCondition
-                        },
-                        {
-                            $lookup: {
-                                from: 'review_lists',
-                                localField: '_id',
-                                foreignField: 'bookId',
-                                as: "reviewData"
+                    if (!authorCategory && !genreCategory) {
+                        newAggregatePipe = [
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
                             }
-                        },
-                        {
-                            $sort: { created_at: -1 }
-                        }
-                    ];
+                        ];
 
-                    newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                        newlyAddedBookList = await eBook.aggregate(newAggregatePipe);
+                    }
+                    if (authorCategory) {
+                        var authorQuery = [
+                            {
+                                $match: {
+                                    authorName: { $in: authorCategory }
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            }
+                        ]
+                        var authorData = await eBook.aggregate(authorQuery);
+                    }
+                    if (genreCategory) {
+                        let categoryQuery = [
+                            {
+                                $match: {
+                                    'category.categoryName': { $in: genreCategory },
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'review_lists',
+                                    localField: '_id',
+                                    foreignField: 'bookId',
+                                    as: "reviewData"
+                                }
+                            },
+                            {
+                                $sort: { created_at: -1 }
+                            }
+                        ]
+                        var categoryData = await eBook.aggregate(categoryQuery);
+                    }
+                    if (authorData && categoryData) {
+                        const mergedResults = [...authorData, ...categoryData];
+                        newlyAddedBookList = Array.from(new Set(mergedResults.map(result => result._id)))
+                            .map(_id => mergedResults.find(result => result._id === _id));
+                    }
+                    else {
+                        if (authorData) {
+                            newlyAddedBookList = authorData
+                        }
+                        if (categoryData) {
+                            newlyAddedBookList = categoryData
+                        }
+                    }
                 }
                 newlyAddedBookList.forEach(book => {
                     const reviews = book.reviewData;
@@ -531,7 +800,15 @@ class AuthService {
                     book.reviewData = reviews
                 });
                 //-------------------------other Book----------------------------------------------
-
+                if (authorCategory) {
+                    otherAggregatePipe.push(
+                        {
+                            $match: {
+                                authorName: { $in: authorCategory }
+                            }
+                        },
+                    )
+                }
                 otherAggregatePipe.push(
                     {
                         $match: {
