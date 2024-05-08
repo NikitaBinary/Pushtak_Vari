@@ -30,7 +30,7 @@ class AuthService {
             aggregatePipe.push(
                 {
                     $match: {
-                        created_at: { $gte: thirtyDaysAgo, $lte: currentDate }
+                        // created_at: { $gte: thirtyDaysAgo, $lte: currentDate }
                     }
                 },
                 {
@@ -52,7 +52,7 @@ class AuthService {
             aggregationPipeline.push(
                 {
                     $match: {
-                        created_at: { $gte: thirtyDaysAgo, $lte: currentDate },
+                        // created_at: { $gte: thirtyDaysAgo, $lte: currentDate },
                         userType: { "$nin": ['SUPER_ADMIN', 'INSTITUTE'] }
                     }
                 },
