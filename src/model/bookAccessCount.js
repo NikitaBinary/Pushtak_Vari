@@ -10,8 +10,11 @@ const bookAccessSchema = new mongoose.Schema({
     subscribeUserCount: {
         type: Number
     },
-    currentReading:{
-        type:Boolean,
+    currentReading: {
+        type: Boolean,
+    },
+    readingUsers: {
+        type: Array
     }
 },
     {
