@@ -169,13 +169,6 @@ class authController {
             const userId = req.query.userId
             const response = await purchaseService.eBookGraphService(userId)
 
-            // if (response.message) {
-            //     return res.status(200).send({
-            //         status: 404,
-            //         message: response.message
-            //     })
-            // }
-
             return res.status(200).send({
                 status: 200,
                 message: "Get e-book graph.",
