@@ -8,7 +8,47 @@ const fcmServerKey = process.env.Server_Key; // put your server key here
 
 
 
+exports.sendNotification = async (registrationToken, data) => {
+    try {
+        console.log("data---------------->", data)
+        const dataInfo = data.body
+        const response = await axios.post(
+            'https://fcm.googleapis.com/fcm/send',
+            {
+                to: registrationToken,
+                notification: {
+                    "title": "notification.title",
+                    "body": "notification.description",
+                    // "sound": "default",
+                    "color": "#53c4bc",
+                    "image": "https://via.placeholder.com/500x500.png?text=Sample+Image",
+                    "mutable_content": true,
+                    "sound": "Tri-tone"
+                    // "apns": {
+                    //   payload: {
+                    //     aps: {
+                    //       'mutable-content': 1
+                    //     }
+                    //   },
+                    // },
+                },
+                android: {},
+                data: {
+                },
+            },
 
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `key=${fcmServerKey}`,
+                },
+            }
+        );
+        console.log('Notification sent successfully:', response.data);
+    } catch (error) {
+        console.error('Error sending notification:', error.response.data);
+    }
+}
 exports.sendPushNotification = async (req) => {
     try {
         console.log("sendPushNotificationData body ");
@@ -18,6 +58,7 @@ exports.sendPushNotification = async (req) => {
             type: req.body.type,
             title: req.body.title,
             message: req.body.message,
+            image: req.body.image
         };
 
         if (req.body.usertype === 'csv') {

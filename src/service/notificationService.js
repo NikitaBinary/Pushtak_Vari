@@ -18,7 +18,7 @@ class AuthService {
             );
 
             data.userType = userTypeData;
-            data.imageUrl = imageUrl; // Assuming imageUrl is defined elsewhere
+            data.image = imageUrl; // Assuming imageUrl is defined elsewhere
             const notificationInfo = await notification.create(data);
 
             let notificationObj = {
@@ -26,7 +26,7 @@ class AuthService {
                     title: notificationInfo.notificationTitle,
                     type: notificationInfo.notificationType,
                     message: notificationInfo.message,
-                    image: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                    image: notificationInfo.image,
                     usertype: "all",
                     uservalues: []
                 },
