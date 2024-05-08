@@ -465,85 +465,85 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            // if (userInfo.userType == 'INSTITUTE_USER') {
-            //     const bookAccessInfo = await bookAccess_userCount.findOne({
-            //         bookId: new mongoose.Types.ObjectId(bookId)
-            //     });
+            if (userInfo.userType == 'INSTITUTE_USER') {
+                const bookAccessInfo = await bookAccess_userCount.findOne({
+                    bookId: new mongoose.Types.ObjectId(bookId)
+                });
 
-            //     if (!bookAccessInfo) {
-            //         // Create a new entry if book access info doesn't exist
-            //         await bookAccess_userCount.create({
-            //             bookId: bookId,
-            //             subscribeUserCount: 10,
-            //             accessUserCount: 1,
-            //             currentReading: currentReading
-            //         });
-            //     } else {
-            //         // Decrement access count if currentReading is false
-            //         if (currentReading == 'false') {
-            //             const data = await bookAccess_userCount.findOneAndUpdate(
-            //                 {
-            //                     bookId: new mongoose.Types.ObjectId(bookId),
-            //                     accessUserCount: { $gt: 0 }
-            //                 },
-            //                 { $inc: { accessUserCount: -1 } },
-            //                 { new: true }
-            //             );
-            //         }
-            //         else {
-            //             if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
-            //                 await bookAccess_userCount.findOneAndUpdate(
-            //                     {
-            //                         bookId: new mongoose.Types.ObjectId(bookId)
-            //                     },
-            //                     { $inc: { accessUserCount: 1 } },
-            //                     { new: true }
-            //                 );
-            //             } else {
-            //                 return { message: "Access limit exceeded. Please purchase the book license." };
-
-            //             }
-            //         }
-            //     }
-            // }
-            if (userInfo.userType === 'INSTITUTE_USER') {
-                const bookAccessInfo = await bookAccess_userCount.findOne({ bookId: new mongoose.Types.ObjectId(bookId) });
-            
                 if (!bookAccessInfo) {
                     // Create a new entry if book access info doesn't exist
                     await bookAccess_userCount.create({
                         bookId: bookId,
                         subscribeUserCount: 10,
                         accessUserCount: 1,
-                        currentReading: currentReading,
-                        readingUsers: currentReading === 'true' ? [userId] : [] // Initialize readingUsers array with userId if currently reading
+                        currentReading: currentReading
                     });
                 } else {
-                    if (currentReading === 'false') {
-                        // Remove userId from readingUsers array when user stops reading
-                        await bookAccess_userCount.findOneAndUpdate(
-                            { bookId: new mongoose.Types.ObjectId(bookId) },
-                            { $pull: { readingUsers: userId }, $inc: { accessUserCount: -1 } },
+                    // Decrement access count if currentReading is false
+                    if (currentReading == 'false') {
+                        const data = await bookAccess_userCount.findOneAndUpdate(
+                            {
+                                bookId: new mongoose.Types.ObjectId(bookId),
+                                accessUserCount: { $gt: 0 }
+                            },
+                            { $inc: { accessUserCount: -1 } },
                             { new: true }
                         );
-                    } else {
-                        if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
-                            // Check if userId is already reading the book
-                            const isUserReading = bookAccessInfo.readingUsers.includes(userId);
-                            if (!isUserReading) {
-                                // If not reading, increment access count and add userId to readingUsers array
-                                await bookAccess_userCount.findOneAndUpdate(
-                                    { bookId: new mongoose.Types.ObjectId(bookId) },
-                                    { $push: { readingUsers: userId }, $inc: { accessUserCount: 1 } },
-                                    { new: true }
-                                );
-                            }
+                    }
+                    else {
+                        if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
+                            await bookAccess_userCount.findOneAndUpdate(
+                                {
+                                    bookId: new mongoose.Types.ObjectId(bookId)
+                                },
+                                { $inc: { accessUserCount: 1 } },
+                                { new: true }
+                            );
                         } else {
                             return { message: "Access limit exceeded. Please purchase the book license." };
+
                         }
                     }
                 }
             }
+            // if (userInfo.userType === 'INSTITUTE_USER') {
+            //     const bookAccessInfo = await bookAccess_userCount.findOne({ bookId: new mongoose.Types.ObjectId(bookId) });
+            
+            //     if (!bookAccessInfo) {
+            //         // Create a new entry if book access info doesn't exist
+            //         await bookAccess_userCount.create({
+            //             bookId: bookId,
+            //             subscribeUserCount: 10,
+            //             accessUserCount: 1,
+            //             currentReading: currentReading,
+            //             readingUsers: currentReading === 'true' ? [userId] : [] // Initialize readingUsers array with userId if currently reading
+            //         });
+            //     } else {
+            //         if (currentReading === 'false') {
+            //             // Remove userId from readingUsers array when user stops reading
+            //             await bookAccess_userCount.findOneAndUpdate(
+            //                 { bookId: new mongoose.Types.ObjectId(bookId) },
+            //                 { $pull: { readingUsers: userId }, $inc: { accessUserCount: -1 } },
+            //                 { new: true }
+            //             );
+            //         } else {
+            //             if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
+            //                 // Check if userId is already reading the book
+            //                 const isUserReading = bookAccessInfo.readingUsers.includes(userId);
+            //                 if (!isUserReading) {
+            //                     // If not reading, increment access count and add userId to readingUsers array
+            //                     await bookAccess_userCount.findOneAndUpdate(
+            //                         { bookId: new mongoose.Types.ObjectId(bookId) },
+            //                         { $push: { readingUsers: userId }, $inc: { accessUserCount: 1 } },
+            //                         { new: true }
+            //                     );
+            //                 }
+            //             } else {
+            //                 return { message: "Access limit exceeded. Please purchase the book license." };
+            //             }
+            //         }
+            //     }
+            // }
             
 
             let status = Math.min(Number((readPages / totalPages) * 100), 100);
