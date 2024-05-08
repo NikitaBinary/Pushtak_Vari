@@ -106,23 +106,36 @@ class AuthService {
         }
     }
 
-    async updateMyPrefenceService(userId) {
+    async updateMyPrefenceService(userId, type) {
         try {
             if (userId) {
                 const userInfo = await user.findOne({ _id: userId })
                 if (!userInfo) {
                     return { message: "User not found!" }
                 }
-                var updatePreference = await user.updateOne(
-                    {
-                        _id: userId
-                    },
-                    {
-                        $unset: {
-                            genre_prefernce: "",
-                            author_prefernce: ""
-                        }
-                    });
+                var updatePreference
+                if (type == 'genre') {
+                    updatePreference = await user.updateOne(
+                        {
+                            _id: userId
+                        },
+                        {
+                            $unset: {
+                                genre_prefernce: "",
+                            }
+                        });
+                }
+                if (type == 'author') {
+                    updatePreference = await user.updateOne(
+                        {
+                            _id: userId
+                        },
+                        {
+                            $unset: {
+                                author_prefernce: ""
+                            }
+                        });
+                }
             }
             return updatePreference
         } catch (error) {
