@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const writeFileAsync = promisify(fs.writeFile);
+const categoryModel = require("../model/categoryModel")
 
 const ebookService = new authService();
 
@@ -359,42 +360,21 @@ class authController {
 
     async bulkUpdateDevices(req, res) {
         try {
-            // const convertExcelDate = (excelDate) => {
-
-            //     if (excelDate < 1 || excelDate > 2958465) {
-            //         console.error("Excel date is out of range.");
-            //         return null; // or handle the error in an appropriate way
-            //     }
-            //     const msPerDay = 24 * 60 * 60 * 1000;
-            //     const excelEpoch = Date.parse("1899-12-30");
-            //     const excelTime = (excelDate - 1) * msPerDay;
-            //     const date = new Date(excelTime + excelEpoch);
-            //     const formattedDate = date.toISOString().split("T")[0];
-
-            //     return formattedDate;
-            // };
             const convertExcelDate = (excelDate) => {
-                // Check if excelDate is undefined or null
-                if (excelDate === undefined || excelDate === null) {
-                    console.error("excelDate is undefined or null.");
+
+                if (excelDate < 1 || excelDate > 2958465) {
+                    console.error("Excel date is out of range.");
                     return null; // or handle the error in an appropriate way
                 }
-
-                // Convert excelDate to a string
-                const dateStr = excelDate.toString();
-
-                // Assuming the date is in the format "DD/MM/YYYY"
-                const parts = dateStr.split("/");
-                const dateISO = `${parts[2]}-${parts[1]}-${parts[0]}`;
-
                 const msPerDay = 24 * 60 * 60 * 1000;
                 const excelEpoch = Date.parse("1899-12-30");
-                const excelTime = (Date.parse(dateISO) - Date.parse("01/01/1970")) / msPerDay; // Adjusting for UNIX epoch
-                const formattedDate = new Date(excelTime * msPerDay + excelEpoch).toISOString().split("T")[0];
+                const excelTime = (excelDate - 1) * msPerDay;
+                const date = new Date(excelTime + excelEpoch);
+                const formattedDate = date.toISOString().split("T")[0];
 
                 return formattedDate;
             };
-
+            
             const xlsxDevicesUpdater = req.file
             const excelFilePath = xlsxDevicesUpdater.path;
             const wb = xlsx.readFile(excelFilePath);
@@ -406,6 +386,15 @@ class authController {
             const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
             for (let i = 1; i < data.length; i++) {
+                if (i === 0) continue;
+
+                // Check if the row contains data
+                const rowData = data[i];
+                if (rowData.every(cell => cell === null || cell === undefined || cell === '')) {
+                    // Skip processing for rows without data
+                    continue;
+                }
+
                 const [
                     bookName,
                     bookImage,
@@ -475,11 +464,34 @@ class authController {
                 // const parsedPrice = parseFloat(price.replace(/[^\d.]/g, ''));
                 const parsedPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
 
+                //------------category----------------------------------
+                const categoryList = await categoryModel.find({}, { categoryName: 1, _id: 0 })
+                const categoryNames = categoryList.map(category => category.categoryName);
 
                 var categoryArray = category.split(',').map(category => {
                     const [categoryName] = category.split(':');
                     return { categoryName };
                 });
+                // const isValidCategoryInput = category.split(',').every(category => {
+                //     const [categoryName] = category.split(':');
+                //     return categoryNames.includes(categoryName);
+                // });
+
+                // if (!isValidCategoryInput) {
+                //     console.log("comee in categgggggg")
+                //     return res.json({
+                //         status: 404,
+                //         message: "Invalid category detected."
+                //     });
+                // }
+                // else {
+                //     // If all categories are valid, proceed with mapping
+                //     var categoryArray = category.split(',').map(category => {
+                //         const [categoryName] = category.split(':');
+                //         return { categoryName };
+                //     });
+                // }
+
 
                 if (videoLink && videoLink != undefined) {
                     var videoLinksArray = videoLink.split(',').map(link => link.replace(/^"(.*)"$/, '$1'));
@@ -502,31 +514,61 @@ class authController {
                     is_selected: false,
                     userCount: 0
                 };
-                var exists_doc = await ebook.findOne({ bookName: newBook.bookName })
-                if (exists_doc) {
-                    var document = await ebook.updateMany(
-                        { bookName: newBook.bookName },
-                        newBook,
-                        { new: true }
-                    )
+
+                //-----------------------bookname exists---------------------------------------
+                const newBookArray = [newBook];
+                const existingBooks = await ebook.find({ bookName: { $in: newBookArray.map(book => book.bookName) } });
+
+                const newBooksToInsert = newBookArray.filter(newBook => !existingBooks.some(existingBook => existingBook.bookName == newBook.bookName));
+
+                if (newBooksToInsert) {
+                    if (newBooksToInsert.length > 0) {
+                        var document = await ebook.insertMany(newBooksToInsert);
+                        return res.json({
+                            status: 200,
+                            message: "Data uploaded and saved to database successfully."
+                        })
+                    } else {
+                        return res.json({
+                            status: 200,
+                            message: "All books already exist in the database."
+                        });
+                    }
                 }
                 else {
-                    var document = await ebook.insertMany(newBook);
+                    if (!document) {
+                        return res.json({
+                            status: 500,
+                            message: "data not upload."
+                        });
+                    }
                 }
-            }
-            if (document) {
-                return res.json({
-                    status: 200,
-                    message: "Data uploaded and saved to database successfully."
-                })
-            }
-            else {
-                return res.json({
-                    status: 400,
-                    message: "Data not uploaded."
-                })
-            }
 
+
+
+                // var exists_doc = await ebook.find({ bookName: newBook.bookName })
+                // if (exists_doc) {
+                //     var upadateDoc = await ebook.updateMany(
+                //         { bookName: newBook.bookName },
+                //         newBook,
+                //         { new: true }
+                //     )
+                //     return res.json({
+                //         status: 200,
+                //         message: "This books are already exists."
+                //     })
+
+                // }
+                // else {
+                //     var document = await ebook.insertMany(newBook);
+                // }
+            }
+            // if (document) {
+            //     return res.json({
+            //         status: 200,
+            //         message: "Data uploaded and saved to database successfully."
+            //     })
+            //  }
 
         } catch (error) {
             console.error("Error:", error);

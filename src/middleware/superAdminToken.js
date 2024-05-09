@@ -19,21 +19,28 @@ async function superAdminAuth(req, res, next) {
             const payload = await verifyToken(token);
 
             // Check if session is still valid in MongoDB
-            const session = await Session.findOne({ email: payload.email });
-            if (!session || session.token !== token) {
-                return res.status(401).json({ message: 'Token expire' });
-            }
-
-            if (payload.email && payload.name) {
-                let user = await useService.verifyUser({ emailId: payload.email });
-                if (!user) {
-                    user = await InsiService.verifyUser({ emailId: payload.email });
+            const userData = await useService.verifyUser({ emailId: payload.email });
+            if (userData.userType != 'SUPER_ADMIN') {
+                const session = await Session.findOne({ email: payload.email });
+                if (!session || session.token !== token) {
+                    return res.status(401).json({ message: 'Token expire' });
                 }
-                req.email = user.emailId;
-                req.userId = user._id;
 
+                if (payload.email && payload.name) {
+                    let user = await useService.verifyUser({ emailId: payload.email });
+                    if (!user) {
+                        user = await InsiService.verifyUser({ emailId: payload.email });
+                    }
+                    req.email = user.emailId;
+                    req.userId = user._id;
+
+                }
+                next();
             }
-            next();
+            else {
+                console.log("token not expire")
+            }
+
         }
 
     } catch (error) {
