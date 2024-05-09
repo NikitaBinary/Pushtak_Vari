@@ -20,6 +20,9 @@ const quizSchema = new mongoose.Schema({
     },
     languageInfo: {
         type: JSON
+    },
+    solvedBy: {
+        type: Array
     }
 });
 

@@ -465,47 +465,7 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            // if (userInfo.userType == 'INSTITUTE_USER') {
-            //     const bookAccessInfo = await bookAccess_userCount.findOne({
-            //         bookId: new mongoose.Types.ObjectId(bookId)
-            //     });
-
-            //     if (!bookAccessInfo) {
-            //         // Create a new entry if book access info doesn't exist
-            //         await bookAccess_userCount.create({
-            //             bookId: bookId,
-            //             subscribeUserCount: 10,
-            //             accessUserCount: 1,
-            //             currentReading: currentReading
-            //         });
-            //     } else {
-            //         // Decrement access count if currentReading is false
-            //         if (currentReading == 'false') {
-            //             const data = await bookAccess_userCount.findOneAndUpdate(
-            //                 {
-            //                     bookId: new mongoose.Types.ObjectId(bookId),
-            //                     accessUserCount: { $gt: 0 }
-            //                 },
-            //                 { $inc: { accessUserCount: -1 } },
-            //                 { new: true }
-            //             );
-            //         }
-            //         else {
-            //             if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount && currentReading != 'false') {
-            //                 await bookAccess_userCount.findOneAndUpdate(
-            //                     {
-            //                         bookId: new mongoose.Types.ObjectId(bookId)
-            //                     },
-            //                     { $inc: { accessUserCount: 1 } },
-            //                     { new: true }
-            //                 );
-            //             } else {
-            //                 return { message: "Access limit exceeded. Please purchase the book license." };
-
-            //             }
-            //         }
-            //     }
-            // }
+            
             if (userInfo.userType === 'INSTITUTE_USER') {
                 const bookAccessInfo = await bookAccess_userCount.findOne({ bookId: new mongoose.Types.ObjectId(bookId) });
 

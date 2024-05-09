@@ -205,18 +205,26 @@ class AuthService {
         }
     }
 
-    async updateQuizUserCountService(quizId) {
+    async updateQuizUserCountService(quizId, userId) {
         try {
             const is_quizExists = await quiz.findOne({ _id: new mongoose.Types.ObjectId(quizId) })
             if (!is_quizExists) {
                 return { message: "Quiz not exists." }
             }
             else {
-                var updateUserCount = await quiz.findOneAndUpdate(
-                    { _id: new mongoose.Types.ObjectId(quizId) },
-                    { $inc: { solveByUser: 1 } },
-                    { new: true }
-                )
+                if (userId) {
+                    const existingQuiz = await quiz.findOne({ _id: new mongoose.Types.ObjectId(quizId), solvedBy: userId });
+                    if (!existingQuiz) {
+                        var updateUserCount = await quiz.findOneAndUpdate(
+                            { _id: new mongoose.Types.ObjectId(quizId) },
+                            { $inc: { solveByUser: 1 }, $push: { solvedBy: userId } },
+                            { new: true }
+                        );
+                    }
+                    else {
+                        updateUserCount = await quiz.findOne({ _id: new mongoose.Types.ObjectId(quizId) })
+                    }
+                }
             }
             return updateUserCount
         } catch (error) {

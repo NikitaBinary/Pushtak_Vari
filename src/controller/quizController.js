@@ -104,7 +104,8 @@ class authController {
     async updateQuizUserCountController(req, res) {
         try {
             const quizId = req.params.id
-            const response = await quizService.updateQuizUserCountService(quizId)
+            const userId = req.query.userId
+            const response = await quizService.updateQuizUserCountService(quizId, userId)
             if (response.message) {
                 return res.status(404).send({
                     status: 404,
@@ -117,6 +118,7 @@ class authController {
                 data: response
             })
         } catch (error) {
+            console.log("error-------->",error)
             return res.json({
                 status: 500,
                 message: error.message
