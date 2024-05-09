@@ -41,12 +41,11 @@ class AuthService {
             } else if (notificationInfo.userType.userType == 'All') {
                 notificationObj.body.uservalues = await user.find({}, { _id: 1 });
             }
-             console.log("keyyy--------->",notificationObj.body.uservalues)
-             let userKey = notificationObj.body.uservalues
-             await sendNotification(userKey,notificationObj);
+            //  console.log("keyyy--------->",notificationObj.body.uservalues)
+            //  let userKey = notificationObj.body.uservalues
+            //  await sendNotification(userKey,notificationObj);
 
-
-            // await sendPushNotification(notificationObj);
+            await sendPushNotification(notificationObj);
             return notificationInfo;
         } catch (error) {
             console.log("error---------->", error);
