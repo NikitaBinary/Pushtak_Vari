@@ -104,7 +104,6 @@ class AuthService {
 
     async getAppQuizListService(userId, searchText) {
         try {
-            console.log("searchText=========>", searchText)
             const userInfo = await user.findOne({ _id: userId })
             let quizDetail
             if (userInfo.userType == 'INSTITUTE_USER') {
@@ -126,7 +125,10 @@ class AuthService {
                     questionAggregate.push(
                         {
                             $match: {
-                                userId: new mongoose.Types.ObjectId(instituteId)
+                                $or: [
+                                    { userId: { $exists: false } }, // Documents where userId does not exist
+                                    { userId: new mongoose.Types.ObjectId(instituteId) } // Documents where userId matches instituteId
+                                ]
                             }
                         },
                         {
