@@ -465,10 +465,8 @@ class AuthService {
             if (!userInfo) {
                 return { message: "User not found." }
             }
-            
             if (userInfo.userType === 'INSTITUTE_USER') {
                 const bookAccessInfo = await bookAccess_userCount.findOne({ bookId: new mongoose.Types.ObjectId(bookId) });
-
                 if (!bookAccessInfo) {
                     // Create a new entry if book access info doesn't exist
                     console.log("currentReading----------->", currentReading)
@@ -491,21 +489,18 @@ class AuthService {
                             { new: true }
                         );
                     } else {
-
                         if (bookAccessInfo.accessUserCount <= bookAccessInfo.subscribeUserCount && bookAccessInfo.readingUsers.includes(userId)) {
                             console.log("Currently reading users:", bookAccessInfo.readingUsers);
                             console.log("user already reading book")
                         }
                         else {
                             if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
-                                if (!bookAccessInfo.readingUsers || !bookAccessInfo.readingUsers.includes(userId)) {
-                                    // If not reading, increment access count and add userId to readingUsers array
-                                    await bookAccess_userCount.findOneAndUpdate(
-                                        { bookId: new mongoose.Types.ObjectId(bookId) },
-                                        { $push: { readingUsers: userId }, $inc: { accessUserCount: 1 } },
-                                        { new: true }
-                                    );
-                                }
+                                // Use $addToSet to add userId to readingUsers array if not already present
+                                await bookAccess_userCount.findOneAndUpdate(
+                                    { bookId: new mongoose.Types.ObjectId(bookId) },
+                                    { $addToSet: { readingUsers: userId }, $inc: { accessUserCount: 1 } },
+                                    { new: true }
+                                );
                             }
                             else {
                                 return { message: "Access limit exceeded. Please purchase the book license." };
@@ -513,7 +508,56 @@ class AuthService {
                         }
                     }
                 }
+
             }
+            // if (userInfo.userType === 'INSTITUTE_USER') {
+            //     const bookAccessInfo = await bookAccess_userCount.findOne({ bookId: new mongoose.Types.ObjectId(bookId) });
+
+            //     if (!bookAccessInfo) {
+            //         // Create a new entry if book access info doesn't exist
+            //         console.log("currentReading----------->", currentReading)
+            //         await bookAccess_userCount.create({
+            //             bookId: bookId,
+            //             subscribeUserCount: 10,
+            //             accessUserCount: 1,
+            //             currentReading: currentReading,
+            //             readingUsers: currentReading == 'true' ? [userId] : [] // Initialize readingUsers array with userId if currently reading
+            //         });
+            //     } else {
+            //         if (currentReading == 'false') {
+            //             // Remove userId from readingUsers array when user stops reading
+            //             await bookAccess_userCount.findOneAndUpdate(
+            //                 {
+            //                     bookId: new mongoose.Types.ObjectId(bookId),
+            //                     accessUserCount: { $gt: 0 }
+            //                 },
+            //                 { $pull: { readingUsers: userId }, $inc: { accessUserCount: -1 } },
+            //                 { new: true }
+            //             );
+            //         } else {
+
+            //             if (bookAccessInfo.accessUserCount <= bookAccessInfo.subscribeUserCount && bookAccessInfo.readingUsers.includes(userId)) {
+            //                 console.log("Currently reading users:", bookAccessInfo.readingUsers);
+            //                 console.log("user already reading book")
+            //             }
+            //             else {
+            //                 if (bookAccessInfo.accessUserCount < bookAccessInfo.subscribeUserCount) {
+            //                     if (!bookAccessInfo.readingUsers || !bookAccessInfo.readingUsers.includes(userId)) {
+            //                         // If not reading, increment access count and add userId to readingUsers array
+            //                         await bookAccess_userCount.findOneAndUpdate(
+            //                             { bookId: new mongoose.Types.ObjectId(bookId) },
+            //                             { $push: { readingUsers: userId }, $inc: { accessUserCount: 1 } },
+            //                             { new: true }
+            //                         );
+            //                     }
+            //                 }
+            //                 else {
+            //                     return { message: "Access limit exceeded. Please purchase the book license." };
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
 
             let status = Math.min(Number((readPages / totalPages) * 100), 100);
