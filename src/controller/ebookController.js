@@ -374,7 +374,7 @@ class authController {
 
                 return formattedDate;
             };
-            
+
             const xlsxDevicesUpdater = req.file
             const excelFilePath = xlsxDevicesUpdater.path;
             const wb = xlsx.readFile(excelFilePath);
@@ -386,13 +386,17 @@ class authController {
             const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
             for (let i = 1; i < data.length; i++) {
-                if (i === 0) continue;
+                // if (i === 0) continue;
 
-                // Check if the row contains data
+                // // Check if the row contains data
+                // const rowData = data[i];
+                // if (rowData.every(cell => cell === null || cell === undefined || cell === '')) {
+                //     // Skip processing for rows without data
+                //     continue;
+                // }
                 const rowData = data[i];
-                if (rowData.every(cell => cell === null || cell === undefined || cell === '')) {
-                    // Skip processing for rows without data
-                    continue;
+                if (!rowData || rowData.length == 0) {
+                    continue; // Skip empty rows
                 }
 
                 const [
@@ -515,60 +519,63 @@ class authController {
                     userCount: 0
                 };
 
-                //-----------------------bookname exists---------------------------------------
-                const newBookArray = [newBook];
-                const existingBooks = await ebook.find({ bookName: { $in: newBookArray.map(book => book.bookName) } });
 
-                const newBooksToInsert = newBookArray.filter(newBook => !existingBooks.some(existingBook => existingBook.bookName == newBook.bookName));
+                // //-----------------------bookname exists---------------------------------------
 
-                if (newBooksToInsert) {
-                    if (newBooksToInsert.length > 0) {
-                        var document = await ebook.insertMany(newBooksToInsert);
-                        return res.json({
-                            status: 200,
-                            message: "Data uploaded and saved to database successfully."
-                        })
-                    } else {
-                        return res.json({
-                            status: 200,
-                            message: "All books already exist in the database."
-                        });
-                    }
-                }
-                else {
-                    if (!document) {
-                        return res.json({
-                            status: 500,
-                            message: "data not upload."
-                        });
-                    }
-                }
+                // const newBookArray = [newBook];
+                // const existingBooks = await ebook.find({ bookName: { $in: newBookArray.map(book => book.bookName) } });
 
+                // const newBooksToInsert = newBookArray.filter(newBook => !existingBooks.some(existingBook => existingBook.bookName == newBook.bookName));
 
-
-                // var exists_doc = await ebook.find({ bookName: newBook.bookName })
-                // if (exists_doc) {
-                //     var upadateDoc = await ebook.updateMany(
-                //         { bookName: newBook.bookName },
-                //         newBook,
-                //         { new: true }
-                //     )
-                //     return res.json({
-                //         status: 200,
-                //         message: "This books are already exists."
-                //     })
-
+                // if (newBooksToInsert) {
+                //     if (newBooksToInsert.length > 0) {
+                //         var document = await ebook.insertMany(newBooksToInsert);
+                //         return res.json({
+                //             status: 200,
+                //             message: "Data uploaded and saved to database successfully."
+                //         })
+                //     } else {
+                //         return res.json({
+                //             status: 200,
+                //             message: "All books already exist in the database."
+                //         });
+                //     }
                 // }
                 // else {
-                //     var document = await ebook.insertMany(newBook);
+                //     if (!document) {
+                //         return res.json({
+                //             status: 500,
+                //             message: "data not upload."
+                //         });
+                //     }
                 // }
+
+
+
+                var exists_doc = await ebook.findOne({ bookName: newBook.bookName })
+                console.log("exists_doc---------->",exists_doc)
+                if (exists_doc) {
+                    var upadateDoc = await ebook.updateMany(
+                        { bookName: newBook.bookName },
+                        newBook,
+                        { new: true }
+                    )
+                    // return res.json({
+                    //     status: 200,
+                    //     message: "This books are already exists."
+                    // })
+
+                }
+                else {
+                    var document = await ebook.insertMany(newBook);
+                }
             }
-            // if (document) {
-            //     return res.json({
-            //         status: 200,
-            //         message: "Data uploaded and saved to database successfully."
-            //     })
-            //  }
+            if (document) {
+                return res.json({
+                    status: 200,
+                    message: "Data uploaded and saved to database successfully."
+                })
+            }
 
         } catch (error) {
             console.error("Error:", error);
