@@ -195,7 +195,7 @@ class AuthService {
                     )
                     const supperAdminSeesion = await session.findOne({ email: userInfo.emailId });
                     if (supperAdminSeesion) {
-                        await user.findByIdAndUpdate({ _id: supperAdminSeesion.userId }, { loginStatus: true });
+                        await user.findByIdAndUpdate({ _id: supperAdminSeesion.userId }, { loginStatus: false });
                         // Update existing session
                         await session.updateOne(
                             { email: userInfo.emailId },
