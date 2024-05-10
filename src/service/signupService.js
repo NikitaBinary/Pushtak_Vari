@@ -384,6 +384,10 @@ class AuthService {
             }
 
             if (userDetail.userType == 'INSTITUTE') {
+                if (dataBody.password) {
+                    var updatepassword = await getPasswordHash(dataBody.password, 12);
+                    dataBody.password = updatepassword
+                }
                 if (dataBody.select_Subscription) {
                     var subscriptionInfo = dataBody.select_Subscription ? await subscription.findOne({ _id: dataBody.select_Subscription }, { duration: 1, no_of_Users: 1, no_of_Books: 1 }) : null;
                     dataBody.select_Subscription = subscriptionInfo
@@ -400,21 +404,6 @@ class AuthService {
                         dataBody,
                         { new: true }
                     )
-                    // if (userInfo) {
-                    //     const accessUser_exists = await bookAccess_userCount.findOne({ instituteId: _id })
-                    //     if (accessUser_exists) {
-                    //         await bookAccess_userCount.updateMany(
-                    //             { instituteId: _id },
-                    //             {
-                    //                 subscribeUserCount: userInfo.no_of_user
-                    //             },
-                    //             { new: true }
-                    //         )
-                    //     }
-                    //     else {
-                    //         console.log("this institute no one user start reading book.")
-                    //     }
-                    // }
                 }
                 else {
                     var userInfo = await user.findOneAndUpdate(
