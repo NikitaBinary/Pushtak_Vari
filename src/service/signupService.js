@@ -189,10 +189,33 @@ class AuthService {
                     default:
                         return { message: "Invalid user access." };
                 }
-                var token = await generateToken(
-                    { email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '1h' }
-                )
-                if (userInfo.userType != 'SUPER_ADMIN') {
+                if (userInfo.userType == 'SUPER_ADMIN') {
+                    var token = await generateToken(
+                        { email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '30h' }
+                    )
+                    const supperAdminSeesion = await session.findOne({ email: userInfo.emailId });
+                    if (supperAdminSeesion) {
+                        await user.findByIdAndUpdate({ _id: supperAdminSeesion.userId }, { loginStatus: true });
+                        // Update existing session
+                        await session.updateOne(
+                            { email: userInfo.emailId },
+                            { token }
+                        );
+
+                    } else {
+                        // Create new session
+                        await session.create({
+                            email: userInfo.emailId,
+                            token,
+                            userId: userInfo._id,
+                            userName: userInfo.fullName
+                        });
+                    }
+
+                } else {
+                    var token = await generateToken(
+                        { email: userInfo.emailId, name: userInfo.fullName }, { expiresIn: '1h' }
+                    )
                     const existingSession = await session.findOne({ email: userInfo.emailId });
                     if (existingSession) {
                         await user.findByIdAndUpdate({ _id: existingSession.userId }, { loginStatus: false });
@@ -212,6 +235,8 @@ class AuthService {
                         });
                     }
                 }
+
+
 
                 await user.findOneAndUpdate(
                     { emailId: userBody.emailId },
