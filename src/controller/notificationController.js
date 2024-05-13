@@ -19,6 +19,7 @@ class authController {
         } catch (error) {
             return res.json({
                 status: 500,
+                
                 message: error.message
             })
         }
