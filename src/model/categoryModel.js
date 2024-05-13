@@ -7,6 +7,9 @@ const categorySchema = new mongoose.Schema({
     categoryName: {
         type: String,
     },
+    marathiName:{
+        type: String,
+    },
     is_selected:{
         type:Boolean,
         default:false
