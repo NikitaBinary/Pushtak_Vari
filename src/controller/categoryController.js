@@ -5,15 +5,15 @@ const categoryService = new authService();
 class authController {
     async addCategoryController(req, res) {
         try {
-            const file = req.file
+            // const file = req.file
             const data = req.body
 
-            if (file) {
-                const webUrl = `${req.protocol}://${req.get('host')}`;
-                var ImageUrl = `${webUrl}/uploads/${file.filename}`
-            }
+            // if (file) {
+            //     const webUrl = `${req.protocol}://${req.get('host')}`;
+            //     var ImageUrl = `${webUrl}/uploads/${file.filename}`
+            // }
 
-            const categoryInfo = await categoryService.addCategoryService(data, ImageUrl);
+            const categoryInfo = await categoryService.addCategoryService(data);
 
             if (categoryInfo.uniqueCategory) {
                 return res.json({

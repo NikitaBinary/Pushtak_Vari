@@ -4,15 +4,14 @@ const eBook = require("../model/ebookModel")
 const language = require("../model/ebookLanguageModel")
 
 class AuthService {
-    async addCategoryService(categoryBody, ImageUrl) {
+    async addCategoryService(categoryBody) {
         try {
             const uniqueCategory = await category.findOne({ categoryName: categoryBody.categoryName })
-            const bookLanguage = await language.findById({ _id: categoryBody.language }, { _id: 1, language: 1 })
-            categoryBody.language = bookLanguage
+            // const bookLanguage = await language.findById({ _id: categoryBody.language }, { _id: 1, language: 1 })
+            // categoryBody.language = bookLanguage
             if (!uniqueCategory) {
                 var categoryInfo = await category.create({
                     ...categoryBody,
-                    categoryImage: ImageUrl || '',
                 });
             }
             return { categoryInfo, uniqueCategory }
