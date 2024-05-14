@@ -360,20 +360,55 @@ class authController {
 
     async bulkUpdateDevices(req, res) {
         try {
-            const convertExcelDate = (excelDate) => {
+            // const convertExcelDate = (excelDate) => {
 
+            //     if (excelDate < 1 || excelDate > 2958465) {
+            //         console.error("Excel date is out of range.");
+            //         return null; // or handle the error in an appropriate way
+            //     }
+            //     const msPerDay = 24 * 60 * 60 * 1000;
+            //     const excelEpoch = Date.parse("1899-12-30");
+            //     const excelTime = (excelDate - 1) * msPerDay;
+            //     const date = new Date(excelTime + excelEpoch);
+            //     const formattedDate = date.toISOString().split("T")[0];
+
+            //     return formattedDate;
+            // };
+            
+            const convertExcelDate = (excelDate) => {
+                // Check if the input is a string representing a date
+                if (typeof excelDate === 'string') {
+                    const parts = excelDate.split('/');
+                    if (parts.length === 3) {
+                        // Parse the date string
+                        const year = parseInt(parts[2]);
+                        const month = parseInt(parts[0]) - 1; // Months are zero-based in JavaScript
+                        const day = parseInt(parts[1]);
+            
+                        // Check if the parsed date values are valid
+                        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                            const date = new Date(year, month, day);
+                            if (!isNaN(date.getTime())) {
+                                return date.toISOString().split("T")[0];
+                            }
+                        }
+                    }
+                }
+            
+                // If not a string representing a date or invalid date string, handle as an Excel serial date
                 if (excelDate < 1 || excelDate > 2958465) {
                     console.error("Excel date is out of range.");
                     return null; // or handle the error in an appropriate way
                 }
+                
                 const msPerDay = 24 * 60 * 60 * 1000;
                 const excelEpoch = Date.parse("1899-12-30");
                 const excelTime = (excelDate - 1) * msPerDay;
                 const date = new Date(excelTime + excelEpoch);
-                const formattedDate = date.toISOString().split("T")[0];
-
-                return formattedDate;
+                return date.toISOString().split("T")[0];
             };
+            
+            
 
             const xlsxDevicesUpdater = req.file
             const excelFilePath = xlsxDevicesUpdater.path;
