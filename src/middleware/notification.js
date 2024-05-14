@@ -134,20 +134,20 @@ exports.PushAllNotifications = async (params) => {
                 title: params.title || '',
                 body: params.message,
                 type: params.type,
-                image: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                image: "",
                 android: {},
                 data: {},
 
                 notification: {
                     title: params.message,
-                    image: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                    image: "",
                     type: params.type,
                     android: {},
                     data: {},
                 },
                 data: {
                     title: params.message,
-                    image: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                    image: "",
                     type: params.type,
                 },
             };

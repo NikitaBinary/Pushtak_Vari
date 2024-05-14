@@ -27,7 +27,7 @@ let appUtils = {
                 body: payload['body'],
                 sound: 'default',
                 type: payload['type'],
-                imageUrl: "http://ebook.prometteur.in:5050/uploads/1713415943658-Bracket.png",
+                imageUrl: "",
                 force: true,
                 badge: 1,
             },
