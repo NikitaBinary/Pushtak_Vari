@@ -51,7 +51,7 @@ exports.sendNotification = async (registrationToken, data) => {
 }
 exports.sendPushNotification = async (req) => {
     try {
-        console.log("sendPushNotificationData body ");
+        console.log("sendPushNotificationData body----------------> ",req.body);
         let appKey = [];
         let dataArr = [];
         const notificationObject = {
@@ -130,24 +130,25 @@ exports.sendPushNotification = async (req) => {
 exports.PushAllNotifications = async (params) => {
     return new Promise((resolve, reject) => {
         try {
+            console.log("params--all------->",params)
             const pushLoad = {
                 title: params.title || '',
                 body: params.message,
                 type: params.type,
-                image: "",
+                image: params.image,
                 android: {},
                 data: {},
 
                 notification: {
                     title: params.message,
-                    image: "",
+                    image: params.image,
                     type: params.type,
                     android: {},
                     data: {},
                 },
                 data: {
                     title: params.message,
-                    image: "",
+                    image: params.image,
                     type: params.type,
                 },
             };
@@ -173,35 +174,3 @@ exports.PushAllNotifications = async (params) => {
     });
 };
 
-// exports.sendNotification = async (registrationToken, data) => {
-//     try {
-//         const response = await axios.post(
-//             'https://fcm.googleapis.com/fcm/send',
-//             {
-//                 "to": registrationToken,
-//                 "notification": {
-//                     "title": data.title,
-//                     "body": "Rich Notification testing (body)",
-//                     "mutable_content": true,
-//                     "sound": "Tri-tone",
-//                     "image": "https://via.placeholder.com/500x500.png?text=Sample+Image",
-//                 },
-
-//                 "data": {
-//                     // "url": "https://via.placeholder.com/500x500.png?text=Sample+Image",
-//                     // "dl": "<deeplink action on tap of notification>"
-//                 }
-//             },
-
-//             {
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     Authorization: `key=${fcmServerKey}`,
-//                 },
-//             }
-//         );
-//         console.log('Notification sent successfully:', response.data);
-//     } catch (error) {
-//         console.error('Error sending notification:', error.response.data);
-//     }
-// }
