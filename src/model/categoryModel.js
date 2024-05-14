@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
-    categoryImage: {
-        type: String,
-    },
+    // categoryImage: {
+    //     type: String,
+    // },
     categoryName: {
         type: String,
     },
@@ -14,9 +14,9 @@ const categorySchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    language:{
-        type: JSON
-    }
+    // language:{
+    //     type: JSON
+    // }
 },
     {
         timestamps: {
